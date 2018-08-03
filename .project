@@ -3,6 +3,8 @@
 	<name>Papers_arcana</name>
 	<comment></comment>
 	<projects>
+		<project>arcana</project>
+		<project>nianalysis</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
