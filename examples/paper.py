@@ -1,7 +1,9 @@
-from arcana import MultiStudy, MultiStudyMetaClass, SubStudySpec
+from arcana import (
+    MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
 from nianalysis.study.mri.structural.diffusion import DiffusionStudy
 from nianalysis.study.mri.structural.t2star import T2StarStudy
 import numpy as np
+from itertools import chain
 from collections import defaultdict
 import os.path as op
 import matplotlib.image
@@ -33,7 +35,12 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
         # SubStudySpec('t2star', T2starwT1wStudy)
         ]
 
-    def figure9(self, save_path=None, **kwargs):
+    add_parameter_specs = [
+        # Override default parameter in DiffusionStudy
+        ParameterSpec('dmri_num_global_tracks', int(1e5)),
+        ParameterSpec('dmri_global_tracks_cutoff', 0.2)]
+
+    def figure10(self, save_path=None, **kwargs):
         """
         Generates an image panel containing the SWI, QSM, vein atlas,
         and vein mask
@@ -46,8 +53,9 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
         """
         self._plot_slice_panel(('swi', 'qsm', 'vein_atlas', 'ven_mask'),
                                save_path=save_path, **kwargs)
+        print('Plotted Figure 10')
 
-    def figure10(self, save_path=None, **kwargs):
+    def figure11(self, save_path=None, **kwargs):
         """
         Generates an image panel containing the derived FA and ADC
         images
@@ -62,12 +70,18 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
                                save_path=save_path,
                                plot_args={'fa': {'vmax': 1.0}},
                                **kwargs)
+        print('Plotted Figure 11')
 
-    def figure11(self, save_path=None, img_size=5):
+    def figure12(self, save_path=None, img_size=3, padding=1,
+                 view_area=(100, 100)):
         """
         Generates dMRI tractography streamlines seeded from without the
-        white matter. Uses MRtrix's mrview to display the high volume
-        of streamlines created.
+        white matter.
+
+        Is a bit more complex as it uses MRtrix's mrview to display and
+        screenshot to file the high volume of streamlines created. Then
+        reload, crop and combine the different slice orientations into
+        a single panel.
 
         Parameters
         ----------
@@ -93,26 +107,34 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
                 options = ['-tractography.load', tck_path]
                 tmpdir = tempfile.mkdtemp()
                 options.extend(
-                    ['-imagevisible', '0', '-capture.grab',
-                     '-capture.folder', tmpdir])
-                # Call mrview to display the tracks
-                for plane in range(3):
-                    sp.check_call(
-                        '{} {} -plane {} {}'.format(
-                            cmd, fa_path, plane, ' '.join(options)),
-                        **sp_kwargs)
-                # Create figure to plot
+                    ['-noannotations', '-lock', 'yes',
+                     '-size', '{},{}'.format(*view_area),
+                     '-capture.grab', '-exit'])
+                # Create figure in which to aggregate the plots
                 gs = GridSpec(1, 3)
                 gs.update(wspace=0.0, hspace=0.0)
                 fig = plt.figure(figsize=(3 * img_size, img_size))
-                for i, fname in enumerate(
-                        sorted(os.listdir(tmpdir))):
-                    img = matplotlib.image.imread(op.join(tmpdir,
-                                                          fname))
+                # Call mrview to display the tracks, capture them to
+                # file and then reload the image into a matplotlib
+                # grid
+                imgs = []
+                for i in range(3):
+                    sp.call(
+                        '{} {} -plane {} {}'.format(
+                            cmd, fa_path, 2 - i, ' '.join(options)),
+                        cwd=tmpdir, **sp_kwargs)
+                    img = matplotlib.image.imread(
+                        op.join(tmpdir, 'screenshot0000.png'))
+                    imgs.append(self._crop(img, border=padding))
+                padded_size = max(chain(*(a.shape for a in imgs)))
+                for i, img in enumerate(imgs):
+                    img = self._pad_to_size(img, (padded_size,
+                                                  padded_size))
                     axis = fig.add_subplot(gs[i])
                     axis.get_xaxis().set_visible(False)
                     axis.get_yaxis().set_visible(False)
                     plt.imshow(img)
+#                 plt.tight_layout()
                 if save_path is None:
                     plt.show()
                 else:
@@ -123,6 +145,7 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
                         base += '-vis{}'.format(visit_id)
                     sess_save_path = base + ext
                     plt.savefig(sess_save_path)
+                print('Plotted Figure 12')
 
     def _plot_slice_panel(self, data_names, save_path=None,
                           img_size=5, plot_args=None):
@@ -151,8 +174,8 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
                 # Set up figure
                 gs = GridSpec(n_rows, 3)
                 gs.update(wspace=0.0, hspace=0.0)
-                fig = plt.figure(figsize=(n_rows * img_size,
-                                          3 * img_size))
+                fig = plt.figure(figsize=(3 * img_size,
+                                          n_rows * img_size))
 
                 # Loop through derivatives and generate image
                 for i, data_name in enumerate(data_names):
@@ -169,7 +192,7 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
                 if save_path is None:
                     plt.show()
                 else:
-                    base, ext = save_path
+                    base, ext = op.splitext(save_path)
                     if len(list(self.subject_ids)) > 1:
                         base += '-sub{}'.format(subj_id)
                     if len(list(self.visit_ids)) > 1:
@@ -183,12 +206,9 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
         # Guard agains NaN
         array[np.isnan(array)] = 0.0
         # Crop black-space around array
-        nz = np.argwhere(array)
-        array = array[tuple(
-            slice(a, b) for a, b in zip(nz.min(axis=0),
-                                        nz.max(axis=0)))]
+        array = self._crop(array, padding)
         # Pad out image array into cube
-        padded_size = np.max(array.shape) + padding
+        padded_size = np.max(array.shape)
         mid = np.array(array.shape, dtype=int) // 2
 
         # Get dynamic range of array
@@ -201,31 +221,45 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
             axis = fig.add_subplot(grid_spec[index])
             axis.get_xaxis().set_visible(False)
             axis.get_yaxis().set_visible(False)
-            pad_before = [
-                (padded_size - slce.shape[i]) // 2
-                for i in range(2)]
-            pad_after = [
-                padded_size - slce.shape[i] - pad_before[i]
-                for i in range(2)]
-            padded_slce = np.pad(
-                slce, list(zip(pad_before, pad_after)),
-                'constant')
+            padded_slce = self._pad_to_size(slce, (padded_size,
+                                                   padded_size))
             plt.imshow(padded_slce,
                        interpolation='bilinear',
                        cmap='gray', aspect=aspect,
                        vmin=0, vmax=vmax)
         # Plot slices
-        plot_slice(np.squeeze(array[:, -1:0:-1, mid[2]]).T,
+        plot_slice(np.squeeze(array[-1:0:-1, -1:0:-1, mid[2]]).T,
                    row_index * 3, vox_sizes[0] / vox_sizes[1])
-        plot_slice(np.squeeze(array[:, mid[1], -1:0:-1]).T,
+        plot_slice(np.squeeze(array[-1:0:-1, mid[1], -1:0:-1]).T,
                    row_index * 3 + 1, vox_sizes[0] / vox_sizes[2])
-        plot_slice(np.squeeze(array[mid[0], :, -1:0:-1]).T,
+        plot_slice(np.squeeze(array[mid[0], -1:0:-1, -1:0:-1]).T,
                    row_index * 3 + 2, vox_sizes[1] / vox_sizes[2])
+
+    @classmethod
+    def _crop(cls, array, border=0):
+        nz = np.argwhere(array)
+        return array[tuple(
+            slice(max(a - border, 0),
+                  min(b + border, array.shape[i]))
+            for i, (a, b) in enumerate(zip(nz.min(axis=0),
+                                           nz.max(axis=0))))]
+
+    @classmethod
+    def _pad_to_size(cls, array, size):
+        pad_before = [
+            (size[i] - array.shape[i]) // 2
+            for i in range(2)]
+        pad_after = [
+            size[i] - array.shape[i] - pad_before[i]
+            for i in range(2)]
+        padding = list(zip(pad_before, pad_after))
+        padding.extend((0, 0) for _ in range(array.ndim - 2))
+        return np.pad(array, padding, 'constant')
 
 
 if __name__ == '__main__':
     from arcana import (
-        LocalRepository, LinearProcessor, FilesetMatch, Parameter)
+        LocalRepository, LinearProcessor, FilesetMatch)
     from nianalysis.file_format import dicom_format
     import os
 
@@ -238,11 +272,10 @@ if __name__ == '__main__':
         inputs=[FilesetMatch('dmri_primary', dicom_format, '16.*',
                              is_regex=True),
                 FilesetMatch('dmri_reverse_phase', dicom_format, '15.*',
-                             is_regex=True)],
-        parameters=[Parameter('dmri_num_global_tracks', int(1e7))])
+                             is_regex=True)])
 
     fig_dir = op.join(study_dir, 'figures')
     os.makedirs(fig_dir, exist_ok=True)
-#     paper.figure9(op.join(fig_dir, 'figure10.png'))
 #     paper.figure10(op.join(fig_dir, 'figure10.png'))
     paper.figure11(op.join(fig_dir, 'figure11.png'))
+    paper.figure12(op.join(fig_dir, 'figure12.png'))
