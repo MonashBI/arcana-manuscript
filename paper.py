@@ -9,27 +9,24 @@ import os.path as op
 class ArcanaPaper(MultiStudy, ImageDisplayMixin,
                   metaclass=MultiStudyMetaClass):
     """
-    An Arcana study that analyses a MRI project data contain T1-weighted,
-    T2*-weighted and diffusion MRI contrasts
-
-    Parameters
-    ----------
-    mrtrix_path : str | None
-        Path to the installation of MRtrix (required to render the
-        streamlines in Figure 11) if not installed on the system
-        path
+    An Study class to perform the analyses performed in the paper
+    introducing Arcana. Requires a repository containing
+    T1-weighted, T2*-weighted and diffusion MRI data.
     """
 
-    def __init__(self, *args, mrtrix_path=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._mrtrix_path = mrtrix_path
-
     add_sub_study_specs = [
+        # Include two Study classes in the overall study
         SubStudySpec('t2star', T2starwT1wStudy),
         SubStudySpec('dmri', DiffusionStudy)]
 
     add_parameter_specs = [
-        # Override default parameters in DiffusionStudy
+        # Override default parameters in DiffusionStudy to reduce the
+        # number of streamlines generated (for improved visibility).
+        #
+        # NB: Names of the parameters in the sub-study space (i.e.
+        # 'num_global_track' and 'global_tracks_cutoff') are prepended
+        # by the name of the sub-study (from add_sub_study_specs) to
+        # avoid clashes.
         ParameterSpec('dmri_num_global_tracks', int(1e5)),
         ParameterSpec('dmri_global_tracks_cutoff', 0.2)]
 
@@ -56,10 +53,10 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
                                                    vein_masks):
             # Display slices from the filesets in a panel using
             # method from the ImageDisplayMixin base class.
-            self._display_slice_panel(
+            self.display_slice_panel(
                 (swi, qsm, vein_atlas, vein_mask), **kwargs)
             # Display or save to file the generated image.
-            self._save_or_show(save_path, swi.subject_id, swi.visit_id)
+            self.save_or_show(save_path, swi.subject_id, swi.visit_id)
 
     def figure11(self, save_path=None, **kwargs):
         """
@@ -79,11 +76,11 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         for fa, adc in zip(fas, adcs):
             # Display slices from the filesets in a panel using
             # method from the ImageDisplayMixin base class.
-            self._display_slice_panel((fa, adc),
-                                      row_kwargs=({'vmax': 1.0},
+            self.display_slice_panel((fa, adc),
+                                     row_kwargs=({'vmax': 1.0},
                                                   {}), **kwargs)
             # Display or save to file the generated image.
-            self._save_or_show(save_path, fa.subject_id, fa.visit_id)
+            self.save_or_show(save_path, fa.subject_id, fa.visit_id)
 
     def figure12(self, save_path=None, **kwargs):
         """
@@ -109,10 +106,10 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
                                        'dmri_fa'))):
             # Display generated streamlines with mrview from the
             # MRtrix package
-            self._display_tcks_with_mrview(
+            self.display_tcks_with_mrview(
                 tcks=(tck,), backgrounds=(fa,), **kwargs)
             # Display or save to file the generated image.
-            self._save_or_show(save_path, tck.subject_id, tck.visit_id)
+            self.save_or_show(save_path, tck.subject_id, tck.visit_id)
         print('Figure12')
 
 
@@ -145,8 +142,8 @@ if __name__ == '__main__':
                 FilesetMatch('dmri_reverse_phase', dicom_format, '15.*',
                              is_regex=True)])
 
-    # Derive the data required for each figure and display them a single
-    # steps
+    # Derive required data and display them in a single step for each
+    # figure.
     paper.figure10(op.join(fig_dir, 'figure10.png'))
     paper.figure11(op.join(fig_dir, 'figure11.png'))
     paper.figure12(op.join(fig_dir, 'figure12.png'))
