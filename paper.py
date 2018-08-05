@@ -1,7 +1,7 @@
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
 from nianalysis.study.mri.structural.diffusion import DiffusionStudy
-# from nianalysis.study.mri.structural.t2star import T2StarwT1wStudy
+from nianalysis.study.mri.structural.t2star import T2starwT1wStudy
 from nianalysis.plot import ImageDisplayMixin
 import os.path as op
 
@@ -25,7 +25,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         self._mrtrix_path = mrtrix_path
 
     add_sub_study_specs = [
-        # SubStudySpec('t2star', T2starwT1wStudy),
+        SubStudySpec('t2star', T2starwT1wStudy),
         SubStudySpec('dmri', DiffusionStudy)]
 
     add_parameter_specs = [
@@ -113,6 +113,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
                 tcks=(tck,), backgrounds=(fa,), **kwargs)
             # Display or save to file the generated image.
             self._save_or_show(save_path, tck.subject_id, tck.visit_id)
+        print('Figure12')
 
 
 if __name__ == '__main__':
@@ -146,6 +147,6 @@ if __name__ == '__main__':
 
     # Derive the data required for each figure and display them a single
     # steps
-#     paper.figure10(op.join(fig_dir, 'figure10.png'))
+    paper.figure10(op.join(fig_dir, 'figure10.png'))
     paper.figure11(op.join(fig_dir, 'figure11.png'))
     paper.figure12(op.join(fig_dir, 'figure12.png'))
