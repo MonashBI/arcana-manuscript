@@ -2,6 +2,7 @@ from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
 from nianalysis.study.mri.structural.diffusion import DiffusionStudy
 from nianalysis.study.mri.structural.t2star import T2StarStudy
+from nianalysis.plot import ImageDisplayMixin
 import numpy as np
 from itertools import chain
 from collections import defaultdict
@@ -13,7 +14,8 @@ from matplotlib.gridspec import GridSpec
 import subprocess as sp
 
 
-class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
+class ArcanaPaper(MultiStudy, ImageDisplayMixin,
+                  metaclass=MultiStudyMetaClass):
     """
     An Arcana study that analyses a MRI project data contain T1-weighted,
     T2*-weighted and diffusion MRI contrasts
@@ -36,7 +38,7 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
         ]
 
     add_parameter_specs = [
-        # Override default parameter in DiffusionStudy
+        # Override default parameters in DiffusionStudy
         ParameterSpec('dmri_num_global_tracks', int(1e5)),
         ParameterSpec('dmri_global_tracks_cutoff', 0.2)]
 
@@ -58,7 +60,7 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
     def figure11(self, save_path=None, **kwargs):
         """
         Generates an image panel containing the derived FA and ADC
-        images
+        images for each session in the study (typically only one)
 
         Parameters
         ----------
@@ -66,11 +68,31 @@ class ArcanaPaper(MultiStudy, metaclass=MultiStudyMetaClass):
             The path to save the image to. If None the image will be
             displayed instead of saved
         """
-        self._plot_slice_panel(('dmri_fa', 'dmri_adc'),
-                               save_path=save_path,
-                               plot_args={'fa': {'vmax': 1.0}},
-                               **kwargs)
-        print('Plotted Figure 11')
+        # Derive FA and ADC if necessary and return a handle to the
+        # data collections in the repository
+        fa_coll = self.data('dmri_fa')
+        adc_coll = self.data('dmri_adc')
+        # Loop through all sessions
+        for subj_id in self.subject_ids:
+            for visit_id in self.visit_ids:
+                # Select filesets for given session
+                fa = fa_coll.item(subj_id, visit_id)
+                adc = adc_coll.item(subj_id, visit_id)
+                # Display slices from the filesets in a panel using
+                # method from the ImageDisplayMixin base class.
+                self._display_slice_panel((fa, adc), vmax=(1.0, None),
+                                          **kwargs)
+                # Display or save to file the generated image.
+                if save_path is None:
+                    plt.show()
+                else:
+                    base, ext = op.splitext(save_path)
+                    if len(list(self.subject_ids)) > 1:
+                        base += '-sub{}'.format(subj_id)
+                    if len(list(self.visit_ids)) > 1:
+                        base += '-vis{}'.format(visit_id)
+                    sess_save_path = base + ext
+                    plt.savefig(sess_save_path)
 
     def figure12(self, save_path=None, img_size=3, padding=1,
                  view_area=(100, 100)):
@@ -263,18 +285,23 @@ if __name__ == '__main__':
     from nianalysis.file_format import dicom_format
     import os
 
-    study_dir = op.join(op.dirname(__file__), '..', 'data')
+    data_dir = op.join(op.dirname(__file__), 'data')
+    fig_dir = op.join(data_dir, 'figures')
 
+    # Instantiate the ArcanaPaper class in order to apply it to a
+    # specific dataset
     paper = ArcanaPaper(
-        'arcana_paper',
-        LocalRepository(op.join(study_dir, 'study')),
-        LinearProcessor(op.join(study_dir, 'work')),
+        'arcana_paper',  # Name for this analysis instance
+        LocalRepository(op.join(data_dir, 'study')),  # Path to data
+        LinearProcessor(op.join(data_dir, 'work')),  # Use a single process on the local system
+        # Match names in the data specification to filenames used
+        # in the repository
         inputs=[FilesetMatch('dmri_primary', dicom_format, '16.*',
                              is_regex=True),
                 FilesetMatch('dmri_reverse_phase', dicom_format, '15.*',
                              is_regex=True)])
 
-    fig_dir = op.join(study_dir, 'figures')
+    
     os.makedirs(fig_dir, exist_ok=True)
 #     paper.figure10(op.join(fig_dir, 'figure10.png'))
     paper.figure11(op.join(fig_dir, 'figure11.png'))
