@@ -1,7 +1,7 @@
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
 from nianalysis.study.mri.structural.diffusion import DiffusionStudy
-from nianalysis.study.mri.structural.t2star import T2starwT1wStudy
+# from nianalysis.study.mri.structural.t2star import T2starwT1wStudy
 from nianalysis.plot import ImageDisplayMixin
 import os.path as op
 
@@ -16,21 +16,17 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 
     add_sub_study_specs = [
         # Include two Study classes in the overall study
-        SubStudySpec('t2star', T2starwT1wStudy),
+#         SubStudySpec('t2star', T2starwT1wStudy),
         SubStudySpec('dmri', DiffusionStudy)]
 
     add_parameter_specs = [
-        # Override default parameters in DiffusionStudy to reduce the
-        # number of streamlines generated (for improved visibility).
-        #
-        # NB: Names of the parameters in the sub-study space (i.e.
-        # 'num_global_track' and 'global_tracks_cutoff') are prepended
-        # by the name of the sub-study (from add_sub_study_specs) to
-        # avoid clashes.
-        ParameterSpec('dmri_num_global_tracks', int(1e5)),
-        ParameterSpec('dmri_global_tracks_cutoff', 0.2)]
+        ParameterSpec(
+            'fig12_13_slice_offset', (4, 0, 0),
+            desc=("Offset the sagittal slices of Figure 11 & 12 so they "
+                  "intersect a cerebral hemisphere instead of the "
+                  "midline between the hemispheres"))]
 
-    def figure10(self, save_path=None, **kwargs):
+    def figure11(self, save_path=None, **kwargs):
         """
         Generates an image panel containing the SWI, QSM, vein atlas,
         and vein mask
@@ -43,10 +39,10 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         """
         # Derive (when necessary) and access data SWI, QSM, vein atlas,
         # and vein mask data in the repository.
-        swis = self.data('swi')
-        qsms = self.data('qsm')
-        vein_atlases = self.data('vein_atlas')
-        vein_masks = self.data('vein_mask')
+        swis = self.data('t2star_swi')
+        qsms = self.data('t2star_qsm')
+        vein_atlases = self.data('t2star_vein_atlas')
+        vein_masks = self.data('t2star_vein_mask')
         # Loop through all sessions
         for swi, qsm, vein_atlas, vein_mask in zip(swis, qsms,
                                                    vein_atlases,
@@ -58,7 +54,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             # Display or save to file the generated image.
             self.save_or_show(save_path, swi.subject_id, swi.visit_id)
 
-    def figure11(self, save_path=None, **kwargs):
+    def figure12(self, save_path=None, **kwargs):
         """
         Generates an image panel containing the derived FA and ADC
         images for each session in the study (typically only one)
@@ -76,13 +72,15 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         for fa, adc in zip(fas, adcs):
             # Display slices from the filesets in a panel using
             # method from the ImageDisplayMixin base class.
-            self.display_slice_panel((fa, adc),
-                                     row_kwargs=({'vmax': 1.0},
-                                                  {}), **kwargs)
+            self.display_slice_panel(
+                (fa, adc),
+                row_kwargs=({'vmax': 1.0}, {}),
+                offset=self.parameter('fig12_13_slice_offset'),
+                **kwargs)
             # Display or save to file the generated image.
             self.save_or_show(save_path, fa.subject_id, fa.visit_id)
 
-    def figure12(self, save_path=None, **kwargs):
+    def figure13(self, save_path=None, **kwargs):
         """
         Generates dMRI tractography streamlines seeded from without the
         white matter.
@@ -107,15 +105,16 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             # Display generated streamlines with mrview from the
             # MRtrix package
             self.display_tcks_with_mrview(
-                tcks=(tck,), backgrounds=(fa,), **kwargs)
+                tcks=(tck,), backgrounds=(fa,),
+                offset=self.parameter('fig11_12_slice_offset'),
+                **kwargs)
             # Display or save to file the generated image.
             self.save_or_show(save_path, tck.subject_id, tck.visit_id)
-        print('Figure12')
 
 
 if __name__ == '__main__':
     from arcana import (
-        LocalRepository, LinearProcessor, FilesetMatch)
+        DirectoryRepository, LinearProcessor, FilesetMatch)
     from nianalysis.file_format import dicom_format
     import os
 
@@ -132,7 +131,7 @@ if __name__ == '__main__':
         # Name for this analysis instance
         'arcana_paper',
         # Repository is a simple directory on the local file system
-        LocalRepository(data_dir),
+        DirectoryRepository(data_dir),
         # Use a single process on the local system to derive
         LinearProcessor(work_dir),
         # Match names in the data specification to filenames used
@@ -140,10 +139,13 @@ if __name__ == '__main__':
         inputs=[FilesetMatch('dmri_primary', dicom_format, '16.*',
                              is_regex=True),
                 FilesetMatch('dmri_reverse_phase', dicom_format, '15.*',
-                             is_regex=True)])
+                             is_regex=True)],
+        parameters={
+            'dmri_num_global_tracks': int(1e5),
+            'dmri_global_tracks_cutoff': 0.175})
 
     # Derive required data and display them in a single step for each
     # figure.
-    paper.figure10(op.join(fig_dir, 'figure10.png'))
-    paper.figure11(op.join(fig_dir, 'figure11.png'))
-    paper.figure12(op.join(fig_dir, 'figure12.png'))
+#     paper.figure10(op.join(fig_dir, 'figure11.png'))
+    paper.figure11(op.join(fig_dir, 'figure12.png'))
+    paper.figure12(op.join(fig_dir, 'figure13.png'))
