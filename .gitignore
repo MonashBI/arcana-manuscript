@@ -1,5 +1,9 @@
-/qsm-results.png
 /data/
-/.DS_Store
+.DS_Store
 /work/
-/figures/
+/manuscript/figures/derived
+*.aux
+*.log
+*.out
+*.pdf
+*.synctex.gz
