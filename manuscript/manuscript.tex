@@ -45,11 +45,15 @@ grestore
 %
 \smartqed  % flush right qed marks, e.g. at end of proof
 %
+\usepackage{listings}
 \usepackage{graphicx}
-\usepackage{hyperref}
 \usepackage{longtable}
+\usepackage{hyperref}
 \usepackage{booktabs}
 
+\lstset{
+    basicstyle=\footnotesize
+}
 
 % \usepackage{mathptmx}      % use Times fonts if available on your TeX system
 %
@@ -197,7 +201,7 @@ Our objective was to extract common elements of repository-centric
 workflow design into an abstract framework to make it practical to
 implement flexible, portable and complete workflows for a wide range of
 neuroimaging analyses. \emph{Abstraction of Repository-Centric ANAlysis
-(Arcana)} (http://arcana.readthedocs.io) is a Python framework for
+(Arcana)} \\(\href{http://arcana.readthedocs.io}{http://arcana.readthedocs.io}) is a Python framework for
 designing complex workflows in which modular Nipype pipelines operate on
 data stored in various repositories. Intermediate derivatives are
 derived on demand, checking against stored provenance for required
@@ -336,14 +340,17 @@ passed inputs when the class is instantiated.
 
 %\includegraphics[width=5.74851in,height=6.07813in]{media/image27.png}
 
-
-\textbf{Figure 3} - Example data and parameter specifications. The data
+\begin{figure}
+\lstinputlisting[language=Python]{listings/data_spec.py}
+\caption{Example data and parameter specifications. The data
 specification specifies two ``acquired'' file sets, `one' and `ten' and
 ten derived file sets that can be derived from them, at least
 indirectly. Each derived data spec, specifies the name of the pipeline
 constructor that creates the pipeline that derives them. Parameter
 specifications specify a name and default value for free parameters of
-the Study class.
+the Study class}
+\label{list:data_spec}
+\end{figure}
 
 Both acquired and derived data specifications have a \emph{frequency}
 attribute which specifies where the data sits in the hierarchy of the
@@ -443,17 +450,17 @@ overriding methods in subclasses.
 
 The syntax for workflow graph construction in Arcana is inspired by the
 proposed format for Nipype v2.0
-(\href{https://github.com/nipy/nipype/issues/2539}{https://github.com/nipy/nipype/issues/2539}),
+(\href{http://github.com/nipy/nipype/issues/2539}{http://github.com/nipy/nipype/issues/2539}),
 and will be updated as Nipype v2.0 is developed and upstream
 functionality becomes available. Workflow nodes are created from Nipype
-interfaces using the \emph{Pipeline.add(name, interface)} method of the
+interfaces using the \emph{add(name, interface)} method of the
 Pipeline should be used. Once created, the inputs of the node can be set
 explicitly via the node's \emph{inputs} attribute, connected to other
-nodes with the \emph{Pipeline.connect(out\_node, out\_node\_output,
+nodes with the \emph{connect(out\_node, out\_node\_output,
 in\_node, in\_node\_input)} method, or connected to inputs of the
 pipeline. Pipeline inputs and outputs are connected to nodes using the
-\emph{Pipeline.add\_input(spec\_name, node, node\_input)} and
-\emph{Pipeline.add\_output(spec\_name, node, node\_output)} methods,
+\emph{add\_input(spec\_name, node, node\_input)} and
+\emph{add\_output(spec\_name, node, node\_output)} methods,
 respectively.
 
 Any external software packages required by a node should be referenced
@@ -470,23 +477,23 @@ Iteration over subjects and visits is handled implicitly by Arcana and
 depends on the frequency of the pipeline's inputs and outputs. To create
 a summary derivative (i.e. frequency != \emph{per\_session}) from more
 frequent data a join node is used. Join nodes that join over subjects or
-visits are created with \emph{Pipeline.add}\_\emph{join\_subjects(name,
-interface, joinfield)} and \emph{Pipeline.add\_join\_visits(name,
+visits are created with \emph{add}\_\emph{join\_subjects(name,
+interface, joinfield)} and \emph{add\_join\_visits(name,
 interface, joinfield)} respectively. As in the underlying Nipype, the
 \emph{joinfield} argument specifies which inputs of the receiving node
 to join into lists. If direct access to the subject or visit IDs is
 required by a node they can be connected to the implicit iterator nodes
-with \emph{Pipeline.connect\_subject\_id(node, name)} and
-\emph{Pipeline.connect\_visit\_id} respectively. Note that expansion
+with \emph{connect\_subject\_id(node, name)} and
+\emph{connect\_visit\_id} respectively. Note that expansion
 over iterator sources is handled implicitly by Nipype when nodes with
 different iterators are connected to a downstream node.
 
 Study parameters can be accessed during pipeline construction with the
-\emph{Study.parameter(name)} method. If conditional logic is included in
+\emph{parameter(name)} method. If conditional logic is included in
 the workflow construction that alters the pipeline inputs, outputs or
 parameters then it should be controlled by a switch instead of a
 parameter. The analysis branch designated by a switch value should be
-tested with \emph{Study.branch(name, ref\_value)} method.
+tested with \emph{branch(name, ref\_value)} method.
 
 For convenience when the pipeline to construct only consists of a single
 node, the \emph{Study.pipeline\_constructor} classmethod to create the
@@ -558,7 +565,7 @@ derivative specifications in sub-studies. If a spec in the global spaced
 is mapped onto a derivative spec in the sub-study space, then the
 pipeline that generates that derivative in the sub-study will not run
 unless it generates other required derivatives (e.g. \emph{Pipeline 3} in
-\emph{Sub-Study2})}
+\emph{Sub-Study 2})}
 \end{center}
 \label{fig:example_multi_study}
 \end{figure*}
@@ -680,18 +687,18 @@ subjects and visits (e.g. `all'), the names for which are specified when
 the repository is initialised. For example, given in plain-directory
 repository using all as the summary name for both subjects and visits,
 per\_subject data for `subj1' would be stored at
-\emph{\textless{}root-dir\textgreater{}/subj1/}all, per\_visit data for
-`visit1' in \emph{\textless{}root-dir\textgreater{}/}all\emph{/visit1},
-and per\_study data in \emph{\textless{}root\_dir\textgreater{}/}all/all
+\emph{\textless{}root\textgreater{}/subj1/}all, per\_visit data for
+`visit1' in \emph{\textless{}root\textgreater{}/}all\emph{/visit1},
+and per\_study data in \emph{\textless{}root\textgreater{}/}all/all
 (Table \ref{tbl:repo-structure}).
 
 \begin{table}
 % table caption is above the table
-\caption{Storage locations of derivative and provenance data for each repository
+\caption{Storage locations of derived data for each repository
 type. Derivatives are stored in separate namespaces for each Study
 instance to enable multiple analyses on the same datasets with different
-parameterisations. Where `...' = \emph{derivatives}
-directory/XNAT session, \emph{subj} = subject ID, \emph{vis} = visit ID,
+parameterisations. Where `...' is the location of the
+directory or MrSession that holds the derivatives, \emph{subj} = subject ID, \emph{vis} = visit ID,
 \emph{study} = name of the Study instance, and \emph{pl} = name
 of pipeline.}
 \label{tbl:repo-structure}       % Give a unique label
@@ -700,9 +707,9 @@ of pipeline.}
 \hline\noalign{\smallskip}
 \textbf{Type} & Plain-directory & BIDS & XNAT  \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
-\textbf{Deriv.} & /\emph{subj}/\emph{vis}/\emph{study} & /derivatives/\emph{study}/\emph{subj}/\emph{vis} & /\emph{subj}/\emph{vis}\_\emph{study} \\
-\textbf{Fields} & \D/\_\_fields\_\_.json & \D/\_\_fields\_\_.json & ``custom vars.'' \\
-\textbf{Prov.} & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}/prov\emph{.}json \\
+\textbf{Derivatives} & /\emph{subj}/\emph{vis}/\emph{study} & /derivatives/\emph{study}/\emph{subj}/\emph{vis} & /\emph{subj}/\emph{vis}\_\emph{study}\\
+\textbf{Fields} & \D/\_\_fields\_\_.json & \D/\_\_fields\_\_.json & MrSession XML \\ 
+\textbf{Provenance} & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}.json \\
 \noalign{\smallskip}\hline
 \end{tabular}
 \end{table}

@@ -1,15 +1,22 @@
-from arcana import (Study, StudyMetaClass, AcquiredFilesetSpec, FilesetSpec,
-                    AcquiredFieldSpec, FieldSpec, ParameterSpec, SwitchSpec,
-                    FilesetCollection, XnatRepository, Fileset)
+import os
+from arcana import (
+    Study, StudyMetaClass, AcquiredFilesetSpec, FilesetSpec,
+    AcquiredFieldSpec, FieldSpec, ParameterSpec, SwitchSpec,
+    FilesetSelector, XnatRepository)
 from arcana.data.file_format.standard import text_format
 from nianalysis.file_format import (
     nifti_gz_format, dicom_format, nifti_format, analyze_format)
 
-STD_IMAGE_FORMATS = (dicom_format, nifti_format, nifti_gz_format,
-                     analyze_format)
+IMAGE_FORMATS = (dicom_format, nifti_format, nifti_gz_format,
+                 analyze_format)
 
-template_repo = XnatRepository('http://central.xnat.org', 'SAMPLE_TEMPLATES')
-template1_default = FilesetCollection(Fileset('sample_atlas', ))
+atlas_repo = XnatRepository(
+    'http://central.xnat.org', 'SAMPLE_TEMPLATES',
+    os.path.expanduser(os.path.join('~', 'work')))
+
+atlas = FilesetSelector(
+    'an_atlas', nifti_gz_format,
+    'an_atlas', frequency='per_study').match(atlas_repo.tree())
 
 
 class ExampleStudy(Study, metaclass=StudyMetaClass):
@@ -19,11 +26,13 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         AcquiredFilesetSpec('acquired_file1', text_format),
         AcquiredFilesetSpec('acquired_file2', IMAGE_FORMATS),
         # Acquired fields
-        AcquiredFieldSpec('acquired_field1', int, frequency='per_subject'),
+        AcquiredFieldSpec('acquired_field1', int,
+                          frequency='per_subject'),
         AcquiredFieldSpec('acquired_field2', str,),
-        # "Acquired" file set with default value. Useful for standard templates
-        AcquiredFilesetSpec('template1', IMAGE_FORMATS, frequency='per_study',
-                            default=template1_default),
+        # "Acquired" file set with default value. Useful for
+        # standard templates
+        AcquiredFilesetSpec('template1', IMAGE_FORMATS,
+                            frequency='per_study', default=atlas),
         # Derived file sets
         FilesetSpec('derived_file1', text_format, 'pipeline1'),
         FilesetSpec('derived_file2', nifti_gz_format, 'pipeline1'),
@@ -42,5 +51,6 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         # Standard parameters
         ParameterSpec('parameter1', 10),
         ParameterSpec('parameter2', 25.8),
-        # Parameters that specify a qualitative change in the analysis
+        # "Switch" parameters that specify a qualitative change
+        # in the analysis
         SwitchSpec('pipeline_tool', 'toolA', ('toolA', 'toolB'))]
