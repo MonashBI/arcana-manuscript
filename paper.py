@@ -21,12 +21,12 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 
     add_parameter_specs = [
         ParameterSpec(
-            'fig12_13_slice_offset', (4, 0, 0),
-            desc=("Offset the sagittal slices of Figure 11 & 12 so they "
+            'dmri_fig_slice_offset', (4, 0, 0),
+            desc=("Offset the sagittal slices of dMRI figures so they "
                   "intersect a cerebral hemisphere instead of the "
                   "midline between the hemispheres"))]
 
-    def figure11(self, save_path=None, **kwargs):
+    def vein_fig(self, save_path=None, **kwargs):
         """
         Generates an image panel containing the SWI, QSM, vein atlas,
         and vein mask
@@ -54,7 +54,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             # Display or save to file the generated image.
             self.save_or_show(save_path, swi.subject_id, swi.visit_id)
 
-    def figure12(self, save_path=None, **kwargs):
+    def fa_adc_fig(self, save_path=None, **kwargs):
         """
         Generates an image panel containing the derived FA and ADC
         images for each session in the study (typically only one)
@@ -75,12 +75,12 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             self.display_slice_panel(
                 (fa, adc),
                 row_kwargs=({'vmax': 1.0}, {}),
-                offset=self.parameter('fig12_13_slice_offset'),
+                offset=self.parameter('dmri_fig_slice_offset'),
                 **kwargs)
             # Display or save to file the generated image.
             self.save_or_show(save_path, fa.subject_id, fa.visit_id)
 
-    def figure13(self, save_path=None, **kwargs):
+    def tractography_fig(self, save_path=None, **kwargs):
         """
         Generates dMRI tractography streamlines seeded from without the
         white matter.
@@ -106,7 +106,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             # MRtrix package
             self.display_tcks_with_mrview(
                 tcks=(tck,), backgrounds=(fa,),
-                offset=self.parameter('fig11_12_slice_offset'),
+                offset=self.parameter('tractography_fig_slice_offset'),
                 **kwargs)
             # Display or save to file the generated image.
             self.save_or_show(save_path, tck.subject_id, tck.visit_id)
@@ -114,7 +114,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 
 if __name__ == '__main__':
     from arcana import (
-        DirectoryRepository, LinearProcessor, FilesetMatch)
+        DirectoryRepository, LinearProcessor, FilesetSelector)
     from nianalysis.file_format import dicom_format
     import os
 
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     this_dir = op.dirname(__file__)
     data_dir = op.join(this_dir, 'data')
     work_dir = op.join(this_dir, 'work')
-    fig_dir = op.join(this_dir, 'figures')
+    fig_dir = op.join(this_dir, 'manuscript', 'figures')
     os.makedirs(fig_dir, exist_ok=True)
 
     # Instantiate the ArcanaPaper class in order to apply it to a
@@ -136,16 +136,16 @@ if __name__ == '__main__':
         LinearProcessor(work_dir),
         # Match names in the data specification to filenames used
         # in the repository
-        inputs=[FilesetMatch('dmri_primary', dicom_format, '16.*',
-                             is_regex=True),
-                FilesetMatch('dmri_reverse_phase', dicom_format, '15.*',
-                             is_regex=True)],
+        inputs=[FilesetSelector('dmri_primary', dicom_format, '16.*',
+                                is_regex=True),
+                FilesetSelector('dmri_reverse_phase', dicom_format, '15.*',
+                                is_regex=True)],
         parameters={
             'dmri_num_global_tracks': int(1e5),
             'dmri_global_tracks_cutoff': 0.175})
 
     # Derive required data and display them in a single step for each
     # figure.
-#     paper.figure10(op.join(fig_dir, 'figure11.png'))
-    paper.figure11(op.join(fig_dir, 'figure12.png'))
-    paper.figure12(op.join(fig_dir, 'figure13.png'))
+#     paper.figure10(op.join(fig_dir, 'veins.png'))
+    paper.figure11(op.join(fig_dir, 'fa_adc.png'))
+    paper.figure12(op.join(fig_dir, 'tractography.png'))

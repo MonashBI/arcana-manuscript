@@ -49,7 +49,8 @@ grestore
 \usepackage{hyperref}
 \usepackage{longtable}
 \usepackage{booktabs}
-%
+
+
 % \usepackage{mathptmx}      % use Times fonts if available on your TeX system
 %
 % insert here the call for the packages your document requires
@@ -58,6 +59,11 @@ grestore
 %
 % please place your own definitions here and don't use \def but
 % \newcommand{}{}
+
+\newcommand{\D}{...}
+\newcommand*{\affaddr}[1]{#1}
+\newcommand*{\affmark}[1][*]{\textsuperscript{#1}}
+
 %
 % Insert the name of "your journal" with
 % \journalname{myjournal}
@@ -73,26 +79,34 @@ analysis%\thanks{Grants or other notes
 %\titlerunning{Short form of title}        % if too long for running head
 
 \author{
-	Thomas G. Close \and
+	Thomas G. Close\affmark[1,2]\and
+	Phillip G. D. Ward\affmark[1,3,4] \and
+	Francesco Sforazzini\affmark[1] \and
+	Wojtek Goscinski\affmark[6] \and
+	Zhaolin Chen\affmark[1,5] \and
+	Gary F. Egan\affmark[1,3,4]
+}
+
+\authorrunning{
+        Thomas G. Close \and
 	Phillip G. D. Ward  \and
 	Francesco Sforazzini  \and
 	Wojtek Goscinski  \and
 	Zhaolin Chen  \and
-	Gary F. Egan  \and
+	Gary F. Egan  \and} % if too long for running head
+
+\institute{
+	Thomas G. Close \at
+	 \email{tom.close@monash.edu} \\ \\
+         \affaddr{\affmark[1]Monash Biomedical Imaging, Monash University, Melbourne, Australia} \\
+         \affaddr{\affmark[2]Australian National Imaging Facility, Australia} \\
+         \affaddr{\affmark[3]Australian Research Council Centre of Excellence for integrative Brain Function, Melbourne, Australia} \\
+         \affaddr{\affmark[4]Monash Institute of Cognitive and Clinical Neurosciences, Monash University, Melbourne, Australia} \\
+         \affaddr{\affmark[5]Department of Electrical and Computer Systems Engineering, Monash University, Melbourne, Australia} \\
+         \affaddr{\affmark[6]Monash eResearch Centre, Monash University, Melbourne, Australia} \\
 }
 
-%\authorrunning{Short form of author list} % if too long for running head
-
-\institute{F. Author \at
-              first address \\
-              \email{tom.close@monash.edu}           %  \\
-%             \emph{Present address:} of F. Author  %  if needed
-           \and
-           S. Author \at
-              second address
-}
-
-\date{Received: date / Accepted: date}
+%\date{Received: date / Accepted: date}
 % The correct dates will be entered by the editor
 
 
@@ -225,14 +239,18 @@ specification tables. Analysis suites for multi-modal data can be
 implemented by combining multiple Study classes in \emph{MultiStudy}
 classes\emph{.}
 
-%\includegraphics[width=3.55074in,height=3.16146in]{media/image23.png}
-
-\textbf{Figure 1} - Example study. Blue boxes represent acquired (input)
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=0.55\textwidth]{figures/example_study}
+  \caption{Example study. Blue boxes represent acquired (input)
 data (filesets or fields) stored in a repository and green derivatives
 from that data stored alongside the original data. Orange ovals are
 pipelines that operate on data in the repository to derive the
 derivatives. Arrows represent data flows, i.e., inputs and outputs to
-pipelines.
+pipelines}
+  \end{center}
+\label{fig:example_study}
+\end{figure*}
 
 Analysis methods are applied to a specific dataset by instantiating an
 appropriate Study class and requesting a derivative listed in the class'
@@ -249,9 +267,10 @@ matched against entries in the class' data specification table using
 criteria defined in \emph{Selector} objects passed to the Study object
 at instantiation.
 
-%\includegraphics[width=6.27083in,height=3.15278in]{media/image33.png}
-
-\textbf{Figure 2} - Simplified Unified Modelling Language (UML) diagram
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=0.9\textwidth]{figures/simplified_arcana_uml}
+  \caption{Unified Modelling Language (UML) diagram
 of information flow in the Arcana framework. Boxes: Python classes,
 blue=analysis-design, green=analysis-application. Arrows: orange=data,
 magenta=workflow description, diamond=aggregated-in. Study classes
@@ -259,7 +278,10 @@ construct analysis pipelines, which are sent to the \emph{Processor} to
 be processed. Input data is selected by \emph{Selector} objects and
 pulled to the compute environment to be processed along with existing
 intermediate derivatives. After the derivatives are pushed back to the
-repository.
+repository.}
+\end{center}
+\label{fig:simple_uml}
+\end{figure*}
 
 \subsection{Analysis design: Study classes}
 \label{analysis-design-study-classes}
@@ -313,6 +335,7 @@ specifications in subclasses or MultiStudy classes, and vice-versa, or
 passed inputs when the class is instantiated.
 
 %\includegraphics[width=5.74851in,height=6.07813in]{media/image27.png}
+
 
 \textbf{Figure 3} - Example data and parameter specifications. The data
 specification specifies two ``acquired'' file sets, `one' and `ten' and
@@ -516,9 +539,11 @@ sub-study (e.g. brain extracted T1-weighted anatomical) to be referenced
 by workflows of other sub-studies (e.g. anatomically constrained dMRI
 tractography).
 
-%\includegraphics[width=3.86429in,height=4.70313in]{media/image20.png}
 
-\textbf{Figure 6} - Example MultiStudy. Blue boxes represent acquired
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=0.775\textwidth]{figures/example_multi_study}
+  \caption{Example MultiStudy. Blue boxes represent acquired
 (input) data (filesets or fields) and green derivatives. Orange ovals
 are pipelines. Blue and green arrows: acquired and derived inputs to
 pipelines, respectively. Orange arrows: outputs of pipelines. Dashed
@@ -532,7 +557,11 @@ and derivative specifications can be mapped onto acquired data or
 derivative specifications in sub-studies. If a spec in the global spaced
 is mapped onto a derivative spec in the sub-study space, then the
 pipeline that generates that derivative in the sub-study will not run
-unless it generates other required derivatives (e.g. \emph{Pipeline 3}).
+unless it generates other required derivatives (e.g. \emph{Pipeline 3} in
+\emph{Sub-Study2})}
+\end{center}
+\label{fig:example_multi_study}
+\end{figure*}
 
 All MultiStudy classes must inherit from the Multi\emph{Study} base
 class and be created by the Multi\emph{StudyMetaClass} metaclass or
@@ -569,9 +598,10 @@ available to process it (the \emph{Processor}). A Study object controls
 the construction of analysis workflows, the execution of the workflows,
 and the flow of data to and from the repository (Figure 7).
 
-%\includegraphics[width=6.27083in,height=4.69444in]{media/image21.png}
-
-\textbf{Figure 7} - Detailed Unified Modelling Language (UML) diagram of
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=\textwidth]{figures/full_arcana_uml}
+  \caption{Detailed Unified Modelling Language (UML) diagram of
 information flow in the Arcana framework. Boxes: Python classes
 (blue=core, green=interchangeable modules, grey=example
 specialisations). Arrows: orange=data, magenta=workflow description,
@@ -581,7 +611,10 @@ on a Study subclass constructs the requisite pipelines (as specified in
 to the \emph{Processor} to be processed. Data is selected by
 \emph{Selector} objects, pulled to the compute environment to be
 processed, and then the derivatives are pushed back to the repository.
-Repositories can be of plain directories, or BIDS or XNAT repositories.
+Repositories can be of plain directories, or BIDS or XNAT repositories}
+\label{fig:full_uml}
+\end{center}
+\end{figure*}
 
 Each Study object is assigned a name, which is used to differentiate its
 results from alternative analyses on the same dataset (e.g. by different
@@ -592,10 +625,13 @@ remaining arguments passed to the Study object initialisation are the
 Repository and Processor modules and a list of \emph{Selector} objects
 to select input datasets from the repository (Figure 8).
 
-%\includegraphics[width=6.27083in,height=3.94444in]{media/image36.png}\textbf{Figure 8} - Example application of Study class to a dataset stored in an XNAT
-%repository. Once the Study object has been initialised potential
-%derivatives of the Study can be requested, and will be generated and
-%stored in the repository if already present.
+%\includegraphics[width=6.27083in,height=3.94444in]{media/image36.png}
+
+Listing - Example application of Study class to a dataset stored in an XNAT
+repository. Once the Study object has been initialised potential
+derivatives of the Study can be requested, and will be generated and
+stored in the repository if already present.
+
 
 \hypertarget{repository-modules}{%
 \subsubsection{Repository modules}\label{repository-modules}}
@@ -647,40 +683,29 @@ per\_subject data for `subj1' would be stored at
 \emph{\textless{}root-dir\textgreater{}/subj1/}all, per\_visit data for
 `visit1' in \emph{\textless{}root-dir\textgreater{}/}all\emph{/visit1},
 and per\_study data in \emph{\textless{}root\_dir\textgreater{}/}all/all
-(Table 1).
+(Table \ref{tbl:repo-structure}).
 
-\begin{longtable}[]{@{}llll@{}}
-\toprule
-& \textbf{Plain-directory} & \textbf{BIDS} &
-\textbf{XNAT}\tabularnewline
-\midrule
-\endhead
-\textbf{Derivatives} & \emph{/subject/visit/study} &
-/derivatives/study/subject/visit &
-/subject/\emph{visit\_study}\tabularnewline
-\textbf{Fields} & \emph{.../}\_\_fields\_\_\emph{.json} &
-\emph{.../}\_\_fields\_\_\emph{.}json & ``custom
-variables''\tabularnewline
-\textbf{Provenance} & \emph{.../}\_\_prov\_\_\emph{/pipeline.}json &
-\emph{.../}\_\_prov\_\_\emph{/pipeline.}json &
-.../scans/\_\_prov\_\_/resources/\emph{pipeline/}prov\emph{.}json\tabularnewline
-\textbf{per\_subject} & \emph{/subject/}all\emph{/study} &
-\emph{/derivatives/study/subject/}all &
-\emph{/subject/}all\_\emph{study}\tabularnewline
-\textbf{per\_visit} & \emph{/}all\emph{/visit/study} &
-\emph{/derivatives/study/}all\emph{/visit} &
-\emph{/}all\emph{/visit\_study}\tabularnewline
-\textbf{per\_study} & \emph{/}all\emph{/}all\emph{/study} &
-\emph{/derivatives/study/}all\emph{/}all &
-\emph{/}all\emph{/}all\_\emph{study}\tabularnewline
-\bottomrule
-\end{longtable}
-
-\textbf{Table 1} - Storage locations of derived data for each repository
+\begin{table}
+% table caption is above the table
+\caption{Storage locations of derivative and provenance data for each repository
 type. Derivatives are stored in separate namespaces for each Study
 instance to enable multiple analyses on the same datasets with different
-parameterisations. `...' refers to the \emph{Derivatives}
-directory/xnat:MrSession.
+parameterisations. Where `...' = \emph{derivatives}
+directory/XNAT session, \emph{subj} = subject ID, \emph{vis} = visit ID,
+\emph{study} = name of the Study instance, and \emph{pl} = name
+of pipeline.}
+\label{tbl:repo-structure}       % Give a unique label
+% For LaTeX tables use
+\begin{tabular}{llll}
+\hline\noalign{\smallskip}
+\textbf{Type} & Plain-directory & BIDS & XNAT  \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+\textbf{Deriv.} & /\emph{subj}/\emph{vis}/\emph{study} & /derivatives/\emph{study}/\emph{subj}/\emph{vis} & /\emph{subj}/\emph{vis}\_\emph{study} \\
+\textbf{Fields} & \D/\_\_fields\_\_.json & \D/\_\_fields\_\_.json & ``custom vars.'' \\
+\textbf{Prov.} & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}/prov\emph{.}json \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
 
 Each study can only have one repository in which derivatives are stored.
 However, a study can draw data from multiple auxiliary repositories,
@@ -900,7 +925,10 @@ toolbox (Tournier et. al. 2010; Tournier et. al. 2012) (Figure 9).
 
 %\includegraphics[width=3.82849in,height=6.85938in]{media/image28.png}
 
-\textbf{Figure 9} - Example diffusion MRI (dMRI) study, which can derive
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=0.55\textwidth]{figures/dmri_study}
+  \caption{Example diffusion MRI (dMRI) study, which can derive
 tensor metrics, fractional anisotropy (FA) and apparent diffusion
 coefficient (ADC) as well as streamlines fibre tracking. Blue boxes:
 acquired (input) data (filesets or fields). Green boxes: derivatives.
@@ -909,7 +937,10 @@ inputs to pipelines, respectively. Orange arrows: outputs of pipelines.
 The dMRI magnitude image is preprocessed for motion correction and EPI
 distortions masked and bias corrected. From the bias corrected image two
 branches of analysis can be performed using the same intermediate
-derivatives: FA and ADC and/or streamlines fibre tracking.
+derivatives: FA and ADC and/or streamlines fibre tracking.}
+\end{center}
+\label{fig:dmri_study}
+\end{figure*}
 
 The \emph{T2starwT1wStudy} class implements an algorithm to generate
 \emph{composite vein images} from the combination of QSM and SWI
@@ -918,7 +949,10 @@ registered to the T1-weighted acquisition (Ward 2018) (Figure 10).
 
 %\includegraphics[width=4.29167in,height=7.43818in]{media/image32.png}
 
-\textbf{Figure 10} - Combined T1-weighted/T2*-weighted multi-study,
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=0.775\textwidth]{figures/t2star_t1_study}
+  \caption{Combined T2*-weighted/T1-weighted multi-study,
 which can derive vein masks by combining Quantitative Susceptibility
 Mapping (QSM) and Susceptible Weighted Imaging (SWI) contrasts with a
 manual atlas. Blue boxes: acquired (input) data (filesets or fields).
@@ -934,7 +968,10 @@ atlas space are mapped from the T1-weighted sub-study and combined with
 the linear registration between T1-weighted and T2*-weighted images, QSM
 and SWI images mapped from the T2*-weighted sub-study to produce the
 composite-vein image. The brain mask from the T1-weighted sub-study is
-combined with the composite vein image to produce the vein mask.
+combined with the composite vein image to produce the vein mask.}
+  \end{center}
+\label{fig:t2star_t1_study}
+\end{figure*} 
 
 The DiffusionStudy and T2starT1Study classes are further aggregated in
 turn into a single MultiStudy class for the results section of this
@@ -956,7 +993,7 @@ the ArcanaPaper class were applied to the acquired dataset to using the
 \emph{SlurmProcessor} to submit jobs to the the MASSIVE HPC cluster
 (Goscinski 2014) in order to generate the figures.
 
-Figure 11 displays composite vein images and vein masks for the healthy
+Figure \ref{fig:veins} displays composite vein images and vein masks for the healthy
 volunteer along with the SWI and QSM intermediate derivatives and the
 input vein atlas. The derived vein images are comparable to those
 generated by the original implementation (Ward 2018). The complete
@@ -964,14 +1001,20 @@ workflow took ?? min to complete over ?? compute cores.
 
 %\includegraphics[width=6.228in,height=4.72396in]{media/image22.png}
 
-\textbf{Figure 11 -} Vein image (\emph{right column}) constructed by
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=\textwidth]{figures/veins}
+  \caption{Vein image (\emph{right column}) constructed by
 combining susceptibility weighted imaging (SWI) (\emph{left column}),
 quantitative susceptibility mapping (QSM) (\emph{left-middle column})
 and a vein atlas from manual tracings (\emph{right-middle column}).
 \emph{Top row}: sagittal slices. \emph{Middle row}: axial slices.
-\emph{Bottom row}: coronal slices.
+\emph{Bottom row}: coronal slices.}
+  \end{center}
+\label{fig:veins}
+\end{figure*}
 
-Figure 12 displays the FA and ADC maps derived from the diffusion MRI
+Figure \ref{fig:fa_adc}  displays the FA and ADC maps derived from the diffusion MRI
 acquisition. The FA map shows high intensity in known white matter
 tracts and low intensities in known grey matter regions. The ADC map
 shows high intensity in cortical spinal fluid and low intensity through
@@ -979,13 +1022,20 @@ the rest of the brain.
 
 %\includegraphics[width=6.27083in,height=4.18056in]{media/image34.png}
 
-\textbf{Figure 12 -} Fractional Anisotropy (FA) \emph{(top row)} and
+
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=\textwidth]{figures/fa_adc}
+  \caption{Fractional Anisotropy (FA) \emph{(top row)} and
 Apparent Diffusion Coefficient (ADC) (\emph{bottom rowI)} derived from
 diffusion MRI data. \emph{Left column:} axial midline slices.
 \emph{Middle column:} coronal midline slices. \emph{Left column}:
-sagittal midline slices.
+sagittal midline slices.}
+  \end{center}
+\label{fig:fa_adc}
+\end{figure*}
 
-Figure 12 displays the global tractography derived from the dMRI
+Figure \ref{fig:tractography} displays the global tractography derived from the dMRI
 acquisition. The streamlines follow well known white matter tracts such
 as the cortico-spinal, fasciculus and corpus callosum. Intermediate
 derivatives derived for the FA and ADC analysis, including the
@@ -995,14 +1045,20 @@ produce the tractography results from ?? to ??.
 
 %\includegraphics[width=6.27083in,height=2.09722in]{media/image30.png}
 
-\textbf{Figure 13 -} Global tractography performed using the MRtrix
+\begin{figure*}
+  \begin{center}
+    \includegraphics[width=\textwidth]{figures/tractography}
+  \caption{Global tractography performed using the MRtrix
 toolbox. Probabilistic streamlines generated with the iFOD2 algorithm
 from fibre Orientation Distribution Function (fODF) estimated from
 diffusion MRI datasets using Constrained Spherical Deconvolution (CSD).
 Streamlines are colour-encoded by orientation: green=anterior-posterior,
 blue=inferior-superior, red=left-right. \emph{Left panel:} axial midline
 slice. \emph{Middle panel:} coronal midline slice. \emph{Left panel}:
-sagittal midline slice.
+sagittal midline slice.}
+  \end{center}
+\label{fig:tractography}
+\end{figure*}
 
 \section{Discussion}
 \label{discussion}
@@ -1151,6 +1207,9 @@ facilitates the design of comprehensive analyses by larger communities.
 Larger communities of developers working on the same code-base should
 make it feasible to capture the arcana of neuroimaging analysis in
 templates that can be applied to a wide range of relevant datasets.
+
+\section*{Acknowlegements}
+We would like to acknowledge the generous support of
 
 % Your text comes here. Separate text sections with
 % \section{Section title}
