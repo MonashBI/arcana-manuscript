@@ -140,7 +140,7 @@ subject classification numbers as needed.
 
 Despite the availability of well-established neuroimaging analysis
 packages (\cite{cox_afni:_1996}; \cite{smith_advances_2004}; \cite{friston_statistical_2007};
-Tournier et. al. 2012), the arcana of neuroimaging analysis is substantial due to
+\cite{tournier_mrtrix:_2012}), the arcana of neuroimaging analysis is substantial due to
 the range of available tools, tuneable parameters, and imaging sequences
 involved (\cite{cusack_automatic_2015}). The distribution of complete
 ``end-to-end'' workflows, from acquired data to publication results, is
@@ -159,7 +159,7 @@ to standardise the storage of neuroimaging data in file system
 directories. BIDS specifies strict file and directory naming
 conventions, which facilitate the design of portable \emph{BIDS Apps}
 (https://bids-apps.neuroimaging.io). However, for research groups with
-sufficient informatics support, software-managed repositories (Marcus et. al. 2007; Das et. al. 2011) can provide additional features, such as
+sufficient informatics support, software-managed repositories (\cite{marcus_extensible_2007}; Das et. al. 2011) can provide additional features, such as
 flexible access-control and automated pipelines. Therefore, for
 published workflows, the choice of repository should be transparent in
 order to maximise their audience.
@@ -172,7 +172,7 @@ logic in construction or execution to be portable. Nipype is a flexible
 Python framework for neuroimaging analysis in which workflows are
 constructed programmatically in Python (Gorgolewski et al. 2011).
 Programmatic construction allows for rich control-flow logic that is not
-readily available in alternative workflow frameworks (Cusack et. al. 2015; \cite{achterberg_fastr:_2016}; \cite{amstutz_common_2016}), and has been used
+readily available in alternative workflow frameworks (\cite{cusack_automatic_2015}; \cite{achterberg_fastr:_2016}; \cite{amstutz_common_2016}), and has been used
 to implement workflows that are robust to differences in fMRI protocols
 across a large number of sites (Esteban et al. 2018).
 
@@ -384,7 +384,7 @@ the Study class by providing a list of \emph{ParameterSpec} objects to
 the \emph{add\_parameter\_specs} class attribute. ParameterSpec objects
 are initialised with a name and default value. Special parameters that
 specify a qualitative change in the analysis, for example using ANTs
-registration (\cite{avants_reproducible_2011}) instead of FSL registration (Smith et. al. 2004), are specified by the \emph{SwitchSpec} subtype.
+registration (\cite{avants_reproducible_2011}) instead of FSL registration (\cite{smith_advances_2004}), are specified by the \emph{SwitchSpec} subtype.
 SwitchSpecs take a name, default value and a list of accepted values at
 initialisation.
 
