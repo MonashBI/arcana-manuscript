@@ -50,9 +50,20 @@ grestore
 \usepackage{longtable}
 \usepackage{hyperref}
 \usepackage{booktabs}
+\usepackage{color}
+
+\definecolor{commentcolour}{rgb}{0.4,0.4,0.4}
+\definecolor{keywordcolour}{rgb}{0.8,0.4,0.4}
+\definecolor{stringcolour}{rgb}{0.1,0.1,0.5}
 
 \lstset{
-    basicstyle=\footnotesize
+    basicstyle=\footnotesize,
+%  captionpos=b,                    % sets the caption-position to bottom
+    language=Python,                 % the language of the code
+    showstringspaces=false,          % underline spaces within strings only
+    stringstyle=\color{stringcolour},     % string literal style
+    commentstyle=\color{commentcolour},    % comment style
+    keywordstyle=\color{keywordcolour}\bfseries,       % keyword style
 }
 
 % \usepackage{mathptmx}      % use Times fonts if available on your TeX system
@@ -163,7 +174,7 @@ Python framework for neuroimaging analysis in which workflows are
 constructed programmatically in Python (Gorgolewski et al. 2011).
 Programmatic construction allows for rich control-flow logic that is not
 readily available in alternative workflow frameworks (Cusack et. al.
-2015; Achterberg et. al. 2016; Amstutz et. al. 2016), and has been used
+2015; \cite{achterberg_fastr:_2016}; Amstutz et. al. 2016), and has been used
 to implement workflows that are robust to differences in fMRI protocols
 across a large number of sites (Esteban et al. 2018).
 
@@ -338,10 +349,8 @@ fluid, with derived specifications able to be overridden by acquired
 specifications in subclasses or MultiStudy classes, and vice-versa, or
 passed inputs when the class is instantiated.
 
-%\includegraphics[width=5.74851in,height=6.07813in]{media/image27.png}
-
 \begin{figure}
-\lstinputlisting[language=Python]{listings/data_spec.py}
+\lstinputlisting[language=Python, firstline=2, lastline=57]{listings/example_study.py}
 \caption{Example data and parameter specifications. The data
 specification specifies two ``acquired'' file sets, `one' and `ten' and
 ten derived file sets that can be derived from them, at least
@@ -400,12 +409,14 @@ workflows, which manage the namespaces of the workflow nodes, and should
 be created in constructor methods using the \emph{Study.new\_pipeline}
 method (Figure 4).
 
-%\includegraphics[width=5.33854in,height=4.21623in]{media/image35.png}
-
-\textbf{Figure 4} - Example pipeline constructor method. Pipelines are
+\begin{figure}
+\lstinputlisting[language=Python, firstline=58, lastline=108]{listings/example_study.py}
+\caption{Example pipeline constructor method. Pipelines are
 created using the \emph{create\_pipeline} method of the Study class.
 Pipeline objects are thin wrappers around Nipype workflows to allow for
-namespace management.
+namespace management}
+\label{list:pipeline_constructor}
+\end{figure}
 
 At instantiation (via the new\_pipeline method) a Pipeline is passed the
 following arguments:
@@ -494,15 +505,6 @@ the workflow construction that alters the pipeline inputs, outputs or
 parameters then it should be controlled by a switch instead of a
 parameter. The analysis branch designated by a switch value should be
 tested with \emph{branch(name, ref\_value)} method.
-
-For convenience when the pipeline to construct only consists of a single
-node, the \emph{Study.pipeline\_constructor} classmethod to create the
-method (Figure 5).
-
-%\includegraphics[width=6.27083in,height=2in]{media/image7.png}
-
-\textbf{Figure 5} - Example basic constructor defined using the
-\emph{Study.pipeline\_constructor} convenience method.
 
 \subsubsection{Extension and specialisation by class inheritance}
 \label{extension-and-specialisation-by-class-inheritance}
@@ -632,13 +634,14 @@ remaining arguments passed to the Study object initialisation are the
 Repository and Processor modules and a list of \emph{Selector} objects
 to select input datasets from the repository (Figure 8).
 
-%\includegraphics[width=6.27083in,height=3.94444in]{media/image36.png}
-
-Listing - Example application of Study class to a dataset stored in an XNAT
+\begin{figure}
+\lstinputlisting[language=Python]{listings/example_application.py}
+\caption{Example application of Study class to a dataset stored in an XNAT
 repository. Once the Study object has been initialised potential
 derivatives of the Study can be requested, and will be generated and
-stored in the repository if already present.
-
+stored in the repository if already present.}
+\label{list:study_application}
+\end{figure}
 
 \hypertarget{repository-modules}{%
 \subsubsection{Repository modules}\label{repository-modules}}
@@ -693,7 +696,6 @@ and per\_study data in \emph{\textless{}root\textgreater{}/}all/all
 (Table \ref{tbl:repo-structure}).
 
 \begin{table}
-% table caption is above the table
 \caption{Storage locations of derived data for each repository
 type. Derivatives are stored in separate namespaces for each Study
 instance to enable multiple analyses on the same datasets with different
@@ -701,8 +703,7 @@ parameterisations. Where `...' is the location of the
 directory or MrSession that holds the derivatives, \emph{subj} = subject ID, \emph{vis} = visit ID,
 \emph{study} = name of the Study instance, and \emph{pl} = name
 of pipeline.}
-\label{tbl:repo-structure}       % Give a unique label
-% For LaTeX tables use
+\label{tbl:repo-structure} 
 \begin{tabular}{llll}
 \hline\noalign{\smallskip}
 \textbf{Type} & Plain-directory & BIDS & XNAT  \\
@@ -727,35 +728,26 @@ New repository modules for additional repository types can be
 implemented by extending the Repository abstract base class and
 implementing a small set of methods (Table 2).
 
-\begin{longtable}[]{@{}ll@{}}
-\toprule
-\textbf{Method name} & \textbf{Function}\tabularnewline
-\midrule
-\endhead
+\begin{table}
+\caption{Abstract methods in the base Repository class that
+need to be implemented by platform-specific sub-classes.}
+\label{tbl:abstract-repo-methods} 
+\begin{tabular}{ll}
+\hline\noalign{\smallskip}
+\textbf{Method name} & Function \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
 find\_data() & Queries repository to find all existing filesets and
-fields and registers them with the
-\emph{Repository.found\_fileset(fileset)} and
-\emph{Repository.found\_field(field)} methods
-respectively.\tabularnewline
-get\_fileset(Fileset) & Caches the files in a Fileset locally and
-returns the path to the primary file or directory in the
-cache.\tabularnewline
+fields \\
+get\_fileset(Fileset) & Caches file-set (if necessary) and returns the file path. \\
 get\_field(Field) & Retrieves and returns the value of the field from
-the repository\tabularnewline
-put\_fileset(Fileset) & Inserts the files in the Fileset into the
-repository and updates the local cache.\tabularnewline
-put\_field(Field) & Inserts the value of the Field into the
-repository\tabularnewline
-connect() & Opens a connection to the repository (optional). Called by
-methods in the base class before entering outer processing
-loops.\tabularnewline
-disconnect() & Closes connection to repository opened by
-\emph{connect()} method (optional)\tabularnewline
-\bottomrule
-\end{longtable}
-
-\textbf{Table 2} - Abstract methods in the base Repository class that
-need to be implemented by platform-specific sub-classes.
+the repository \\
+put\_fileset(Fileset) & Inserts file-set into the repository and updates cache. \\
+put\_field(Field) & Inserts the value of the Field into the repository \\
+connect() & Opens a connection to the repository (optional). \\
+disconnect() & Closes connection to repository (optional)\\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
 
 \subsubsection{Study inputs}
 \label{study-inputs}
@@ -881,25 +873,24 @@ respectively, or per-study. How provenance mismatches are handled by the
 study is determined by the \emph{reprocess} flag, which is passed to the
 Study on initialisation (Table 3).
 
-\begin{longtable}[]{@{}ll@{}}
-\toprule
-\textbf{\emph{Repocess} flag value} & \textbf{Behaviour when mismatching
-derivatives are found}\tabularnewline
-\midrule
-\endhead
-False (default) & An exception will be raised\tabularnewline
-True & Mismatching derivatives will be reprocessed\tabularnewline
-`Ignore' & Mismatches will be ignored\tabularnewline
-`ignore\_versions' & Version mismatches will be ignored, other
-mismatches cause an exception to be raised\tabularnewline
-`ignore\_versions\_true' & version mismatches will be ignored, other
-mismatches will cause the derivative to be reprocessed\tabularnewline
-\bottomrule
-\end{longtable}
 
-\textbf{Table 3} - Effect of the \emph{reprocess} flag value on the
+\begin{table}
+\caption{Effect of the \emph{reprocess} flag value on the
 behaviour of the study when existing derivatives are found that were
-derived with mismatching inputs and parameters.
+derived with mismatching inputs and parameters.}
+\label{tbl:reprocess-flag} 
+\begin{tabular}{ll}
+\hline\noalign{\smallskip}
+\textbf{Reprocess value} & \textbf{Behaviour on provenance mismatch} \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+False (default) & Raises an exception \\
+True & Mismatching derivatives will be reprocessed \\
+`ignore' & Mismatches are ignored \\
+`ignore\_versions' & Ignore versions, otherwise raise exception \\
+`ignore\_versions\_true' & Ignore versions, otherwise the derivative will be reprocessed \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
 
 Additionally, a time limit can be passed to the
 \emph{reprocess\_time\_limit}, and if the estimated time to reprocess
@@ -1090,7 +1081,7 @@ infrastructure without modification.
 
 Software frameworks (Yacoub and Ammar 2004) have been successful in
 improving code quality and efficiency of development in a variety of
-contexts (Moore et. al. 2008; White 2012; Abadi et. al. 2016). By
+contexts (Moore et. al. 2008; White 2012; \cite{abadi_tensorflow:_2016}). By
 factoring out common elements, only features that are specific to the
 given application need to be implemented by the analysis designer, and
 the common elements become battle hardened through repeated use. Arcana
@@ -1215,84 +1206,35 @@ Larger communities of developers working on the same code-base should
 make it feasible to capture the arcana of neuroimaging analysis in
 templates that can be applied to a wide range of relevant datasets.
 
-\section*{Acknowlegements}
-We would like to acknowledge the generous support of
-
-% Your text comes here. Separate text sections with
-% \section{Section title}
-% \label{sec:1}
-% Text with citations \cite{RefB} and \cite{RefJ}.
-% \subsection{Subsection title}
-% \label{sec:2}
-% as required. Don't forget to give each section
-% and subsection a unique label (see Sect.~\ref{sec:1}).
-% \paragraph{Paragraph headings} Use paragraph headings as needed.
-% \begin{equation}
-% a^2+b^2=c^2
-% \end{equation}
-
-% For one-column wide figures use
-\begin{figure}
-% Use the relevant command to insert your figure file.
-% For example, with the graphicx package use
-  \includegraphics{example.eps}
-% figure caption is below the figure
-\caption{Please write your figure caption here}
-\label{fig:1}       % Give a unique label
-\end{figure}
-%
-% For two-column wide figures use
-\begin{figure*}
-% Use the relevant command to insert your figure file.
-% For example, with the graphicx package use
-  \includegraphics[width=0.75\textwidth]{example.eps}
-% figure caption is below the figure
-\caption{Please write your figure caption here}
-\label{fig:2}       % Give a unique label
-\end{figure*}
-%
-% For tables use
-\begin{table}
-% table caption is above the table
-\caption{Please write your table caption here}
-\label{tab:1}       % Give a unique label
-% For LaTeX tables use
-\begin{tabular}{lll}
-\hline\noalign{\smallskip}
-first & second & third  \\
-\noalign{\smallskip}\hline\noalign{\smallskip}
-number & number & number \\
-number & number & number \\
-\noalign{\smallskip}\hline
-\end{tabular}
-\end{table}
-
-
-%\begin{acknowledgements}
-%If you'd like to thank anyone, place your comments here
-%and remove the percent signs.
-%\end{acknowledgements}
+\begin{acknowledgements}
+The authors acknowledge the facilities and scientific and technical assistance
+of the National Imaging Facility, a National Collaborative Research
+Infrastructure Strategy (NCRIS) capability, at Monash Biomedical Imaging,
+Monash University. \textbf{Salary support for me ??} Early versions of the software described in the manuscript
+were informed by existing software written Parnesh Raniga while
+employed at Monash Biomedical Imaging.
+\end{acknowledgements}
 
 % BibTeX users please use one of
-%\bibliographystyle{spbasic}      % basic style, author-year citations
+\bibliographystyle{spbasic}      % basic style, author-year citations
 %\bibliographystyle{spmpsci}      % mathematics and physical sciences
 %\bibliographystyle{spphys}       % APS-like style for physics
-%\bibliography{}   % name your BibTeX data base
+\bibliography{arcana}   % name your BibTeX data base
 
 % Non-BibTeX users please use
-\begin{thebibliography}{}
+%\begin{thebibliography}{}
 %
 % and use \bibitem to create references. Consult the Instructions
 % for authors for reference list style.
 %
-\bibitem{RefJ}
+%\bibitem{RefJ}
 % Format for Journal Reference
-Author, Article title, Journal, Volume, page numbers (year)
+%Author, Article title, Journal, Volume, page numbers (year)
 % Format for books
-\bibitem{RefB}
-Author, Book title, page numbers. Publisher, place (year)
+%\bibitem{RefB}
+%Author, Book title, page numbers. Publisher, place (year)
 % etc
-\end{thebibliography}
+%\end{thebibliography}
 
 \end{document}
 % end of file template.tex
