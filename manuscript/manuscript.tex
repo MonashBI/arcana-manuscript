@@ -139,10 +139,10 @@ subject classification numbers as needed.
 \label{intro}
 
 Despite the availability of well-established neuroimaging analysis
-packages (Cox 1996; Smith et. al. 2004; Friston et. al. 2007; Tournier
+packages (Cox 1996; \cite{smith_advances_2004}; \cite{friston_statistical_2007}; Tournier
 et. al. 2012), the arcana of neuroimaging analysis is substantial due to
 the range of available tools, tuneable parameters, and imaging sequences
-involved (Cusack et. al. 2015). The distribution of complete
+involved (\cite{cusack_automatic_2015}). The distribution of complete
 ``end-to-end'' workflows, from acquired data to publication results, is
 necessary for routine reproduction because of the effort required to
 accurately exactly reimplement such analyses (Kennedy 2018). It is also
@@ -152,9 +152,9 @@ workflows are important to promote reproduction and code reuse in
 neuroimaging research.
 
 A barrier to designing portable and complete workflows is the
-heterogeneity of data storage conventions (Marcus et. al. 2007; Das et.
-al. 2011; Gorgolewski et. al. 2016). To address this, the emerging Brain
-Imaging Data Standard (BIDS) (Gorgolewski et. al. 2016) provides a way
+heterogeneity of data storage conventions (\cite{marcus_extensible_2007}; Das et.
+al. 2011; \cite{gorgolewski_brain_2016}). To address this, the emerging Brain
+Imaging Data Standard (BIDS) (\cite{gorgolewski_brain_2016}) provides a way
 to standardise the storage of neuroimaging data in file system
 directories. BIDS specifies strict file and directory naming
 conventions, which facilitate the design of portable \emph{BIDS Apps}
@@ -174,17 +174,17 @@ Python framework for neuroimaging analysis in which workflows are
 constructed programmatically in Python (Gorgolewski et al. 2011).
 Programmatic construction allows for rich control-flow logic that is not
 readily available in alternative workflow frameworks (Cusack et. al.
-2015; \cite{achterberg_fastr:_2016}; Amstutz et. al. 2016), and has been used
+2015; \cite{achterberg_fastr:_2016}; \cite{amstutz_common_2016}), and has been used
 to implement workflows that are robust to differences in fMRI protocols
 across a large number of sites (Esteban et al. 2018).
 
 The trend towards large multi-site and multi-contrast datasets collected
-over a number of years (Van Essen et. al. 2012; Thompson et. al. 2014;
-Sudlow et. al. 2015) presents additional challenges to workflow design.
+over a number of years (Van Essen et. al. 2012; \cite{thompson_enigma_2014};
+\cite{sudlow_uk_2015}) presents additional challenges to workflow design.
 Analysis packages are constantly being developed and improved, so the
 state-of-the-art workflow for a particular analysis can change over
 time. Therefore, it is challenging to ensure workflows are applied
-consistently over the course of long studies (Cusack et. al. 2015).
+consistently over the course of long studies (\cite{cusack_automatic_2015}).
 
 While analysis workflows for different contrasts and modalities are
 typically implemented independently, they can share common processing
@@ -196,7 +196,7 @@ rerunning common segments can lead to significant increases in
 computation time and therefore project cost. In addition, duplication of
 processing segments increases time for manual quality control (QC),
 making the reuse of intermediate derivatives a practical requirement for
-some large studies (Schreiber et. al. 2018).
+some large studies (\cite{schreiber_using_2018}).
 
 To maximise the reusability of neuroimaging workflows and avoid frequent
 reimplementation of standard analyses, workflow implementations should
@@ -386,7 +386,7 @@ the Study class by providing a list of \emph{ParameterSpec} objects to
 the \emph{add\_parameter\_specs} class attribute. ParameterSpec objects
 are initialised with a name and default value. Special parameters that
 specify a qualitative change in the analysis, for example using ANTs
-registration (Avants et. al. 2011) instead of FSL registration (Smith
+registration (\cite{avants_reproducible_2011}) instead of FSL registration (Smith
 et. al. 2004), are specified by the \emph{SwitchSpec} subtype.
 SwitchSpecs take a name, default value and a list of accepted values at
 initialisation.
@@ -919,7 +919,7 @@ T1-weighted contrasts.
 
 The DmriStudy class implements diffusion tensor metrics, FA and ADC, as
 well as global tractography using streamlines tracking from the MRtrix
-toolbox (Tournier et. al. 2010; Tournier et. al. 2012) (Figure 9).
+toolbox (\cite{tournier_improved_2010}; \cite{tournier_mrtrix:_2012}) (Figure 9).
 
 %\includegraphics[width=3.82849in,height=6.85938in]{media/image28.png}
 
@@ -1081,7 +1081,7 @@ infrastructure without modification.
 
 Software frameworks (Yacoub and Ammar 2004) have been successful in
 improving code quality and efficiency of development in a variety of
-contexts (Moore et. al. 2008; White 2012; \cite{abadi_tensorflow:_2016}). By
+contexts (\cite{moore_professional_2008}; White 2012; \cite{abadi_tensorflow:_2016}). By
 factoring out common elements, only features that are specific to the
 given application need to be implemented by the analysis designer, and
 the common elements become battle hardened through repeated use. Arcana
