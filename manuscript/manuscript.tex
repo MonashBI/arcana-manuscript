@@ -139,13 +139,13 @@ subject classification numbers as needed.
 \label{intro}
 
 Despite the availability of well-established neuroimaging analysis
-packages (Cox 1996; \cite{smith_advances_2004}; \cite{friston_statistical_2007}; Tournier
-et. al. 2012), the arcana of neuroimaging analysis is substantial due to
+packages (\cite{cox_afni:_1996}; \cite{smith_advances_2004}; \cite{friston_statistical_2007};
+Tournier et. al. 2012), the arcana of neuroimaging analysis is substantial due to
 the range of available tools, tuneable parameters, and imaging sequences
 involved (\cite{cusack_automatic_2015}). The distribution of complete
 ``end-to-end'' workflows, from acquired data to publication results, is
 necessary for routine reproduction because of the effort required to
-accurately exactly reimplement such analyses (Kennedy 2018). It is also
+accurately exactly reimplement such analyses (\cite{kennedy_neuroimaging_2018}). It is also
 difficult to adapt existing workflows to new studies without detailed
 knowledge of their design. Therefore, flexible, portable and complete
 workflows are important to promote reproduction and code reuse in
@@ -159,27 +159,25 @@ to standardise the storage of neuroimaging data in file system
 directories. BIDS specifies strict file and directory naming
 conventions, which facilitate the design of portable \emph{BIDS Apps}
 (https://bids-apps.neuroimaging.io). However, for research groups with
-sufficient informatics support, software-managed repositories (Marcus
-et. al. 2007; Das et. al. 2011) can provide additional features, such as
+sufficient informatics support, software-managed repositories (Marcus et. al. 2007; Das et. al. 2011) can provide additional features, such as
 flexible access-control and automated pipelines. Therefore, for
 published workflows, the choice of repository should be transparent in
 order to maximise their audience.
 
 While neuroimaging analyses are generally amenable to standardisation
-(Kennedy 2018), minor modifications are often required to accommodate
+(\cite{kennedy_neuroimaging_2018}), minor modifications are often required to accommodate
 idiosyncrasies of the acquisition protocols in use at different sites
 (Esteban et al. 2018). Therefore, workflows may require conditional
 logic in construction or execution to be portable. Nipype is a flexible
 Python framework for neuroimaging analysis in which workflows are
 constructed programmatically in Python (Gorgolewski et al. 2011).
 Programmatic construction allows for rich control-flow logic that is not
-readily available in alternative workflow frameworks (Cusack et. al.
-2015; \cite{achterberg_fastr:_2016}; \cite{amstutz_common_2016}), and has been used
+readily available in alternative workflow frameworks (Cusack et. al. 2015; \cite{achterberg_fastr:_2016}; \cite{amstutz_common_2016}), and has been used
 to implement workflows that are robust to differences in fMRI protocols
 across a large number of sites (Esteban et al. 2018).
 
 The trend towards large multi-site and multi-contrast datasets collected
-over a number of years (Van Essen et. al. 2012; \cite{thompson_enigma_2014};
+over a number of years (Van et. al. 2012; \cite{thompson_enigma_2014};
 \cite{sudlow_uk_2015}) presents additional challenges to workflow design.
 Analysis packages are constantly being developed and improved, so the
 state-of-the-art workflow for a particular analysis can change over
@@ -225,8 +223,8 @@ complex workflows that are portable and complete.
 
 The utility of the Arcana framework is demonstrated by the
 implementation of analysis suites for T1, T2* and diffusion weighted MRI
-(dMRI) data and the application of dMRI tractogram (Tournier 2012) and
-composite vein image (Ward 2018) workflows to data collected from a
+(dMRI) data and the application of dMRI tractogram (\cite{tournier_mrtrix:_2012}) and
+composite vein image (\cite{ward_combining_2018}) workflows to data collected from a
 healthy subject.
 
 \section{Methods}
@@ -386,8 +384,7 @@ the Study class by providing a list of \emph{ParameterSpec} objects to
 the \emph{add\_parameter\_specs} class attribute. ParameterSpec objects
 are initialised with a name and default value. Special parameters that
 specify a qualitative change in the analysis, for example using ANTs
-registration (\cite{avants_reproducible_2011}) instead of FSL registration (Smith
-et. al. 2004), are specified by the \emph{SwitchSpec} subtype.
+registration (\cite{avants_reproducible_2011}) instead of FSL registration (Smith et. al. 2004), are specified by the \emph{SwitchSpec} subtype.
 SwitchSpecs take a name, default value and a list of accepted values at
 initialisation.
 
@@ -850,7 +847,7 @@ iterator nodes to create a single workflow, which is then executed using
 the Nipype execution plugin.
 
 Software versions are managed by the processor if environment modules
-(Furlani 1991) are installed on the system. These are loaded and
+(\cite{furlani_modules:_1991}) are installed on the system. These are loaded and
 unloaded before the interface of a workflow node is run based on the
 requirements specified for the node during construction of the pipeline
 (see \emph{Pipeline constructors}). Maps from requirement names to
@@ -943,7 +940,7 @@ derivatives: FA and ADC and/or streamlines fibre tracking.}
 The \emph{T2starwT1wStudy} class implements an algorithm to generate
 \emph{composite vein images} from the combination of QSM and SWI
 contrasts derived from the T2*-weighted acquisition with an vein atlas
-registered to the T1-weighted acquisition (Ward 2018) (Figure 10).
+registered to the T1-weighted acquisition (\cite{ward_combining_2018}) (Figure 10).
 
 %\includegraphics[width=4.29167in,height=7.43818in]{media/image32.png}
 
@@ -989,12 +986,12 @@ directions with b=1500 mm2/s and 3 b=0, bandwidth=781Hz/pixel)
 (\textbf{cite Lifespan paper ??}). Methods for Figure 11, 12, and 13 in
 the ArcanaPaper class were applied to the acquired dataset to using the
 \emph{SlurmProcessor} to submit jobs to the the MASSIVE HPC cluster
-(Goscinski 2014) in order to generate the figures.
+(\cite{goscinski_multi-modal_2014}) in order to generate the figures.
 
 Figure \ref{fig:veins} displays composite vein images and vein masks for the healthy
 volunteer along with the SWI and QSM intermediate derivatives and the
 input vein atlas. The derived vein images are comparable to those
-generated by the original implementation (Ward 2018). The complete
+generated by the original implementation (\cite{ward_combining_2018}). The complete
 workflow took ?? min to complete over ?? compute cores.
 
 %\includegraphics[width=6.228in,height=4.72396in]{media/image22.png}
@@ -1081,7 +1078,7 @@ infrastructure without modification.
 
 Software frameworks (Yacoub and Ammar 2004) have been successful in
 improving code quality and efficiency of development in a variety of
-contexts (\cite{moore_professional_2008}; White 2012; \cite{abadi_tensorflow:_2016}). By
+contexts (\cite{moore_professional_2008}; \cite{white_hadoop:_2012}; \cite{abadi_tensorflow:_2016}). By
 factoring out common elements, only features that are specific to the
 given application need to be implemented by the analysis designer, and
 the common elements become battle hardened through repeated use. Arcana
@@ -1095,7 +1092,7 @@ Linus' Law is that "given a large enough beta-tester and co-developer
 base, almost every problem will be characterized quickly and the fix
 obvious to someone" or more compactly, "given enough eyeballs, all
 \href{https://en.wikipedia.org/wiki/Software_bug}{bugs} are shallow"
-(Raymond 1999). Given the size of the neuroimaging research community,
+(\cite{raymond_cathedral_1999}). Given the size of the neuroimaging research community,
 there are a large number of potential beta-testers and co-developers.
 However, it has been difficult for researchers to collaborate on the
 same code base due to slight differences in acquisition protocols,
@@ -1137,11 +1134,9 @@ workflow implementation to be applied to datasets stored in BIDS format
 or XNAT repositories. A single code-base can therefore be containerized
 into BIDS apps or XNAT pipelines without adaptation, helping to form a
 bridge between the two communities of users and developers. Alternative
-data storage systems (Book et. al. 2009; Das et. al. 2011, Scott et. al
-2011), can be integrated into Arcana by overriding a small number of
+data storage systems (Book et. al. 2009; Das et. al. 2011, Scott et. al 2011), can be integrated into Arcana by overriding a small number of
 methods from the Repository abstract base class. Repository modules
-could also be created for data portals such as \emph{DataLad} (Halchenko
-2018) in order to take advantage of the range of platforms they support.
+could also be created for data portals such as \emph{DataLad} (Halchenko et. al. 2018) in order to take advantage of the range of platforms they support.
 Implementing analyses in Arcana therefore enables researchers and
 research groups to easily migrate their workflows between storage
 platforms, and not risk being locked in to a particular technology.
@@ -1157,7 +1152,7 @@ greater than two), which is not currently possible in Arcana.
 
 Ensuring that the consistent versions of external tools are used
 throughout the analysis is important to avoid introducing biases due to
-algorithm updates. In systems with environment modules (Furlani 1991)
+algorithm updates. In systems with environment modules (\cite{furlani_modules:_1991})
 installed, Arcana loads and unloads the required modules before and
 after each node is executed. When running Arcana within a container,
 environment modules and software versions can be installed inside the
