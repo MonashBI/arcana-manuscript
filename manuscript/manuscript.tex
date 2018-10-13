@@ -136,7 +136,7 @@ subject classification numbers as needed.
 % \subclass{MSC code1 \and MSC code2 \and more}
 \end{abstract}
 
-\section{Introduction}
+\section*{Introduction}
 \label{intro}
 
 Despite the availability of well-established neuroimaging analysis
@@ -227,10 +227,10 @@ implementation of analysis suites for T1, T2* and diffusion weighted MRI
 composite vein image \citep{ward_combining_2018} workflows to data collected from a
 healthy subject.
 
-\section{Methods}
+\section*{Methods}
 \label{methods}
 
-\subsection{Framework overview}
+\subsection*{Framework overview}
 \label{framework-overview}
 
 The separation of analysis design and application in the Arcana
@@ -244,7 +244,7 @@ the Study class to a specific dataset.
 The set of acquired data, the derivatives that can be derived from it,
 and methods that construct pipelines to derive the derivatives, are
 linked together by the \emph{data specification} \emph{table} of the
-Study class (Figure 1). Likewise, free parameters used in pipeline
+Study class (Figure \ref{fig:example_study}). Likewise, free parameters used in pipeline
 construction are defined in the class' \emph{parameter specification}
 \emph{table}. Class inheritance can be used to specialise analysis
 suites by overriding pipeline constructor methods or entries in the
@@ -253,7 +253,7 @@ implemented by combining multiple Study classes in \emph{MultiStudy}
 classes\emph{.}
 
 \begin{figure*}
-  \begin{center}
+    \centering
     \includegraphics[width=0.55\textwidth]{figures/example_study}
   \caption{Example study. Blue boxes represent acquired (input)
 data (filesets or fields) stored in a repository and green derivatives
@@ -261,7 +261,6 @@ from that data stored alongside the original data. Orange ovals are
 pipelines that operate on data in the repository to derive the
 derivatives. Arrows represent data flows, i.e., inputs and outputs to
 pipelines}
-  \end{center}
 \label{fig:example_study}
 \end{figure*}
 
@@ -275,13 +274,13 @@ derivatives that can be reused before constructing a workflow to produce
 the requested derivative. Workflows are executed in the computing
 environment specified by the Processor object and their products are
 stored back in the repository for reuse by subsequent analyses (Figure
-2). Input data to the study are also stored in the repository, and are
+\ref{fig:simple_uml}). Input data to the study are also stored in the repository, and are
 matched against entries in the class' data specification table using
 criteria defined in \emph{Selector} objects passed to the Study object
 at instantiation.
 
 \begin{figure*}
-  \begin{center}
+    \centering
     \includegraphics[width=0.9\textwidth]{figures/simplified_arcana_uml}
   \caption{Unified Modelling Language (UML) diagram
 of information flow in the Arcana framework. Boxes: Python classes,
@@ -292,11 +291,10 @@ be processed. Input data is selected by \emph{Selector} objects and
 pulled to the compute environment to be processed along with existing
 intermediate derivatives. After the derivatives are pushed back to the
 repository.}
-\end{center}
 \label{fig:simple_uml}
 \end{figure*}
 
-\subsection{Analysis design: Study classes}
+\subsection*{Analysis design: Study classes}
 \label{analysis-design-study-classes}
 
 Study classes encapsulate a study dataset (i.e. data collected across
@@ -311,7 +309,7 @@ implicitly by the framework. All Study classes must inherit from the
 \emph{Study} base class and be created by the \emph{StudyMetaClass}
 metaclass or subclasses thereof.
 
-\subsubsection{Data and parameter specification
+\subsubsection*{Data and parameter specification
 tables}
 \label{data-and-parameter-specification-tables}
 
@@ -339,7 +337,7 @@ the same extension is used for different formats in different contexts.
 
 Fileset and field specifications are passed to the data specification of
 a Study class via the \emph{add\_data\_specs} class attribute as a list
-of named \emph{FilesetSpec} and \emph{FieldSpec} objects (Figure 3).
+of named \emph{FilesetSpec} and \emph{FieldSpec} objects (Figure \ref{fig:data_spec}).
 Specifications for acquired data (i.e. input data to the study) are
 distinguished from derived data by using the \emph{AcquiredFilesetSpec}
 and \emph{AcquiredFieldSpec} subtypes. However, the distinction is
@@ -356,7 +354,7 @@ indirectly. Each derived data spec, specifies the name of the pipeline
 constructor that creates the pipeline that derives them. Parameter
 specifications specify a name and default value for free parameters of
 the Study class}
-\label{list:data_spec}
+\label{fig:data_spec}
 \end{figure}
 
 Both acquired and derived data specifications have a \emph{frequency}
@@ -389,7 +387,7 @@ registration \citep{avants_reproducible_2011} instead of FSL registration
 SwitchSpecs take a name, default value and a list of accepted values at
 initialisation.
 
-\subsubsection{Workflow design}
+\subsubsection*{Workflow design}
 \label{workflow-design}
 
 Analysis workflows are implemented in Arcana as a series of pipelines
@@ -405,7 +403,7 @@ defining a method in the class that constructs and returns a
 specification table. Pipeline objects are thin wrappers around Nipype
 workflows, which manage the namespaces of the workflow nodes, and should
 be created in constructor methods using the \emph{Study.new\_pipeline}
-method (Figure 4).
+method (Figure \ref{fig:pipeline_constructor}).
 
 \begin{figure}
 \lstinputlisting[language=Python, firstline=59]{listings/example_study.py}
@@ -413,7 +411,7 @@ method (Figure 4).
 created using the \emph{create\_pipeline} method of the Study class.
 Pipeline objects are thin wrappers around Nipype workflows to allow for
 namespace management}
-\label{list:pipeline_constructor}
+\label{fig:pipeline_constructor}
 \end{figure}
 
 At instantiation (via the new\_pipeline method) a Pipeline is passed the
@@ -504,7 +502,7 @@ parameters then it should be controlled by a switch instead of a
 parameter. The analysis branch designated by a switch value should be
 tested with \emph{branch(name, ref\_value)} method.
 
-\subsubsection{Extension and specialisation by class inheritance}
+\subsubsection*{Extension and specialisation by class inheritance}
 \label{extension-and-specialisation-by-class-inheritance}
 
 Because Arcana analyses are implemented as Python classes, class
@@ -530,7 +528,7 @@ that in this scheme, specifications can only be appended or overridden
 but not removed by Study subclasses so as not to break workflows
 inherited from base classes.
 
-\subsubsection{Implementing multi-modal
+\subsubsection*{Implementing multi-modal
 studies}
 \label{implementing-multi-modal-studies}
 
@@ -541,14 +539,14 @@ classes (sub-studies) in a \emph{MultiStudy} class. Analysis suites are
 integrated by joining the data specification tables of the sub-studies
 of a MultiStudy class. Entries in specification tables of sub-studies
 are joined by mapping them to a common entry in the specification table
-of the MultiStudy (Figure 6). This enables derivatives from one
+of the MultiStudy (Figure \ref{fig:example_multi_study}). This enables derivatives from one
 sub-study (e.g. brain extracted T1-weighted anatomical) to be referenced
 by workflows of other sub-studies (e.g. anatomically constrained dMRI
 tractography).
 
 
 \begin{figure*}
-  \begin{center}
+  \centering
     \includegraphics[width=0.775\textwidth]{figures/example_multi_study}
   \caption{Example MultiStudy. Blue boxes represent acquired
 (input) data (filesets or fields) and green derivatives. Orange ovals
@@ -558,7 +556,8 @@ boxes represent data specifications in a sub-study that are present in
 the global namespace and mapped into the sub-study space, and dotted
 arrows the mappings. Sub-studies are linked by mapping the same data
 spec in the global space onto data specifications the multiple sub-study
-namespaces (e.g. \emph{Derived 1, 2 \& 3}). There are no restrictions
+namespaces (e.g. \emph{Derived} \emph{1}, \emph{2} and \emph{3}).
+There are no restrictions
 between mapping acquired and derivative specifications: both acquired
 and derivative specifications can be mapped onto acquired data or
 derivative specifications in sub-studies. If a spec in the global spaced
@@ -566,7 +565,6 @@ is mapped onto a derivative spec in the sub-study space, then the
 pipeline that generates that derivative in the sub-study will not run
 unless it generates other required derivatives (e.g. \emph{Pipeline 3} in
 \emph{Sub-Study 2})}
-\end{center}
 \label{fig:example_multi_study}
 \end{figure*}
 
@@ -594,19 +592,18 @@ mapped into the MultiStudy namespace. For example, \emph{derived1} in
 \emph{sub\_study2} would be mapped to \emph{sub\_study2\_derived1} along
 with the method \emph{sub\_study2\_pipeline1}.
 
-\hypertarget{analysis-application-study-instances}{%
-\subsection{Analysis application: Study
-instances}\label{analysis-application-study-instances}}
+\subsection*{Analysis application: Study instances}
+\label{analysis-application-study-instances}
 
 To apply the analysis blueprint specified in a Study class to a specific
 dataset, an instance of the Study class is created with details of where
 the data is stored (the \emph{Repository}) and the computing environment
 available to process it (the \emph{Processor}). A Study object controls
 the construction of analysis workflows, the execution of the workflows,
-and the flow of data to and from the repository (Figure 7).
+and the flow of data to and from the repository (Figure \ref{fig:full_uml}).
 
 \begin{figure*}
-  \begin{center}
+	\centering
     \includegraphics[width=\textwidth]{figures/full_arcana_uml}
   \caption{Detailed Unified Modelling Language (UML) diagram of
 information flow in the Arcana framework. Boxes: Python classes
@@ -614,13 +611,12 @@ information flow in the Arcana framework. Boxes: Python classes
 specialisations). Arrows: orange=data, magenta=workflow description,
 diamond=aggregated-in, triangle=subclass-of. Calling \emph{data(name)}
 on a Study subclass constructs the requisite pipelines (as specified in
-\emph{Study.data\_specs}) to produce the requested data, and sends them
+\emph{data\_specs}) to produce the requested data, and sends them
 to the \emph{Processor} to be processed. Data is selected by
 \emph{Selector} objects, pulled to the compute environment to be
 processed, and then the derivatives are pushed back to the repository.
 Repositories can be of plain directories, or BIDS or XNAT repositories}
 \label{fig:full_uml}
-\end{center}
 \end{figure*}
 
 Each Study object is assigned a name, which is used to differentiate its
@@ -630,7 +626,7 @@ object along with the range of subject and visit IDs to be included in
 the analysis (if they are not provided then all IDs are included). The
 remaining arguments passed to the Study object initialisation are the
 Repository and Processor modules and a list of \emph{Selector} objects
-to select input datasets from the repository (Figure 8).
+to select input datasets from the repository (Figure \ref{fig:study_application}).
 
 \begin{figure}
 \lstinputlisting[language=Python]{listings/example_application.py}
@@ -638,16 +634,15 @@ to select input datasets from the repository (Figure 8).
 repository. Once the Study object has been initialised potential
 derivatives of the Study can be requested, and will be generated and
 stored in the repository if already present.}
-\label{list:study_application}
+\label{fig:study_application}
 \end{figure}
 
-\hypertarget{repository-modules}{%
-\subsubsection{Repository modules}\label{repository-modules}}
+\subsubsection*{Repository modules}\label{repository-modules}
 
 In Arcana, repository access is encapsulated within modular
 \emph{Repository} objects to enable switching between different
 repositories and repository types at analysis ``application time''
-(Figure 2). There are currently three supported repository types, XNAT
+(Figure \ref{fig:simple_uml}). There are currently three supported repository types, XNAT
 \citep{marcus_extensible_2007}, BIDS \citep{gorgolewski_brain_2016} and a simple
 ``directory'' format, which are encapsulated by \emph{XnatRepository},
 \emph{BidsRepository}, and \emph{DirectoryRepository} classes
@@ -672,7 +667,7 @@ repositories, derivatives for each session are stored in separate
 \emph{MrSession} objects alongside the primary session underneath its
 \emph{Subject}, and are named
 \emph{\textless{}primary-session-name\textgreater{}\_\textless{}study-name\textgreater{}}
-(Table 1).
+(Table \ref{tbl:repo-structure}).
 
 Derived filesets are stored with the format specified in the study's
 data specification. In plain-directory and BIDS repositories, fields are
@@ -724,7 +719,7 @@ keyword arguments during initialisation of a repository.
 
 New repository modules for additional repository types can be
 implemented by extending the Repository abstract base class and
-implementing a small set of methods (Table 2).
+implementing a small set of methods (Table \ref{tbl:abstract-repo-methods}).
 
 \begin{table}
 \caption{Abstract methods in the base Repository class that
@@ -747,7 +742,7 @@ disconnect() & Closes connection to repository (optional)\\
 \end{tabular}
 \end{table}
 
-\subsubsection{Study inputs}
+\subsubsection*{Study inputs}
 \label{study-inputs}
 
 While derivatives generated by a Study object are named in accordance
@@ -807,7 +802,7 @@ initialisation of the Study. However, BidsSelector and
 BidsAssociatedSelector objects can be provided to override the default
 selections is required.
 
-\subsubsection{Processor modules}
+\subsubsection*{Processor modules}
 \label{processor-modules}
 
 Processor modules control how and where pipelines generated by a Study
@@ -823,7 +818,7 @@ trivial.
 
 A processor is used internally by a Study instance to execute pipelines
 to derive derivatives requested from the data specification by the
-\emph{Study.data(name{[}, name,...{]})} method (Figure 2). The first
+\emph{Study.data(name{[}, name,...{]})} method (Figure \ref{fig:simple_uml}). The first
 step in this procedure is to query the repository tree for all data and
 provenance associated with the study. Sessions for which the requested
 outputs of the pipeline are already present in the repository are
@@ -869,7 +864,7 @@ Subject or visit IDs only flag a mismatch if any of the inputs, or
 inputs of upstream pipelines, are per-visit or per-subject,
 respectively, or per-study. How provenance mismatches are handled by the
 study is determined by the \emph{reprocess} flag, which is passed to the
-Study on initialisation (Table 3).
+Study on initialisation (Table \ref{tbl:reprocess-flag}).
 
 
 \begin{table}
@@ -895,7 +890,7 @@ Additionally, a time limit can be passed to the
 all the required sessions is less than the time limit they will be
 reprocessed and otherwise an exception will be raised.
 
-\section{Results}
+\section*{Results}
 \label{results}
 
 The Arcana framework is distributed as a publicly available software
@@ -916,10 +911,10 @@ T1-weighted contrasts.
 
 The DmriStudy class implements diffusion tensor metrics, FA and ADC, as
 well as global tractography using streamlines tracking from the MRtrix
-toolbox \citep{tournier_improved_2010,tournier_mrtrix:_2012} (Figure 9).
+toolbox \citep{tournier_improved_2010,tournier_mrtrix:_2012} (Figure \ref{fig:dmri_study}).
 
 \begin{figure*}
-  \begin{center}
+	\centering
     \includegraphics[width=0.55\textwidth]{figures/dmri_study}
   \caption{Example diffusion MRI (dMRI) study, which can derive
 tensor metrics, fractional anisotropy (FA) and apparent diffusion
@@ -931,17 +926,16 @@ The dMRI magnitude image is preprocessed for motion correction and EPI
 distortions masked and bias corrected. From the bias corrected image two
 branches of analysis can be performed using the same intermediate
 derivatives: FA and ADC and/or streamlines fibre tracking.}
-\end{center}
 \label{fig:dmri_study}
 \end{figure*}
 
 The \emph{T2starwT1wStudy} class implements an algorithm to generate
 \emph{composite vein images} from the combination of QSM and SWI
 contrasts derived from the T2*-weighted acquisition with an vein atlas
-registered to the T1-weighted acquisition \citep{ward_combining_2018} (Figure 10).
+registered to the T1-weighted acquisition \citep{ward_combining_2018} (Figure \ref{fig:t2star_t1_study}).
 
 \begin{figure*}
-  \begin{center}
+	\centering
     \includegraphics[width=0.775\textwidth]{figures/t2star_t1_study}
   \caption{Combined T2*-weighted/T1-weighted multi-study,
 which can derive vein masks by combining Quantitative Susceptibility
@@ -960,15 +954,14 @@ the linear registration between T1-weighted and T2*-weighted images, QSM
 and SWI images mapped from the T2*-weighted sub-study to produce the
 composite-vein image. The brain mask from the T1-weighted sub-study is
 combined with the composite vein image to produce the vein mask.}
-  \end{center}
 \label{fig:t2star_t1_study}
 \end{figure*} 
 
 The DiffusionStudy and T2starT1Study classes are further aggregated in
 turn into a single MultiStudy class for the results section of this
-manuscript\emph{, ArcanaPaper}, (Figure S.1-5). Methods are implemented
-in ArcanaPaper to generate and display the derivative images in Figures
-11, 12, and 13.
+manuscript\emph{, ArcanaPaper}, (Supplementary material). Methods are
+implemented in ArcanaPaper to generate and display the derivative
+images in Figure \ref{fig:veins}, \ref{fig:fa_adc} and \ref{fig:tractography}.
 
 To test the analysis workflows implemented in ArcanaPaper, a healthy
 volunteer was scanned using a 3T Siemens Skyra with a 32-channel head
@@ -979,7 +972,8 @@ matrix size 256x240x192, FOV 256x240x192, TE = 2.13ms, TR, = 2300ms, TI
 bandwidth=120Hz/pixel), diffusion MRI (1.2 mm contiguous, matrix size
 110x100x60, FOV 256x240x192, TE = 95ms, TR, = 8200ms, 33 diffusion
 directions with b=1500 mm2/s and 3 b=0, bandwidth=781Hz/pixel)
-(\textbf{cite Lifespan paper ??}). Methods for Figure 11, 12, and 13 in
+(\textbf{cite Lifespan paper ??}). Methods for Figure \ref{fig:veins}, \ref{fig:fa_acs},
+and \ref{fig:tractography} in
 the ArcanaPaper class were applied to the acquired dataset to using the
 \emph{SlurmProcessor} to submit jobs to the the MASSIVE HPC cluster
 \citep{goscinski_multi-modal_2014} in order to generate the figures.
@@ -991,7 +985,7 @@ generated by the original implementation \citep{ward_combining_2018}. The comple
 workflow took ?? min to complete over ?? compute cores.
 
 \begin{figure*}
-  \begin{center}
+    \centering
     \includegraphics[width=\textwidth]{figures/veins}
   \caption{Vein image (\emph{right column}) constructed by
 combining susceptibility weighted imaging (SWI) (\emph{left column}),
@@ -999,7 +993,6 @@ quantitative susceptibility mapping (QSM) (\emph{left-middle column})
 and a vein atlas from manual tracings (\emph{right-middle column}).
 \emph{Top row}: sagittal slices. \emph{Middle row}: axial slices.
 \emph{Bottom row}: coronal slices.}
-  \end{center}
 \label{fig:veins}
 \end{figure*}
 
@@ -1010,14 +1003,13 @@ shows high intensity in cortical spinal fluid and low intensity through
 the rest of the brain.
 
 \begin{figure*}
-  \begin{center}
+    \centering
     \includegraphics[width=\textwidth]{figures/fa_adc}
   \caption{Fractional Anisotropy (FA) \emph{(top row)} and
 Apparent Diffusion Coefficient (ADC) (\emph{bottom rowI)} derived from
 diffusion MRI data. \emph{Left column:} axial midline slices.
 \emph{Middle column:} coronal midline slices. \emph{Left column}:
 sagittal midline slices.}
-  \end{center}
 \label{fig:fa_adc}
 \end{figure*}
 
@@ -1030,7 +1022,7 @@ reused in the generation of the streamlines reducing the time taken to
 produce the tractography results from ?? to ??.
 
 \begin{figure*}
-  \begin{center}
+    \centering
     \includegraphics[width=\textwidth]{figures/tractography}
   \caption{Global tractography performed using the MRtrix
 toolbox. Probabilistic streamlines generated with the iFOD2 algorithm
@@ -1040,11 +1032,10 @@ Streamlines are colour-encoded by orientation: green=anterior-posterior,
 blue=inferior-superior, red=left-right. \emph{Left panel:} axial midline
 slice. \emph{Middle panel:} coronal midline slice. \emph{Left panel}:
 sagittal midline slice.}
-  \end{center}
 \label{fig:tractography}
 \end{figure*}
 
-\section{Discussion}
+\section*{Discussion}
 \label{discussion}
 
 We present Arcana, a software framework to facilitate the development of
@@ -1114,16 +1105,16 @@ steps (e.g. registration) to be shared between classes. While not
 necessary, it is recommended to create a subclass specific to the
 research study in question and aggregate all related analysis within it,
 since such classes can be applied to alternate datasets in order to
-reproduce the exact analysis. The \emph{ArcanaPaper} class (Figure
-S.1-5), which contains methods to generate all figures in the Results
-section of this manuscript, is an example of this approach.
+reproduce the exact analysis. The \emph{ArcanaPaper} class
+(Supplementary material), which contains methods to generate all figures
+in the Results section of this manuscript, is an example of this approach.
 
 The abstraction of data and repositories in Arcana enables the same
 workflow implementation to be applied to datasets stored in BIDS format
 or XNAT repositories. A single code-base can therefore be containerized
 into BIDS apps or XNAT pipelines without adaptation, helping to form a
 bridge between the two communities of users and developers. Alternative
-data storage systems \citep{,scott_coins:_2011,das_loris:_2012,book_neuroinformatics_2013}, can be integrated into Arcana by overriding a small number of
+data storage systems \citep{scott_coins:_2011,das_loris:_2012,book_neuroinformatics_2013}, can be integrated into Arcana by overriding a small number of
 methods from the Repository abstract base class. Repository modules
 could also be created for data portals such as \emph{DataLad} \citep{yaroslav_halchenko_datalad/datalad_2018} in order to take advantage of the range of platforms they support.
 Implementing analyses in Arcana therefore enables researchers and
@@ -1173,11 +1164,12 @@ long studies, and therefore help detect any problems that might arise
 with the acquisition protocol when they occur. In addition, by reusing
 shared intermediate derivatives between analyses, such as the
 preprocessed dMRI shared between tensor and fibre tracking workflows
-(Figures 12 and 13), processing time as well as time required for manual
+(Figure \ref{fig:fa_adc} and \ref{fig:tractography}), processing time as
+well as time required for manual
 QC is minimised. Given analyses implemented in Arcana are also able to
 be processed on HPC clusters, they scale well to large studies.
 
-\section{Conclusion}
+\section*{Conclusion}
 \label{conclusion}
 
 By managing the complete flow of data from/to a repository with modular
@@ -1199,12 +1191,7 @@ were informed by existing software written Parnesh Raniga while
 employed at Monash Biomedical Imaging.
 \end{acknowledgements}
 
-% BibTeX users please use one of
-\bibliographystyle{spbasic}      % basic style, author-year citations
-%\bibliographystyle{spmpsci}      % mathematics and physical sciences
-%\bibliographystyle{spphys}       % APS-like style for physics
-\bibliography{arcana}   % name your BibTeX data base
+\bibliographystyle{spbasic} 
+\bibliography{arcana}
 
 \end{document}
-% end of file template.tex
-
