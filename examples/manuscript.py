@@ -38,7 +38,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         FieldSpec('derived_field7', int, 'pipeline4',
                   frequency='per_study')]
 
-    add_parameter_specs = [
+    add_param_specs = [
         # Standard parameters
         ParameterSpec('parameter1', 10),
         ParameterSpec('parameter2', 25.8),

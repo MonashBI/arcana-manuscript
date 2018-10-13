@@ -2,7 +2,7 @@
 import os.path as op
 from arcana import (
     FilesetSelector, FieldSelector, XnatRepository,
-    SlurmProcessor)
+    SlurmProcessor, ModulesEnvironment)
 from .example_study import ExampleStudy
 from nianalysis.file_format import dicom_format
 
@@ -19,9 +19,16 @@ study = ExampleStudy(
         server='https://central.xnat.org',
         cache_dir=op.expanduser(
             op.join('~', 'xnat-cache'))),
-    # Specify to use the SLURM scheduler
-    runner=SlurmProcessor(
+    # Specify the use the SLURM scheduler to submit
+    # nodes as jobs using Nipype's SlurmGraphPlugin
+    processor=SlurmProcessor(
         work_dir=op.expanduser('~/work')),
+    # Specify the use of environment modules to
+    # satisfy software requirements. Non-standard
+    # package names explicitly mapped to approp. reqs.
+    environment=ModulesEnvironment(
+        packages_map={
+            'Package1_Parallel': package1_req}),
     # Link files and fields in the repository
     # to entries in the data specification
     inputs={

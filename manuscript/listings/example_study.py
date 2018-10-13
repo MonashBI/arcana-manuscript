@@ -5,18 +5,19 @@ from arcana import (
     FilesetSelector, XnatRepository)
 from nianalysis.file_format import (
     nifti_gz_format, dicom_format, nifti_format, analyze_format,
-    gif_format, text_format, text_mat_format)
+    text_format, text_mat_format)
 
 STD_IMAGE_FORMATS = (dicom_format, nifti_format, nifti_gz_format,
                      analyze_format)
 
-atlas_repo = XnatRepository(
-    'http://central.xnat.org', 'SAMPLE_TEMPLATES',
-    os.path.expanduser(os.path.join('~', 'xnat-cache')))
-
-atlas = FilesetSelector(
-    'an_atlas', nifti_gz_format,
-    'an_atlas', frequency='per_study').match(atlas_repo.tree())
+# Select a Fileset collection to use as a default for template1
+template_repo = XnatRepository(
+    server='http://central.xnat.org', project_id='TEMPLATES',
+    cache=os.path.expanduser(os.path.join('~', 'xnat-cache')))
+template_selector = FilesetSelector(
+    name='template1_default', format=nifti_gz_format,
+    pattern='MNI152_T1', frequency='per_study')
+template_collectn = template_selector.match(template_repo.tree())
 
 
 class ExampleStudy(Study, metaclass=StudyMetaClass):
@@ -31,8 +32,9 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         AcquiredFieldSpec('acquired_field2', float),
         # "Acquired" file set with default value. Useful for
         # standard templates
-        AcquiredFilesetSpec('atlas1', STD_IMAGE_FORMATS,
-                            frequency='per_study', default=atlas),
+        AcquiredFilesetSpec('template1', STD_IMAGE_FORMATS,
+                            frequency='per_study',
+                            default=template_collectn),
         # Derived file sets
         FilesetSpec('derived_file1', text_format, 'pipeline1'),
         FilesetSpec('derived_file2', nifti_gz_format, 'pipeline1'),
@@ -47,7 +49,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         FieldSpec('derived_field2', int, 'pipeline4',
                   frequency='per_study')]
 
-    add_parameter_specs = [
+    add_param_specs = [
         # Standard parameters
         ParameterSpec('parameter1', 10),
         ParameterSpec('parameter2', 25.8),
@@ -82,7 +84,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                 Interface2(
                     param1=self.parameter('parameter2')),
                 inputs={
-                    'template': ('atlas1', nifti_gz_format)},
+                    'template': ('template1', nifti_gz_format)},
                 connect={
                     'in_file': (node1, 'out_file')},
                 outputs={
@@ -94,7 +96,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                 'node2',
                 Interface3(),
                 inputs={
-                    'template': ('atlas1', nifti_gz_format)},
+                    'template': ('template1', nifti_gz_format)},
                 connect={
                     'in_file': (node1, 'out_file')},
                 outputs={

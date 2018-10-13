@@ -19,7 +19,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 #         SubStudySpec('t2star', T2starwT1wStudy),
         SubStudySpec('dmri', DiffusionStudy)]
 
-    add_parameter_specs = [
+    add_param_specs = [
         ParameterSpec(
             'dmri_fig_slice_offset', (4, 0, 0),
             desc=("Offset the sagittal slices of dMRI figures so they "
