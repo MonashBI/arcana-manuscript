@@ -29,7 +29,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         # Acquired fields
         AcquiredFieldSpec('acquired_field1', int,
                           frequency='per_subject'),
-        AcquiredFieldSpec('acquired_field2', float),
+        AcquiredFieldSpec('acquired_field2', float, optional=True),
         # "Acquired" file set with default value. Useful for
         # standard templates
         AcquiredFilesetSpec('template1', STD_IMAGE_FORMATS,

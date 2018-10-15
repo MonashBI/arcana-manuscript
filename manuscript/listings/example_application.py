@@ -17,8 +17,7 @@ study = ExampleStudy(
     repository=XnatRepository(
         project_id='SAMPLE_PROJECT',
         server='https://central.xnat.org',
-        cache_dir=op.expanduser(
-            op.join('~', 'xnat-cache'))),
+        cache_dir=op.expanduser('~/xnat-cache')),
     # Specify the use the SLURM scheduler to submit
     # nodes as jobs using Nipype's SlurmGraphPlugin
     processor=SlurmProcessor(

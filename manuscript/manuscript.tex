@@ -399,11 +399,11 @@ tool).
 
 Pipelines are included in the analysis suite of a Study class by
 defining a method in the class that constructs and returns a
-\emph{Pipeline} object, and referencing that method in the class' data
-specification table. Pipeline objects are thin wrappers around Nipype
-workflows, which manage the namespaces of the workflow nodes, and should
-be created in constructor methods using the \emph{Study.new\_pipeline}
-method (Figure \ref{fig:pipeline_constructor}).
+\emph{Pipeline} object, and referencing the method by name in a FilesetSpec
+or FieldSpec in the class' data specification table. Pipeline objects are thin
+wrappers around Nipype workflows, which manage the namespaces of the
+workflow nodes, and should be created in constructor methods using the
+\emph{pipeline} method of the Study class (Figure \ref{fig:pipeline_constructor}).
 
 \begin{figure}
 \lstinputlisting[language=Python, firstline=59]{listings/example_study.py}
@@ -414,46 +414,7 @@ namespace management}
 \label{fig:pipeline_constructor}
 \end{figure}
 
-At instantiation (via the new\_pipeline method) a Pipeline is passed the
-following arguments:
-
-\begin{itemize}
-\item
-  \begin{quote}
-  A name for the pipeline
-  \end{quote}
-\item
-  \begin{quote}
-  The inputs to the pipeline
-  \end{quote}
-\item
-  \begin{quote}
-  The output specifications the pipeline
-  \end{quote}
-\item
-  \begin{quote}
-  Description of the pipeline
-  \end{quote}
-\item
-  \begin{quote}
-  A list of scientific references the analysis was informed by
-  \end{quote}
-\item
-  \begin{quote}
-  Keyword arguments passed directly from the pipeline constructor method
-  \end{quote}
-\end{itemize}
-
-Inputs and outputs refer to entries in the data specification table and
-specify the file formats (fileset) or data type (field) that the input
-is expected in, or the output will be returned in. If this
-format/data-type differs from that specified in the data specification
-table then an implicit conversion will be performed when the pipeline is
-executed, thereby making data conversion transparent to the researcher.
-Every pipeline constructor should take only wildcard keyword arguments
-(i.e. **kwargs), which should be passed directly through to the
-new\_pipeline method to enable modification of the pipeline namespace by
-overriding methods in subclasses.
+% Need to introduce and explain new syntax
 
 The syntax for workflow graph construction in Arcana is inspired by the
 proposed format for Nipype v2.0
@@ -469,6 +430,23 @@ pipeline. Pipeline inputs and outputs are connected to nodes using the
 \emph{add\_input(spec\_name, node, node\_input)} and
 \emph{add\_output(spec\_name, node, node\_output)} methods,
 respectively.
+
+At initialisation, a Pipeline is given a name, which must be unique amongst the
+pipelines that can be constructed by the Study. A description of the pipeline and
+the list of scientific references
+
+Study class Inputs and outputs refer to entries in the data specification table and
+specify the file formats (fileset) or data type (field) that the input
+is expected in, or the output will be returned in. If this
+format/data-type differs from that specified in the data specification
+table then an implicit conversion will be performed when the pipeline is
+executed, thereby making data conversion transparent to the researcher.
+Every pipeline constructor should take only wildcard keyword arguments
+(i.e. **kwargs), which should be passed directly through to the
+new\_pipeline method to enable modification of the pipeline namespace by
+overriding methods in subclasses.
+
+% End reworked syntax explanation
 
 Any external software packages required by a node should be referenced
 in the \emph{requirements} keyword argument as a list of
@@ -699,11 +677,11 @@ of pipeline.}
 \label{tbl:repo-structure} 
 \begin{tabular}{llll}
 \hline\noalign{\smallskip}
-\textbf{Type} & \textbf{Plain-directory} & \textbf{BIDS} & \textbf{XNAT}  \\
+\textbf{Datatype} & \textbf{Plain-directory} & \textbf{BIDS} & \textbf{XNAT}  \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
-\textbf{Derivatives} & /\emph{subj}/\emph{vis}/\emph{study} & /derivatives/\emph{study}/\emph{subj}/\emph{vis} & /\emph{subj}/\emph{vis}\_\emph{study}\\
-\textbf{Fields} & \D/\_\_fields\_\_.json & \D/\_\_fields\_\_.json & MrSession XML \\ 
-\textbf{Provenance} & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}.json \\
+Derivatives & /\emph{subj}/\emph{vis}/\emph{study} & /derivatives/\emph{study}/\emph{subj}/\emph{vis} & /\emph{subj}/\emph{vis}\_\emph{study}\\
+Fields & \D/\_\_fields\_\_.json & \D/\_\_fields\_\_.json & MrSession XML \\ 
+Provenance & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}.json & \D/\_\_prov\_\_/\emph{pl}.json \\
 \noalign{\smallskip}\hline
 \end{tabular}
 \end{table}
@@ -729,15 +707,15 @@ need to be implemented by platform-specific sub-classes.}
 \hline\noalign{\smallskip}
 \textbf{Method name} & \textbf{Function} \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
-find\_data() & Queries repository to find all existing filesets and
+\emph{find\_data()} & Queries repository to find all existing filesets and
 fields \\
-get\_fileset(Fileset) & Caches file-set (if necessary) and returns the file path. \\
-get\_field(Field) & Retrieves and returns the value of the field from
+\emph{get\_fileset(Fileset)} & Caches file-set (if necessary) and returns the file path. \\
+\emph{get\_field(Field)} & Retrieves and returns the value of the field from
 the repository \\
-put\_fileset(Fileset) & Inserts file-set into the repository and updates cache. \\
-put\_field(Field) & Inserts the value of the Field into the repository \\
-connect() & Opens a connection to the repository (optional). \\
-disconnect() & Closes connection to repository (optional)\\
+\emph{put\_fileset(Fileset)} & Inserts file-set into the repository and updates cache. \\
+\emph{put\_field(Field)} & Inserts the value of the Field into the repository \\
+\emph{connect()} & Opens a connection to the repository (optional). \\
+\emph{disconnect()} & Closes connection to repository (optional)\\
 \noalign{\smallskip}\hline
 \end{tabular}
 \end{table}
