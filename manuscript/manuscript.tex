@@ -488,7 +488,7 @@ inheritance can be used to specialise existing analyses.
 
 Pipeline constructors can be overridden in subclasses like any Python
 method. Typically the overriding method will call the superclass method
-to construct a base Pipeline, apply modifications and return the
+to construct a base Pipeline, apply name_maps and return the
 modified Pipeline. In this scenario, references to the data
 specification in the superclass method can be mapped onto different
 entries in the subclass by passing a dictionary containing the maps to

@@ -57,11 +57,11 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         # in the analysis
         SwitchSpec('pipeline_tool', 'toolA', ('toolA', 'toolB'))]
 
-    def pipeline2(self, **mods):
+    def pipeline2(self, **name_maps):
 
         pipeline = self.pipeline(
             name='pipeline2',
-            modifications=mods,
+            name_maps=name_maps,
             desc="Description of the pipeline",
             references=[methods_paper_cite])
 
