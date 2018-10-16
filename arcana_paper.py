@@ -1,7 +1,8 @@
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
 from nianalysis.study.mri.structural.diffusion import DiffusionStudy
-# from nianalysis.study.mri.structural.t2star import T2starwT1wStudy
+from nianalysis.study.mri.structural.t1 import T1Study
+from nianalysis.study.mri.structural.t2star import T2StarStudy
 from nianalysis.plot import ImageDisplayMixin
 import os.path as op
 
@@ -16,7 +17,13 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 
     add_sub_study_specs = [
         # Include two Study classes in the overall study
-#         SubStudySpec('t2star', T2starwT1wStudy),
+        SubStudySpec(
+            't1', T1Study),
+        SubStudySpec(
+            't2star', T2StarStudy,
+            name_map={'t1_brain': 'coreg_ref_brain',
+                      't1_coreg_to_atlas_mat': 'coreg_to_atlas_mat',
+                      't1_coreg_to_atlas_warp': 'coreg_to_atlas_warp'}),
         SubStudySpec('dmri', DiffusionStudy)]
 
     add_param_specs = [
@@ -41,11 +48,10 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         # and vein mask data in the repository.
         swis = self.data('t2star_swi')
         qsms = self.data('t2star_qsm')
-        vein_atlases = self.data('t2star_vein_atlas')
+        cv_image = self.data('t2star_composite_vein_image')
         vein_masks = self.data('t2star_vein_mask')
         # Loop through all sessions
-        for swi, qsm, vein_atlas, vein_mask in zip(swis, qsms,
-                                                   vein_atlases,
+        for swi, qsm, vein_atlas, vein_mask in zip(swis, qsms, cv_image,
                                                    vein_masks):
             # Display slices from the filesets in a panel using
             # method from the ImageDisplayMixin base class.
@@ -115,12 +121,12 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 if __name__ == '__main__':
     from arcana import (
         DirectoryRepository, LinearProcessor, FilesetSelector)
-    from nianalysis.file_format import dicom_format
+    from nianalysis.file_format import dicom_format, zip_format
     import os
 
     # Path to data, work and output directories
     this_dir = op.dirname(__file__)
-    data_dir = op.join(this_dir, 'data')
+    data_dir = op.join(this_dir, 'data', 'lifespan')
     work_dir = op.join(this_dir, 'work')
     fig_dir = op.join(this_dir, 'manuscript', 'figures')
     os.makedirs(fig_dir, exist_ok=True)
@@ -136,16 +142,24 @@ if __name__ == '__main__':
         LinearProcessor(work_dir),
         # Match names in the data specification to filenames used
         # in the repository
-        inputs=[FilesetSelector('dmri_primary', dicom_format, '16.*',
-                                is_regex=True),
-                FilesetSelector('dmri_reverse_phase', dicom_format, '15.*',
-                                is_regex=True)],
+        inputs=[
+            FilesetSelector('t1_magnitude', dicom_format, '.*t1_mprage.*',
+                            is_regex=True),
+            FilesetSelector('t2star_channels', zip_format,
+                            'swi_coils_icerecon'),
+            FilesetSelector('t2star_header_image', dicom_format,
+                            '12-SWI_Images'),
+            FilesetSelector('t2star_swi', dicom_format, 'SWI_Images'),
+            FilesetSelector('dmri_magnitude', dicom_format, '.*ep2d_.*',
+                            is_regex=True),
+            FilesetSelector('dmri_reverse_phase', dicom_format, '.*PRE_DWI.*',
+                            is_regex=True)],
         parameters={
             'dmri_num_global_tracks': int(1e5),
             'dmri_global_tracks_cutoff': 0.175})
 
     # Derive required data and display them in a single step for each
     # figure.
-#     paper.figure10(op.join(fig_dir, 'veins.png'))
-    paper.figure11(op.join(fig_dir, 'fa_adc.png'))
-    paper.figure12(op.join(fig_dir, 'tractography.png'))
+    paper.vein_fig(op.join(fig_dir, 'veins.png'))
+    paper.fa_adc_fig(op.join(fig_dir, 'fa_adc.png'))
+    paper.tractography_fig(op.join(fig_dir, 'tractography.png'))
