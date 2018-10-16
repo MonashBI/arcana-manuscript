@@ -27,7 +27,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         AcquiredFilesetSpec('acquired_file1', text_format),
         AcquiredFilesetSpec('acquired_file2', STD_IMAGE_FORMATS),
         # Acquired fields
-        AcquiredFieldSpec('acquired_field1', int,
+        AcquiredFieldSpec('acquired_field1', int, array=True,
                           frequency='per_subject'),
         AcquiredFieldSpec('acquired_field2', float, optional=True),
         # "Acquired" file set with default value. Useful for
@@ -42,7 +42,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         FilesetSpec('derived_file4', dicom_format, 'pipeline3'),
         FilesetSpec('derived_file5', nifti_gz_format, 'pipeline3',
                     frequency='per_subject'),
-        FilesetSpec('derived_file6', text_format, 'pipeline4',
+        FilesetSpec('derived_file6', analyze_format, 'pipeline2',
                     frequency='per_visit'),
         # Derived fields
         FieldSpec('derived_field1', float, 'pipeline2'),
@@ -55,7 +55,8 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         ParameterSpec('parameter2', 25.8),
         # "Switch" parameters that specify a qualitative change
         # in the analysis
-        SwitchSpec('pipeline_tool', 'toolA', ('toolA', 'toolB'))]
+        SwitchSpec('node1_option', False),  # Boolean switch
+        SwitchSpec('pipeline2_tool', 'toolA', ('toolA', 'toolB'))]
 
     def pipeline2(self, **name_maps):
 
@@ -69,7 +70,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
             'node1',
             Interface1(
                 param1=3.5,
-                param3=self.parameter('parameter1')),
+                param2=self.parameter('parameter1')),
             inputs={
                 'in_file1': ('acquired_file1', text_format),
                 'in_file2': ('acquired_file2', analyze_format),
@@ -77,8 +78,10 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
             outputs={
                 'out_field': ('derived_field1', int)},
             wall_time=25, requirements=[software_req1])
+        if self.branch('node1_option'):
+            node1.inputs.option = 'set-extra-option'
 
-        if self.branch('pipeline_tool', 'toolA'):
+        if self.branch('pipeline2_tool', 'toolA'):
             pipeline.add(
                 'node2',
                 Interface2(
@@ -91,7 +94,10 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                     'out_file': ('derived_file3',
                                  text_mat_format)},
                 wall_time=10, requirements=[software_req2])
-        elif self.branch('pipeline_tool', 'toolB'):
+
+            self.connect_output('derived_file6', node1, 'out',
+                                nifti_format)
+        elif self.branch('pipeline2_tool', 'toolB'):
             pipeline.add(
                 'node2',
                 Interface3(),
@@ -105,6 +111,6 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                 wall_time=30, requirements=[matlab_req,
                                             toolbox1_req])
         else:
-            self.unhandled_branch('pipeline_tool')
+            self.unhandled_branch('pipeline2_tool')
 
         return pipeline

@@ -58,7 +58,6 @@ grestore
 \definecolor{stringcolour}{rgb}{0.1,0.1,0.5}
 
 \lstset{
-    basicstyle=\footnotesize,
     captionpos=b,                    % sets the caption-position to bottom
     language=Python,                 % the language of the code
     showstringspaces=false,          % underline spaces within strings only
@@ -129,11 +128,15 @@ analysis%\thanks{Grants or other notes
 \maketitle
 
 \begin{abstract}
+
 Insert your abstract here. Include keywords, PACS and mathematical
 subject classification numbers as needed.
-\keywords{First keyword \and Second keyword \and More}
+
+\keywords{Neuroimaging \and Workflows \and Repository \and Large-scale \and Reproducibility}
+
 % \PACS{PACS code1 \and PACS code2 \and more}
 % \subclass{MSC code1 \and MSC code2 \and more}
+
 \end{abstract}
 
 \section*{Introduction}
@@ -221,6 +224,8 @@ with programmatic workflow construction---yet clear delineation between
 analysis design and application---facilitates the implementation of
 complex workflows that are portable and complete.
 
+% Provenanced mentioned here
+
 The utility of the Arcana framework is demonstrated by the
 implementation of analysis suites for T1, T2* and diffusion weighted MRI
 (dMRI) data and the application of dMRI tractogram \citep{tournier_mrtrix:_2012} and
@@ -236,9 +241,9 @@ healthy subject.
 The separation of analysis design and application in the Arcana
 framework follows the conceptual divide between classes and objects in
 Object-Oriented (OO) software design. \emph{Study} classes encapsulate
-imaging data with the suite of analysis methods that can be performed on
-them, and, in the basic case, are specialised for a specific imaging
-contrast or modality. Study objects apply the analysis suite defined in
+types of data, such as scans of a specific imaging
+contrast or modality, with the suite of analysis methods that can be performed on
+them. Study objects apply the analysis suite defined in
 the Study class to a specific dataset.
 
 The set of acquired data, the derivatives that can be derived from it,
@@ -247,9 +252,9 @@ linked together by the \emph{data specification} \emph{table} of the
 Study class (Figure \ref{fig:example_study}). Likewise, free parameters used in pipeline
 construction are defined in the class' \emph{parameter specification}
 \emph{table}. Class inheritance can be used to specialise analysis
-suites by overriding pipeline constructor methods or entries in the
-specification tables. Analysis suites for multi-modal data can be
-implemented by combining multiple Study classes in \emph{MultiStudy}
+suites by overriding entries in the specification tables or pipeline
+constructor methods. Analysis suites for multi-modal data can be
+implemented by combining Study classes within \emph{MultiStudy}
 classes\emph{.}
 
 \begin{figure*}
@@ -264,20 +269,23 @@ pipelines}
 \label{fig:example_study}
 \end{figure*}
 
-Analysis methods are applied to a specific dataset by instantiating an
-appropriate Study class and requesting a derivative listed in the class'
-data specification table. At instantiation, a Study object is passed
-references to \emph{Repository} and \emph{Processor} objects, which
-define how and where data is stored and processed. When a derivative is
-requested, a Study object queries the repository for intermediate
+Analysis methods defined by a Study class are applied to a
+specific dataset by instantiating an object of the class and
+requesting a derivative listed in the class' data specification table.
+At initialisation, a Study object is passed references to a \emph{Repository},
+a \emph{Processor}, and an \emph{Environment}, which
+define where and how data is stored and processed. When a derivative is
+requested, a Study object queries the Repository for intermediate
 derivatives that can be reused before constructing a workflow to produce
-the requested derivative. Workflows are executed in the computing
-environment specified by the Processor object and their products are
+the requested derivative. The manner in which the workflows are executed
+(i.e. single/multi-process or via SLURM scheduler) is specified by the
+Processor and software modules required by the analysis are
+loaded by the Environment. Selected workflow products are
 stored back in the repository for reuse by subsequent analyses (Figure
-\ref{fig:simple_uml}). Input data to the study are also stored in the repository, and are
-matched against entries in the class' data specification table using
-criteria defined in \emph{Selector} objects passed to the Study object
-at instantiation.
+\ref{fig:simple_uml}). Input data to a study are selected from repositories
+ using criteria defined in \emph{Selector} objects passed to the Study
+ object at initialisation and matched against entries in the class' data
+specification table.
 
 \begin{figure*}
     \centering
@@ -311,7 +319,7 @@ metaclass or subclasses thereof.
 
 \subsubsection*{Data and parameter specification
 tables}
-\label{data-and-parameter-specification-tables}
+\label{sec:data-and-parameter-specification-tables}
 
 At the heart of each Study class is the data specification table, which
 specifies both the input and output data of the analysis, and all the
@@ -326,10 +334,12 @@ of analysis should be included in the table.
 
 Data specified in the data specification table can be of either a
 \emph{fileset} or \emph{field} type. Filesets represent single files,
-header and data file pairs, or sets of related files typically contained
-within single directories (e.g. a multi-volume DICOM dataset). Fields
-represent a single integer, floating point value or character string
-type. Each Fileset references a \emph{FileFormat} object, which
+or sets of related files typically contained within a directory
+(e.g. a multi-volume DICOM dataset). Fields
+represent integer, floating point or character string
+values. By default, a Field represents a single value but if the \emph{array}
+flag is set a Field represents a list of values.
+Each Fileset references a \emph{FileFormat} object, which
 specifies the formats of the files in the set. File formats are
 explicitly registered by the researcher at design time using the
 \emph{FileFormat.register(format)} class method to avoid conflicts where
@@ -346,7 +356,7 @@ specifications in subclasses or MultiStudy classes, and vice-versa, or
 passed inputs when the class is instantiated.
 
 \begin{figure}
-\lstinputlisting[language=Python, firstline=2, lastline=58]{listings/example_study.py}
+\lstinputlisting[basicstyle=\footnotesize,firstline=2, lastline=59]{listings/example_study.py}
 \caption{Example data and parameter specifications. The data
 specification specifies two ``acquired'' file sets, `one' and `ten' and
 ten derived file sets that can be derived from them, at least
@@ -357,10 +367,10 @@ the Study class}
 \label{fig:data_spec}
 \end{figure}
 
-Both acquired and derived data specifications have a \emph{frequency}
-attribute which specifies where the data sits in the hierarchy of the
-dataset and can take the values \emph{per\_session},
-\emph{per\_subject}, \emph{per\_visit} or \emph{per\_study}. In
+All data specifications have a \emph{frequency} attribute which specifies
+where the data sits in the hierarchy of the
+dataset and can take the values 'per\_session',
+'per\_subject, 'per\_visit' or 'per\_study'. In
 addition, derived specifications are passed the name of a method in the
 class that constructs the pipeline to derive them. Therefore, while a
 pipeline can have multiple outputs, each derivative is derived by only
@@ -387,98 +397,107 @@ registration \citep{avants_reproducible_2011} instead of FSL registration
 SwitchSpecs take a name, default value and a list of accepted values at
 initialisation.
 
-\subsubsection*{Workflow design}
-\label{workflow-design}
+\subsubsection*{Workflow design: pipeline constructor methods}
+\label{sec:pipeline-constructors}
 
-Analysis workflows are implemented in Arcana as a series of pipelines
-that each perform a unit of the analysis (e.g. registration, brain
-extraction). Each pipeline is in turn constructed from a (typically
-small) graph of Nipype nodes, with each node wrapping a stand alone tool
+Workflows are implemented in Arcana as a series of pipelines, which
+each perform a unit of the analysis (e.g. registration, brain
+extraction, quantitative susceptibility mapping). Pipelines are represented by \emph{Pipeline} objects,
+which are thin wrappers around Nipype workflows to handle input/output
+connections and namespace management. Each pipeline consists of a
+(typically small) graph of Nipype nodes, with each node wrapping a stand alone tool
 (e.g. FSL's FLIRT) or analysis package function (e.g. SPM's \emph{coreg}
-tool).
+tool). Pipelines source their inputs from, and sink their outputs to, entries
+in the data specification table, thereby linking the table together.
 
-Pipelines are included in the analysis suite of a Study class by
-defining a method in the class that constructs and returns a
-\emph{Pipeline} object, and referencing the method by name in a FilesetSpec
-or FieldSpec in the class' data specification table. Pipeline objects are thin
-wrappers around Nipype workflows, which manage the namespaces of the
-workflow nodes, and should be created in constructor methods using the
-\emph{pipeline} method of the Study class (Figure \ref{fig:pipeline_constructor}).
+Pipelines are constructed dynamically by ``pipeline constructor" methods
+of the study. Pipeline constructor methods are referenced by name in the \emph{pipeline\_name}
+argument of the FilesetSpec and FieldSpec objects of data specifications
+they derive. Pipeline constructor methods should only receive wildcard keyword
+arguments (e.g. \lstinline{my_pipeline(self, **name_maps)}), and these arguments
+should be passed as a dictionary directly to the \emph{name\_maps} argument
+of the pipeline initialisation to enable inputs and outputs of the
+pipeline to be rerouted to alternative data specifications in modified constructor
+methods, typically in subclasses and multi-studies.
 
 \begin{figure}
-\lstinputlisting[language=Python, firstline=59]{listings/example_study.py}
+\lstinputlisting[firstline=61, basicstyle=\footnotesize]{listings/example_study.py}
 \caption{Example pipeline constructor method. Pipelines are
-created using the \emph{create\_pipeline} method of the Study class.
-Pipeline objects are thin wrappers around Nipype workflows to allow for
-namespace management}
+created using the \emph{pipeline} method of the Study class.
+Pipeline objects are thin wrappers around Nipype Workflow objects to
+in order manage the namespaces of the workflow's inputs, outputs and nodes. Every
+pipeline constructor method should allow wildcard keyword arguments,
+which are passed to the \emph{name\_maps} argument of the pipeline
+initialisation. This allows pipeline constructors in sub and multi classes to map the
+inputs and outputs of the pipeline onto different data specifications.}
 \label{fig:pipeline_constructor}
 \end{figure}
 
-% Need to introduce and explain new syntax
+The syntax for pipeline construction is inspired by a proposed form for Nipype v2.0
+(\href{http://github.com/nipy/nipype/issues/2539}{http://github.com/nipy/nipype/issues/2539}).
+Within a pipeline constructor, the Pipeline object is initialised by the \emph{pipeline} method
+of the Study (Figure \ref{fig:pipeline_constructor}). At initialisation, each pipeline is given a name,
+which must be unique amongst the pipelines constructed by the Study. The methods implemented
+by the pipeline can be characterised by providing a the list of scientific references
+and a text description to the \emph{references} and \emph{desc} keyword arguments, respectively.
 
-The syntax for workflow graph construction in Arcana is inspired by the
-proposed format for Nipype v2.0
-(\href{http://github.com/nipy/nipype/issues/2539}{http://github.com/nipy/nipype/issues/2539}),
-and will be updated as Nipype v2.0 is developed and upstream
-functionality becomes available. Workflow nodes are created from Nipype
-interfaces using the \emph{add(name, interface)} method of the
-Pipeline should be used. Once created, the inputs of the node can be set
-explicitly via the node's \emph{inputs} attribute, connected to other
-nodes with the \emph{connect(out\_node, out\_node\_output,
-in\_node, in\_node\_input)} method, or connected to inputs of the
-pipeline. Pipeline inputs and outputs are connected to nodes using the
-\emph{add\_input(spec\_name, node, node\_input)} and
-\emph{add\_output(spec\_name, node, node\_output)} methods,
-respectively.
+The \emph{add(name, interface)} method is used to add a node to a pipeline, which takes
+a unique name for the node (within the pipeline) and a Nipype Interface object, and returns
+a reference to the newly added node. For clarity, is recommended to put all static inputs
+(i.e. parameters) of the interface as keyword arguments of the interface constructor
+(Figure \ref{fig:pipeline_constructor}). However, if an input conditionally depends on a parameter of the
+study it can be set via the \emph{inputs} attribute of the node (e.g. \lstinline{my_node.inputs.my_param = 1.0}).
 
-At initialisation, a Pipeline is given a name, which must be unique amongst the
-pipelines that can be constructed by the Study. A description of the pipeline and
-the list of scientific references
+Interface traits are connected to inputs and outputs of the pipeline by
+providing \emph{inputs} and \emph{outputs} keyword arguments to the \emph{add} method. Both
+arguments take a dictionary, where the keys of the dictionary are the names of traits of the interface. The
+values of the dictionary are 2-tuples each consisting of the name of a data specification
+and the format the pipeline expects the data in (i.e. a FileFormat for Fileset specifications or datatype
+for Field specifications). If the expected format does not match that of the corresponding data specification
+table or study input then an conversion nodes are implicitly connected to the pipeline.
+Inputs and outputs that are conditional on parameters of the study can be set outside of
+the \emph{add} method using the \emph{connect\_input} or
+\emph{connect\_output} methods, respectively.
 
-Study class Inputs and outputs refer to entries in the data specification table and
-specify the file formats (fileset) or data type (field) that the input
-is expected in, or the output will be returned in. If this
-format/data-type differs from that specified in the data specification
-table then an implicit conversion will be performed when the pipeline is
-executed, thereby making data conversion transparent to the researcher.
-Every pipeline constructor should take only wildcard keyword arguments
-(i.e. **kwargs), which should be passed directly through to the
-new\_pipeline method to enable modification of the pipeline namespace by
-overriding methods in subclasses.
-
-% End reworked syntax explanation
+Internal connections between nodes within a pipeline are specified by a dictionary
+passed to the \emph{connect} keyword argument of the receiving node. The
+dictionary keys are the names of the receiving traits and the values are 2-tuples
+consisting of the sending node and the name of the sending trait. Alternatively,
+conditional connections can be specified via the \emph{connect} method of the
+pipeline, which simply calls the method of the same name in the underlying
+Nipype workflow.
 
 Any external software packages required by a node should be referenced
 in the \emph{requirements} keyword argument as a list of
 \emph{Requirement} objects when the node added to the pipeline. These
 requirements can be used by the Processor to configure environment
-modules \citep{furlani_modules:_1991} if present, to ensure the required software
+modules \citep{furlani_modules:_1991}, to ensure the required software
 packages are available. Similarly, the expected memory requirements and
-wall time for the node execution should be provided as keyword args,
-\emph{memory}, and \emph{wall\_time}, so they can be inserted into job
-scripts submitted to schedulers by HPC Processors.
+wall time for the node execution should be provided to the keyword args
+\emph{memory}, and \emph{wall\_time} so they can be inserted into HPC
+scheduler job scripts if required.
 
 Iteration over subjects and visits is handled implicitly by Arcana and
 depends on the frequency of the pipeline's inputs and outputs. To create
-a summary derivative (i.e. frequency != \emph{per\_session}) from more
-frequent data a join node is used. Join nodes that join over subjects or
-visits are created with \emph{add}\_\emph{join\_subjects(name,
-interface, joinfield)} and \emph{add\_join\_visits(name,
-interface, joinfield)} respectively. As in the underlying Nipype, the
-\emph{joinfield} argument specifies which inputs of the receiving node
-to join into lists. If direct access to the subject or visit IDs is
-required by a node they can be connected to the implicit iterator nodes
-with \emph{connect\_subject\_id(node, name)} and
-\emph{connect\_visit\_id} respectively. Note that expansion
-over iterator sources is handled implicitly by Nipype when nodes with
-different iterators are connected to a downstream node.
+a summary derivative (i.e. frequency != 'per\_session') from more frequent
+data, \emph{Study.SUBJECT\_ID} or \emph{Study.VISIT\_ID} should be
+passed to the \emph{joinsource} keyword to join over subjects or visits, respectively.
+In this case, a JoinNode will be created instead of standard Node,
+which should be passed the additional keyword argument \emph{joinfield} to
+specify the list of input traits to convert into lists to receive the joined input.
+Similarly, if the name of an input trait is provided (or list thereof) to the the \emph{iterfield}
+keyword argument, then a MapNode will be created and the interface will
+be applied to all items of the list connected to that input \citep{gorgolewski_nipype:_2011}.
+The subject and visit IDs are directly accessible as input fields of the pipeline
+named \emph{Study.SUBJECT\_ID} and \emph{Study.VISIT\_ID}, respectively.
 
 Study parameters can be accessed during pipeline construction with the
 \emph{parameter(name)} method. If conditional logic is included in
 the workflow construction that alters the pipeline inputs, outputs or
 parameters then it should be controlled by a switch instead of a
 parameter. The analysis branch designated by a switch value should be
-tested with \emph{branch(name, ref\_value)} method.
+tested with \emph{branch(name)} in the case of boolean switches and
+\emph{branch(name, ref\_value)} in the case of string switches.
 
 \subsubsection*{Extension and specialisation by class inheritance}
 \label{extension-and-specialisation-by-class-inheritance}
@@ -486,25 +505,31 @@ tested with \emph{branch(name, ref\_value)} method.
 Because Arcana analyses are implemented as Python classes, class
 inheritance can be used to specialise existing analyses.
 
-Pipeline constructors can be overridden in subclasses like any Python
-method. Typically the overriding method will call the superclass method
-to construct a base Pipeline, apply name_maps and return the
-modified Pipeline. In this scenario, references to the data
-specification in the superclass method can be mapped onto different
-entries in the subclass by passing a dictionary containing the maps to
-the \emph{name\_map} keyword argument of pipeline constructor in the
-superclass.
-
-Instead of setting the class attributes directly, the data and parameter
-specifications are set by the metaclas\emph{s}, in order to combine with
-specifications from base classes. The combined data and parameter
-specifications are constructed by visiting the class' bases in reverse
-method resolution order (MRO) and adding specifications from their
-\emph{add\_data\_specs}, \emph{add\_param\_specs} attributes,
+Instead of being set directly, the data and parameter specifications are set
+by the metaclass of the Study (i.e. StudyMetaClass),
+in order to combine them with corresponding specifications in the class' bases. The combined
+data and parameter specifications are constructed by visiting the class'
+bases in reverse method resolution order (MRO) and adding specifications
+from their \emph{add\_data\_specs}, \emph{add\_param\_specs} attributes,
 overriding previously added specifications with matching names. Note
 that in this scheme, specifications can only be appended or overridden
 but not removed by Study subclasses so as not to break workflows
 inherited from base classes.
+
+Pipeline constructor methods can be overridden in subclasses like any Python
+method. Often the overriding method will call the superclass method
+to construct a pipeline, apply modifications and return the
+modified pipeline. In this scenario, references to the data
+specification in the superclass method can be mapped onto different
+entries in the table of the subclass by providing the \emph{input\_map} and
+\emph{output\_map} keyword arguments when calling the superclass method.
+Additionally the name of the pipeline can be altered by providing the \emph{name}
+argument, which is useful when creating multiple  constructor methods from the
+one base method. In these scenarios it is important to
+also pass the the wildcard keyword arguments of the overriding method to the
+\emph{name\_maps} keyword argument of the superclass method, to allow the
+overriding method to be overridden in turn.
+
 
 \subsubsection*{Implementing multi-modal
 studies}
@@ -575,9 +600,10 @@ with the method \emph{sub\_study2\_pipeline1}.
 
 To apply the analysis blueprint specified in a Study class to a specific
 dataset, an instance of the Study class is created with details of where
-the data is stored (the \emph{Repository}) and the computing environment
-available to process it (the \emph{Processor}). A Study object controls
-the construction of analysis workflows, the execution of the workflows,
+the data is stored (\emph{Repository} module) the computing
+resources available to process it (\emph{Processor} module) and the software
+installed in the environment it will be processed in (\emph{Environment} module).
+A Study object controls the construction and execution of analysis workflows,
 and the flow of data to and from the repository (Figure \ref{fig:full_uml}).
 
 \begin{figure*}
@@ -597,17 +623,19 @@ Repositories can be of plain directories, or BIDS or XNAT repositories}
 \label{fig:full_uml}
 \end{figure*}
 
-Each Study object is assigned a name, which is used to differentiate its
-results from alternative analyses on the same dataset (e.g. by different
-members of a lab). Parameters are set on initialisation of the Study
-object along with the range of subject and visit IDs to be included in
-the analysis (if they are not provided then all IDs are included). The
-remaining arguments passed to the Study object initialisation are the
-Repository and Processor modules and a list of \emph{Selector} objects
-to select input datasets from the repository (Figure \ref{fig:study_application}).
+Each Study instance is assigned a name, which is used to differentiate its
+results from alternative analyses on the same dataset (e.g. with different
+parameterisations). Parameters are set on initialisation of the Study object
+along with the range of subject and visit IDs to be included in the analysis
+(if they are not provided then all IDs found in the repository are included).
+The remaining arguments passed to the Study object initialisation are the
+Repository, Processor and Environment modules to use and a list of
+\emph{Selector} objects to select input data from the repository and match
+it with the Study's data specification table.
+(Figure \ref{fig:study_application}).
 
 \begin{figure}
-\lstinputlisting[language=Python]{listings/example_application.py}
+\lstinputlisting[basicstyle=\footnotesize]{listings/example_application.py}
 \caption{Example application of Study class to a dataset stored in an XNAT
 repository. Once the Study object has been initialised potential
 derivatives of the Study can be requested, and will be generated and
@@ -691,13 +719,15 @@ However, a study can draw data from multiple auxiliary repositories,
 which are specified in the inputs passed to the study. When using
 multiple input repositories, subject and visit IDs will often need to be
 mapped from their values in the auxiliary repositories to the ``ID
-space'' of the study. This mapping is specified using \emph{IdMapper}
-objects passed to \emph{subject\_id\_map} and \emph{visit\_id\_map}
-keyword arguments during initialisation of a repository.
+space'' of the study, which can be done by passing either by a dictionary
+or callable object (e.g. function) to the \emph{subject\_id\_map} or
+\emph{visit\_id\_map} keyword arguments during initialisation of a repository.
 
 New repository modules for additional repository types can be
 implemented by extending the Repository abstract base class and
-implementing a small set of methods (Table \ref{tbl:abstract-repo-methods}).
+implementing five abstract methods, \emph{find\_data}, \emph{get\_fileset},
+\emph{get\_field}, \emph{put\_fileset} and \emph{put\_field}
+(Table \ref{tbl:abstract-repo-methods}).
 
 \begin{table}
 \caption{Abstract methods in the base Repository class that
@@ -709,10 +739,10 @@ need to be implemented by platform-specific sub-classes.}
 \noalign{\smallskip}\hline\noalign{\smallskip}
 \emph{find\_data()} & Queries repository to find all existing filesets and
 fields \\
-\emph{get\_fileset(Fileset)} & Caches file-set (if necessary) and returns the file path. \\
+\emph{get\_fileset(Fileset)} & Caches fileset (if necessary) and returns the path to file(s). \\
 \emph{get\_field(Field)} & Retrieves and returns the value of the field from
 the repository \\
-\emph{put\_fileset(Fileset)} & Inserts file-set into the repository and updates cache. \\
+\emph{put\_fileset(Fileset)} & Inserts fileset into the repository and updates cache. \\
 \emph{put\_field(Field)} & Inserts the value of the Field into the repository \\
 \emph{connect()} & Opens a connection to the repository (optional). \\
 \emph{disconnect()} & Closes connection to repository (optional)\\
@@ -740,8 +770,8 @@ names are inconsistent across the study then regular expressions can be
 used instead of exact matches by passing \emph{is\_regex=True} when
 initialising the Selector. Additional criteria can be used to
 distinguish cases where multiple filesets in the session match the
-pattern provided, such as DICOM header values, or when using an XNAT
-repository, the order and ID of the dataset.
+pattern provided, such as DICOM header values, or the order and ID
+of the dataset.
 
 Inputs can be drawn from auxiliary repositories by providing alternative
 Repository instances to the \emph{repository} keyword of the Selector.
@@ -752,8 +782,8 @@ inputs come from auxiliary repositories) then explicit
 \emph{subject\_ids}, \emph{visit\_ids} need to be provided and the
 \emph{fill\_tree} flag set when initialising the Study.
 
-If the data to select has been derived from an alternative study, then
-the name of the alternative study can be passed to the
+If the data to select has been derived from an alternative Arcana Study
+instance, then the name of the alternative study can be passed to the
 \emph{from\_study} keyword argument provided to the selector. There are
 no restrictions on selecting any data, derived or otherwise, to match
 acquired or derived specifications. For example, it is possible to
@@ -768,9 +798,9 @@ table and contain a single Fileset or Field for every session (or
 subject/visit/study depending on the frequency of the corresponding data
 spec). Collection objects can be used to pass reference atlases and
 templates as inputs to analyses. They can also be set as the ``default
-input'' for a data spec using the \emph{default\_input} keyword
-argument. For the sake of portability, default inputs should be
-restricted to data in publically accessible repositories or included in
+input'' for a data specification via the \emph{default} keyword
+argument. However, for the sake of portability, default inputs should be
+restricted to data in publically accessible repositories or those included in
 standard software packages (e.g. FSL).
 
 When using BIDS repositories, the selection stage is typically already
@@ -783,10 +813,10 @@ selections is required.
 \subsubsection*{Processor modules}
 \label{processor-modules}
 
-Processor modules control how and where pipelines generated by a Study
-are executed. There currently four Processor modules implemented in
+Processor modules control how pipelines generated by a Study
+are executed. There currently three Processor modules implemented in
 Arcana: \emph{LinearProcessor}, \emph{MultiProcProcessor},
-\emph{SlurmProcessor} and \emph{SgeProcessor}, which wrap the
+\emph{SlurmProcessor}, which wrap the
 correspondingly named Nipype execution plugins. The main task performed
 by the processor, as separate from the Nipype execution plugin it wraps,
 is to determine which pipelines need to be run and link them into a
@@ -794,41 +824,32 @@ single workflow. Since this logic is implemented in the Processor
 abstract base class, wrapping additional Nipype plugins as required is
 trivial.
 
-A processor is used internally by a Study instance to execute pipelines
+A Processor is used internally by a Study instance to execute pipelines
 to derive derivatives requested from the data specification by the
-\emph{Study.data(name{[}, name,...{]})} method (Figure \ref{fig:simple_uml}). The first
+\emph{data(name{[}, name,...{]})} method (Figure \ref{fig:simple_uml}). The first
 step in this procedure is to query the repository tree for all data and
 provenance associated with the study. Sessions for which the requested
-outputs of the pipeline are already present in the repository are
+outputs of the pipeline are already present in the repository, and the stored
+provenance matches the current parameters of the study,
 excluded from the list to process. For the remaining sessions to
 process, inputs of the pipeline that are derivatives themselves are
 added to the stack of requested derivatives. This procedure is repeated
 recursively until there are no sessions to process or all inputs to the
 pipeline are study inputs at a given depth.
 
-When a pipeline is processed it is connected to \emph{Source} and
-\emph{Sink} nodes, which get and put the pipeline inputs and outputs
+When a pipeline is processed it is connected to source and
+sink nodes, which get and put the pipeline inputs and outputs
 from and to a repository, respectively. Separate source and sink nodes
 are used for each data frequency (i.e. per-session, per-subject,
 per-visit, per-study). If implicit file format conversion is required
 (i.e. the input or output format differs from the data specification)
 then additional format converter nodes are inserted after the source
 nodes or before the sink nodes. Iterator nodes that iterate over the
-required subjects and visits are connected to the sources, and report
+required subjects and visits are connected to the sources, and ``deiterator''
 nodes that join over subjects and visits are connected to the sink
-nodes. Report nodes of upstream pipelines are connected to downstream
-iterator nodes to create a single workflow, which is then executed using
+nodes. Final nodes of upstream pipelines are connected to downstream
+iterator nodes in order to create a single workflow, which is then executed using
 the Nipype execution plugin.
-
-Software versions are managed by the processor if environment modules
-\citep{furlani_modules:_1991} are installed on the system. These are loaded and
-unloaded before the interface of a workflow node is run based on the
-requirements specified for the node during construction of the pipeline
-(see \emph{Pipeline constructors}. Maps from requirement names to
-module names in the processing environment can be passed to the
-Processor at initialisation. For plugins that submit jobs to HPC
-schedulers (e.g. SLURM, SGE), node memory and wall-time requirements are
-inserted into jobscripts where required.
 
 Provenance is stored for each pipeline run alongside the generated
 derivatives and consists of: parameter values used by the pipeline,
@@ -868,23 +889,40 @@ Additionally, a time limit can be passed to the
 all the required sessions is less than the time limit they will be
 reprocessed and otherwise an exception will be raised.
 
+\subsubsection*{Environment modules}
+
+The software packages installed on the system are detected and managed
+by the Environment module. There are currently two types of available Environment modules:
+\emph{StaticEnvironment} and \emph{ModulesEnvironment}.
+
+The \emph{StaticEnvironment} module doesn't perform any management, and instead
+only checks the existing environment for appropriate software versions before running
+the analysis.
+
+The \emph{ModulesEnvironment} module can be used if environment
+modules \citep{furlani_modules:_1991} are installed on the system (typical in many
+HPC environments). In this case, modules are loaded before the interface of a pipeline node
+is run based on the requirements specified for the node during construction of the pipeline
+(see \emph{Pipeline constructors} and then unloaded afterwards. Mappings from non-standard
+module names installed on the system to requirements required by the Study can be
+can be passed to the \emph{packages\_map} keyword argument of the ModulesEnvironment
+at initialisation. Likewise non-standard versions for packages can be mapped onto requirements
+using the \emph{versions\_map} keyword argument.
+
 \section*{Results}
 \label{results}
 
 The Arcana framework is distributed as a publicly available software
-package via GitHub
-(\href{http://github.com/MonashBI/arcana}{{http://github.com/MonashBI/arcana}})
-and the Python Package Index (PyPI)
-(\href{https://pypi.org/project/arcana/}{{http://pypi.org/project/arcana/}}).
+package via GitHub (\url{github.com/MonashBI/arcana}) and the
+Python Package Index (PyPI) (\url{pypi.org/project/arcana/}).
 Study classes for T1, T2* and diffusion weighted MRI data have been
-implemented as part of the \emph{Biomedical imAgiNg ANAlysis (Banana)} package \\
-(\href{https://github.com/MonashBI/banana}{{http://github.com/MonashBI/banana}} and
-\href{http://pypi.org./project/banana}{{http://pypi.org./project/banana}}).
-All three classes, \emph{T1wStudy}, \emph{T2starwStudy} and
+implemented as part of the \emph{Biomedical imAgiNg ANAlysis (Banana)} package
+(\url{github.com/MonashBI/banana}; \url{pypi.org./project/banana}).
+All three classes, \emph{T1Study}, \emph{T2starStudy} and
 \emph{DmriStudy}, inherit generic image analysis methods, such as
 registration and brain extraction, from the base class \emph{MRIStudy}.
 The T1Study and T2starStudy classes are aggregated into the
-\emph{T2starwT1wStudy} MultiStudy class to combine analysis of T2* and
+\emph{T2starwT1Study} MultiStudy class to combine analysis of T2* and
 T1-weighted contrasts.
 
 The DmriStudy class implements diffusion tensor metrics, FA and ADC, as
@@ -907,7 +945,7 @@ derivatives: FA and ADC and/or streamlines fibre tracking.}
 \label{fig:dmri_study}
 \end{figure*}
 
-The \emph{T2starwT1wStudy} class implements an algorithm to generate
+The \emph{T2starwT1Study} class implements an algorithm to generate
 \emph{composite vein images} from the combination of QSM and SWI
 contrasts derived from the T2*-weighted acquisition with an vein atlas
 registered to the T1-weighted acquisition \citep{ward_combining_2018} (Figure \ref{fig:t2star_t1_study}).
@@ -1046,24 +1084,24 @@ reducing the time and effort required to implement robust workflows from
 acquired data to publication results.
 
 An oft-repeated mantra in the open-source software movement dubbed
-Linus' Law is that "given a large enough beta-tester and co-developer
+Linus' Law is that ``given a large enough beta-tester and co-developer
 base, almost every problem will be characterized quickly and the fix
-obvious to someone" or more compactly, "given enough eyeballs, all
+obvious to someone" or more compactly, ``given enough eyeballs, all
 \href{https://en.wikipedia.org/wiki/Software_bug}{bugs} are shallow"
 \citep{raymond_cathedral_1999}. Given the size of the neuroimaging research community,
 there are a large number of potential beta-testers and co-developers.
 However, it has been difficult for researchers to collaborate on the
-same code base due to slight differences in acquisition protocols,
+same code-base due to slight differences in acquisition protocols,
 storage conventions, researcher preferences, and study requirements.
 
 The flexibility and portability of the Arcana framework increases the
 feasibility of community collaborations on workflow implementations. The
 improvement of code quality in larger community efforts, due to more
 eyeballs to detect and fix errors, has the potential to form a
-reinforcing cycle where in more developers are attracted to the project.
+reinforcing cycle where more developers are attracted to the project.
 To these ends, the Banana code repository on GitHub
 (\url{http://github.com/MonashBI/banana.git}) is proposed as a code base
-for communal development of neuroimaging workflows in Arcana.
+for communal development of biomedical imaging workflows using Arcana.
 
 A level of proficiency in Python OO design is required to design new
 analyses in Arcana, which may preclude inexperienced programmers.
@@ -1111,13 +1149,13 @@ greater than two), which is not currently possible in Arcana.
 Ensuring that the consistent versions of external tools are used
 throughout the analysis is important to avoid introducing biases due to
 algorithm updates. In systems with environment modules \citep{furlani_modules:_1991}
-installed, Arcana loads and unloads the required modules before and
+installed, Arcana can load and unload the required modules before and
 after each node is executed. When running Arcana within a container,
 environment modules and software versions can be installed inside the
 container giving exact control over the versions used. To these ends, a
 Docker container is available on Docker Hub,
 (\href{http://hub.docker.com/r/monashbi/banana}{{http://hub.docker.com/r/monashbi/banana}}),
-which can be used as a base for neuroimaging analysis containers.
+which can be used as a base for biomedical imaging analysis containers.
 
 While the same tools and versions should be applied across an analysis
 to avoid bias, there are cases where it is desirable to rerun the same
@@ -1164,9 +1202,9 @@ templates that can be applied to a wide range of relevant datasets.
 The authors acknowledge the facilities and scientific and technical assistance
 of the National Imaging Facility, a National Collaborative Research
 Infrastructure Strategy (NCRIS) capability, at Monash Biomedical Imaging,
-Monash University. \textbf{Salary support for me ??} Early versions of the software described in the manuscript
-were informed by existing software written Parnesh Raniga while
-employed at Monash Biomedical Imaging.
+Monash University. The ``transparent repository'' feature of Arcana was
+inspired by in-house software written by Parnesh Raniga while he was
+employed at Monash Biomedical Imaging prior to 2016.
 \end{acknowledgements}
 
 \bibliographystyle{spbasic} 
