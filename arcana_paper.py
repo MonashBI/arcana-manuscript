@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
-from nianalysis.study.mri import (DiffusionStudy, T1Study, T2StarStudy)
+from nianalysis.study.mri import (
+    DiffusionStudy, T1Study, T2StarStudy, MriStudy)
 from nianalysis.plot import ImageDisplayMixin
 import os.path as op
 
@@ -23,11 +24,19 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             't2star',
             T2StarStudy,
             name_map={'t1_brain': 'coreg_ref_brain',
+                      'swi_brain': 'swi',
                       't1_coreg_to_atlas_mat': 'coreg_to_atlas_mat',
                       't1_coreg_to_atlas_warp': 'coreg_to_atlas_warp'}),
         SubStudySpec(
             'dmri',
-            DiffusionStudy)]
+            DiffusionStudy),
+        # Since we are using the SWI image produced from the scanner console
+        # we need to brain extract it in order to display it properly, so
+        # we create a basic MriStudy to use its brain extraction before
+        # mapping the extracted image to the T2* study.
+        SubStudySpec(
+            'swi',
+            MriStudy)]
 
     add_param_specs = [
         ParameterSpec(
@@ -49,7 +58,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         """
         # Derive (when necessary) and access data SWI, QSM, vein atlas,
         # and vein mask data in the repository.
-        swis = self.data('t2star_swi')
+        swis = self.data('swi_brain')
         qsms = self.data('t2star_qsm')
         cv_image = self.data('t2star_composite_vein_image')
         vein_masks = self.data('t2star_vein_mask')
@@ -142,10 +151,20 @@ if __name__ == '__main__':
     parser.add_argument('--work_dir', help="The work directory",
                         default=op.join(op.expanduser('~'),
                                         'arcana-paper-work'))
-    parser.add_argument(
-        '--fig_dir', help="The directory to store the figures",
-        default=op.join(op.expanduser('~'),
-                        'arcana-paper-fig'))
+    parser.add_argument('--fig_dir',
+                        help="The directory to store the figures",
+                        default=op.join(op.expanduser('~'),
+                                        'arcana-paper-fig'))
+    parser.add_argument('--t1', default='.*mprage.*',
+                        help="Pattern to match T1-weighted scan")
+    parser.add_argument('--t2star_chann', default='.*coils.*',
+                        help="Pattern to match T1-weighted scan")
+    parser.add_argument('--swi', default='.*(swi|SWI).*',
+                        help="Pattern to match T1-weighted scan")
+    parser.add_argument('--dmri', default='.*diff.*',
+                        help="Pattern to match T1-weighted scan")
+    parser.add_argument('--distort', default='.*distortion_correction.*',
+                        help="Pattern to match T1-weighted scan")
     args = parser.parse_args()
 
     # Make figure directory
@@ -166,16 +185,17 @@ if __name__ == '__main__':
         # Match names in the data specification to filenames used
         # in the repository
         inputs=[
-            FilesetSelector('t1_magnitude', dicom_format, '.*t1_mprage.*',
+            FilesetSelector('t1_magnitude', dicom_format, args.t1,
                             is_regex=True),
-            FilesetSelector('t2star_channels', zip_format,
-                            'swi_coils_icerecon'),
-            FilesetSelector('t2star_header_image', dicom_format,
-                            'SWI_Images.old'),
-            FilesetSelector('t2star_swi', nifti_gz_format, 'SWI_Images'),
-            FilesetSelector('dmri_magnitude', dicom_format, '.*ep2d_.*',
+            FilesetSelector('t2star_channels', zip_format, args.t2star_chann,
                             is_regex=True),
-            FilesetSelector('dmri_reverse_phase', dicom_format, '.*PRE_DWI.*',
+            FilesetSelector('t2star_header_image', dicom_format, args.swi,
+                            is_regex=True),
+            FilesetSelector('swi_magnitude', nifti_gz_format, args.swi,
+                            is_regex=True),
+            FilesetSelector('dmri_magnitude', dicom_format, args.dmri,
+                            is_regex=True),
+            FilesetSelector('dmri_reverse_phase', dicom_format, args.distort,
                             is_regex=True)],
         parameters={
             'dmri_num_global_tracks': int(1e5),
