@@ -31,7 +31,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 
     add_param_specs = [
         ParameterSpec(
-            'dmri_fig_slice_offset', (4, 0, 0),
+            'dmri_fig_slice_offset', (6, 0, 0),
             desc=("Offset the sagittal slices of dMRI figures so they "
                   "intersect a cerebral hemisphere instead of the "
                   "midline between the hemispheres"))]
@@ -187,5 +187,5 @@ if __name__ == '__main__':
     # Derive required data and display them in a single step for each
     # figure.
     paper.vein_fig(op.join(args.fig_dir, 'veins.png'))
-#     paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
-#     paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
+    paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
+    paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))

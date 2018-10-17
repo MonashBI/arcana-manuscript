@@ -380,8 +380,8 @@ initialisation.
 Workflows are implemented in Arcana as a series of pipelines, which
 each perform a unit of the analysis (e.g. registration, brain
 extraction, quantitative susceptibility mapping). Pipelines are represented by \emph{Pipeline} objects,
-which are thin wrappers around Nipype workflows to handle input/output
-connections and namespace management. Each pipeline consists of a
+which are thin wrappers around Nipype workflows to handle input and output
+connections, and namespace management. Each pipeline consists of a
 (typically small) graph of Nipype nodes, with each node wrapping a stand alone tool
 (e.g. FSL's FLIRT) or analysis package function (e.g. SPM's \emph{coreg}
 tool). Pipelines source their inputs from, and sink their outputs to, entries
@@ -395,7 +395,8 @@ arguments (e.g. \lstinline{my_pipeline(self, **name_maps)}), and these arguments
 should be passed as a dictionary directly to the \emph{name\_maps} argument
 of the pipeline initialisation to enable inputs and outputs of the
 pipeline to be rerouted to alternative data specifications in modified constructor
-methods, typically in subclasses and multi-studies.
+methods, typically in subclasses and multi-studies (see
+\emph{Extension and specialisation by class inheritance} and \emph{Implementing multi-modal studies}).
 
 \begin{figure}
 \lstinputlisting[firstline=61, basicstyle=\footnotesize]{listings/example_study.py}
@@ -411,14 +412,14 @@ inputs and outputs of the pipeline onto different data specifications.}
 \end{figure}
 
 The syntax for pipeline construction is inspired by a proposed form for Nipype v2.0
-(\href{http://github.com/nipy/nipype/issues/2539}{http://github.com/nipy/nipype/issues/2539}).
-Within a pipeline constructor, the Pipeline object is initialised by the \emph{pipeline} method
-of the Study (Figure \ref{fig:pipeline_constructor}). At initialisation, each pipeline is given a name,
+(\url{github.com/nipy/nipype/issues/2539}).
+Within a pipeline constructor method, a Pipeline object is constructed by the \emph{Study.pipeline} method
+(Figure \ref{fig:pipeline_constructor}). At initialisation, each pipeline is given a name,
 which must be unique amongst the pipelines constructed by the Study. The methods implemented
 by the pipeline can be characterised by providing a the list of scientific references
 and a text description to the \emph{references} and \emph{desc} keyword arguments, respectively.
 
-The \emph{add(name, interface)} method is used to add a node to a pipeline, which takes
+The \emph{add(name, interface)} method is used to add a node to a pipeline and takes
 a unique name for the node (within the pipeline) and a Nipype Interface object, and returns
 a reference to the newly added node. For clarity, is recommended to put all static inputs
 (i.e. parameters) of the interface as keyword arguments of the interface constructor
@@ -431,14 +432,15 @@ arguments take a dictionary, where the keys of the dictionary are the names of t
 values of the dictionary are 2-tuples each consisting of the name of a data specification
 and the format the pipeline expects the data in (i.e. a FileFormat for Fileset specifications or datatype
 for Field specifications). If the expected format does not match that of the corresponding data specification
-table or study input then an conversion nodes are implicitly connected to the pipeline.
-Inputs and outputs that are conditional on parameters of the study can be set outside of
-the \emph{add} method using the \emph{connect\_input} or
+or study input then a conversion node is implicitly connected to the pipeline.
+Inputs and outputs that are conditional on parameters or inputs provided to the
+study can be set outside of the \emph{add} method using the \emph{connect\_input} or
 \emph{connect\_output} methods, respectively.
 
-Internal connections between nodes within a pipeline are specified by a dictionary
-passed to the \emph{connect} keyword argument of the receiving node. The
-dictionary keys are the names of the receiving traits and the values are 2-tuples
+Connections between nodes are specified by a dictionary
+passed to the \emph{connect} keyword argument of the \emph{add} method
+that creates the receiving node. The dictionary keys are the names of the
+receiving traits and the values are 2-tuples
 consisting of the sending node and the name of the sending trait. Alternatively,
 conditional connections can be specified via the \emph{connect} method of the
 pipeline, which simply calls the method of the same name in the underlying
@@ -446,35 +448,32 @@ Nipype workflow.
 
 Any external software packages required by a node should be referenced
 in the \emph{requirements} keyword argument as a list of
-\emph{Requirement} objects when the node added to the pipeline. These
-requirements can be used by the Processor to configure environment
-modules \citep{furlani_modules:_1991}, to ensure the required software
-packages are available. Similarly, the expected memory requirements and
-wall time for the node execution should be provided to the keyword args
-\emph{memory}, and \emph{wall\_time} so they can be inserted into HPC
-scheduler job scripts if required.
+\emph{Requirement} objects when the node added to the pipeline.
+Similarly, the expected memory requirements and
+wall time for the node execution should be provided to the keyword arguments
+\emph{memory}, and \emph{wall\_time}.
 
 Iteration over subjects and visits is handled implicitly by Arcana and
 depends on the frequency of the pipeline's inputs and outputs. To create
 a summary derivative (i.e. frequency != 'per\_session') from more frequent
 data, \emph{Study.SUBJECT\_ID} or \emph{Study.VISIT\_ID} should be
-passed to the \emph{joinsource} keyword to join over subjects or visits, respectively.
+passed to the \emph{joinsource} keyword of the \emph{add} method to join over subjects or visits, respectively.
 In this case, a JoinNode will be created instead of standard Node,
 which should be passed the additional keyword argument \emph{joinfield} to
 specify the list of input traits to convert into lists to receive the joined input.
 Similarly, if the name of an input trait is provided (or list thereof) to the the \emph{iterfield}
 keyword argument, then a MapNode will be created and the interface will
 be applied to all items of the list connected to that input \citep{gorgolewski_nipype:_2011}.
-The subject and visit IDs are directly accessible as input fields of the pipeline
+Additionally, the values of the subject and visit IDs are directly accessible as input fields of the pipeline
 named \emph{Study.SUBJECT\_ID} and \emph{Study.VISIT\_ID}, respectively.
 
 Study parameters can be accessed during pipeline construction with the
-\emph{parameter(name)} method. If conditional logic is included in
+\emph{Study.parameter(name)} method. If conditional logic is included in
 the workflow construction that alters the pipeline inputs, outputs or
 parameters then it should be controlled by a switch instead of a
 parameter. The analysis branch designated by a switch value should be
-tested with \emph{branch(name)} in the case of boolean switches and
-\emph{branch(name, ref\_value)} in the case of string switches.
+tested with \emph{Study.branch(name)} in the case of boolean switches and
+\emph{Study.branch(name, ref\_value)} in the case of string switches.
 
 \subsubsection*{Extension and specialisation by class inheritance}
 \label{extension-and-specialisation-by-class-inheritance}
@@ -508,8 +507,7 @@ also pass the the wildcard keyword arguments of the overriding method to the
 overriding method to be overridden in turn.
 
 
-\subsubsection*{Implementing multi-modal
-studies}
+\subsubsection*{Implementing multi-modal studies}
 \label{implementing-multi-modal-studies}
 
 While basic Study classes are typically associated with single image
@@ -868,23 +866,37 @@ reprocessed and otherwise an exception will be raised.
 
 \subsubsection*{Environment modules}
 
-The software packages installed on the system are detected and managed
-by the Environment module. There are currently two types of available Environment modules:
+The software packages installed on the system that are required by a study's
+workflows (e.g. FSL, SPM) are detected and managed by
+the Environment object passed to the study at initialisation.
+There are currently two types of Environment class implemented in Arcana:
 \emph{StaticEnvironment} and \emph{ModulesEnvironment}.
 
-The \emph{StaticEnvironment} module doesn't perform any management, and instead
-only checks the existing environment for appropriate software versions before running
-the analysis.
-
-The \emph{ModulesEnvironment} module can be used if environment
+\emph{ModulesEnvironment} objects can be used if environment
 modules \citep{furlani_modules:_1991} are installed on the system (typical in many
-HPC environments). In this case, modules are loaded before a workflow node is run,
+HPC systems). In this case, environment modules are loaded before a workflow node is run,
 based on the requirements specified for the node during construction of the pipeline
 (see \emph{Pipeline constructors}), and then unloaded afterwards. Mappings from non-standard
-module names installed on the system to requirements required by the Study can be
-can be passed to the \emph{packages\_map} keyword argument of the ModulesEnvironment
-at initialisation. Likewise non-standard versions for packages can be mapped onto requirements
-using the \emph{versions\_map} keyword argument.
+module names installed on the system to those expected by the Study can be
+can be passed as a dictionary to the \emph{packages\_map} keyword argument
+at initialisation. Likewise non-standard versions for packages can be mapped onto
+requirements using the \emph{versions\_map} keyword argument.
+
+\emph{StaticEnvironment} objects don't actively manage the environment,
+and instead only check the current environment for appropriate software
+versions before running requested workflows.
+
+\subsection*{Acquisition of test dataset}
+
+A healthy volunteer was scanned using a 3T Siemens Skyra with a 32-channel head
+and neck coil to demonstrate the application of analyses implemented in
+Arcana. The protocol was a T1-weighted MPRAGE (1mm contiguous,
+matrix size 256x240x192, FOV 256x240x192, TE = 2.13ms, TR, = 2300ms, TI
+= 900ms, bandwidth=230Hz/pixel), GRE (1.8 mm contiguous, matrix size
+256x232x72, FOV 230x208x130, TE = 20ms, TR, = 30ms,
+bandwidth=120Hz/pixel), and diffusion MRI (1.2 mm contiguous, matrix size
+110x100x60, FOV 256x240x192, TE = 95ms, TR, = 8200ms, 33 diffusion
+directions with b=1500 mm2/s and 3 b=0, bandwidth=781Hz/pixel).
 
 \section*{Results}
 \label{results}
@@ -898,9 +910,6 @@ implemented as part of the \emph{Biomedical imAgiNg ANAlysis (Banana)} package
 All three classes, \emph{T1Study}, \emph{T2starStudy} and
 \emph{DmriStudy}, inherit generic image analysis methods, such as
 registration and brain extraction, from the base class \emph{MriStudy}.
-The T1Study and T2starStudy classes are aggregated into the
-\emph{T2starT1Study} MultiStudy class to combine analysis of T2* and
-T1-weighted contrasts.
 
 The DmriStudy class implements diffusion tensor metrics, FA and ADC, as
 well as global tractography using streamlines tracking from the MRtrix
@@ -922,11 +931,11 @@ derivatives: FA and ADC and/or streamlines fibre tracking.}
 \label{fig:dmri_study}
 \end{figure*}
 
-The \emph{T2starT1Study} class implements an algorithm to generate
-\emph{composite vein images} from the combination of QSM and SWI
-contrasts derived from the T2*-weighted acquisition with an vein atlas
-registered to the T1-weighted acquisition \citep{ward_combining_2018}.
-(Figure \ref{fig:t2star_t1_study}).
+The \emph{T2starStudy} class implements an algorithm to generate
+\emph{composite vein images} \citep{ward_combining_2018} and
+vein masks \citep{ward_vein_2017} from the combination of QSM and SWI
+contrasts derived from the T2*-weighted acquisition with vein atlases
+derived from manual tracings (Figure \ref{fig:t2star_t1_study}).
 
 \begin{figure*}
 	\centering
@@ -951,29 +960,28 @@ combined with the composite vein image to produce the vein mask.}
 \label{fig:t2star_t1_study}
 \end{figure*} 
 
-The DiffusionStudy and T2starT1Study classes are further aggregated in
-turn into a single MultiStudy class for the results section of this
-manuscript\emph{, ArcanaPaper}, (Supplementary material). Methods are
-implemented in ArcanaPaper to generate and display the derivative
-images in Figure \ref{fig:veins}, \ref{fig:fa_adc} and \ref{fig:tractography}.
+The T1Study, T2starStudy and DmriStudy classes are
+aggregated into a single MultiStudy class,
+\emph{ArcanaPaper} (Supplementary material), which is specialised to produce
+the figures in the Results section of this manuscript. In order to warp the
+prior vein atlases to the subject space in the generation of the composite vein images,
+nonlinear registration to Montreal Neurological Institute templates
+\citep{mni-cite} is performed in the T1Study. The transform and warp
+field from this registration are then mapped onto the `coreg\_to\_atlas\_mat` and
+`coreg\_to\_atlas\_warp' specifications in the T2starStudy, instead
+of registering the T2*-weighted images directly, in order to improve the registration.
+These transforms were used to produce the composite vein
+image in conjuction with the linear transform from the brain-extracted T2*-weighted
+magnitude image to the brain extracted T1-weighted image, which required the
+`brain' specification in the T1Study to be mapped to the `coreg\_ref\_brain`
+specification in the T2starStudy.
 
-To test the analysis workflows implemented in ArcanaPaper, a healthy
-volunteer was scanned using a 3T Siemens Skyra with a 32-channel head
-and neck coil. The protocol was a T1-weighted MPRAGE (1mm contiguous,
-matrix size 256x240x192, FOV 256x240x192, TE = 2.13ms, TR, = 2300ms, TI
-= 900ms, bandwidth=230Hz/pixel), GRE (1.8 mm contiguous, matrix size
-256x232x72, FOV 230x208x130, TE = 20ms, TR, = 30ms,
-bandwidth=120Hz/pixel), diffusion MRI (1.2 mm contiguous, matrix size
-110x100x60, FOV 256x240x192, TE = 95ms, TR, = 8200ms, 33 diffusion
-directions with b=1500 mm2/s and 3 b=0, bandwidth=781Hz/pixel).
-Methods for Figure \ref{fig:veins}, \ref{fig:fa_adc}, and \ref{fig:tractography} in
-the ArcanaPaper class were applied to the acquired dataset to using the
-\emph{SlurmProcessor} to submit jobs to the the MASSIVE HPC cluster
-\citep{goscinski_multi-modal_2014} in order to generate the figures.
-
-Figure \ref{fig:veins} displays composite vein images for the healthy
-volunteer along with the SWI and QSM intermediate derivatives and the
-input vein atlas. The derived vein images are comparable to those
+The \emph{vein\_fig}, \emph{fa\_adc\_fig} and \emph{tractography\_fig} methods
+implemented in the ArcanaPaper class were applied to the test dataset to produce
+Figure \ref{fig:veins}, \ref{fig:fa_adc}, and \ref{fig:tractography}, respectively.
+Figure \ref{fig:veins} displays composite vein images and vein masks for the healthy
+volunteer along with the SWI and QSM intermediate derivatives.
+The derived vein images are comparable to those
 generated by the original implementation \citep{ward_combining_2018}.
 
 \begin{figure*}
@@ -983,7 +991,7 @@ generated by the original implementation \citep{ward_combining_2018}.
   combining susceptibility weighted imaging (SWI) (\emph{top row}),
   quantitative susceptibility mapping (QSM) (\emph{second row})
   and a vein atlas from manual tracings. A vein mask was then
-  generated (\emph{bottom row}) by thresholding the composite
+  generated (\emph{bottom row}) from the composite
   vein image.
   \emph{left column}: axial slices. \emph{centre column}: coronal slices.
   \emph{right column}: sagittal slices.}
@@ -995,6 +1003,12 @@ acquisition. The FA map shows high intensity in known white matter
 tracts and low intensities in known grey matter regions. The ADC map
 shows high intensity in cortical spinal fluid and low intensity through
 the rest of the brain.
+Figure \ref{fig:tractography} displays the global tractography derived from the dMRI
+acquisition. The streamlines follow well known white matter tracts such
+as the cortico-spinal, fasciculus and corpus callosum. Intermediate
+derivatives derived for the FA and ADC analysis, including the
+preprocessed and bias-corrected dMRI image and a whole brain mask, were
+reused in the generation of the streamlines.
 
 \begin{figure*}
     \centering
@@ -1007,13 +1021,6 @@ sagittal midline slices.}
 \label{fig:fa_adc}
 \end{figure*}
 
-Figure \ref{fig:tractography} displays the global tractography derived from the dMRI
-acquisition. The streamlines follow well known white matter tracts such
-as the cortico-spinal, fasciculus and corpus callosum. Intermediate
-derivatives derived for the FA and ADC analysis, including the
-preprocessed and bias-corrected dMRI image and a whole brain mask, were
-reused in the generation of the streamlines reducing the time taken to
-produce the tractography results from ?? to ??.
 
 \begin{figure*}
     \centering
@@ -1138,7 +1145,7 @@ Docker container is available on Docker Hub,
 (\url{hub.docker.com/r/monashbi/banana}), which can be used as a
 base for biomedical imaging analysis containers. In future versions of Arcana,
 additional Environment modules could be implemented to run each pipeline
-node within its own container if required to take advantage of
+node within its own container to take advantage of
 containers maintained by tool developers (e.g. 
 \url{hub.docker.com/r/vistalab/freesurfer/}).
 
