@@ -79,7 +79,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                 'out_field': ('derived_field1', int)},
             wall_time=25, requirements=[software_req1])
         if self.branch('node1_option'):
-            node1.inputs.option = 'set-extra-option'
+            node1.inputs.an_option = 'set-extra-option'
 
         if self.branch('pipeline2_tool', 'toolA'):
             pipeline.add(

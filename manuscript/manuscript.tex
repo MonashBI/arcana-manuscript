@@ -15,36 +15,19 @@
 % First comes an example EPS file -- just ignore it and
 % proceed on the \documentclass line
 % your LaTeX will extract the file if required
-\begin{filecontents*}{example.eps}
-%!PS-Adobe-3.0 EPSF-3.0
-%%BoundingBox: 19 19 221 221
-%%CreationDate: Mon Sep 29 1997
-%%Creator: programmed by hand (JK)
-%%EndComments
-gsave
-newpath
-  20 20 moveto
-  20 220 lineto
-  220 220 lineto
-  220 20 lineto
-closepath
-2 setlinewidth
-gsave
-  .4 setgray fill
-grestore
-stroke
-grestore
-\end{filecontents*}
-%
+
 \RequirePackage{fix-cm}
-%
+
 %\documentclass{svjour3}                     % onecolumn (standard format)
 %\documentclass[smallcondensed]{svjour3}     % onecolumn (ditto)
 \documentclass[smallextended]{svjour3}       % onecolumn (second format)
 %\documentclass[twocolumn]{svjour3}          % twocolumn
-%
+
 \smartqed  % flush right qed marks, e.g. at end of proof
-%
+
+
+% \usepackage{mathptmx}      % use Times fonts if available on your TeX system
+
 \usepackage{natbib}
 \usepackage{listings}
 \usepackage{graphicx}
@@ -66,29 +49,18 @@ grestore
     keywordstyle=\color{keywordcolour}\bfseries,       % keyword style
 }
 
-% \usepackage{mathptmx}      % use Times fonts if available on your TeX system
-%
-% insert here the call for the packages your document requires
-%\usepackage{latexsym}
-% etc.
-%
-% please place your own definitions here and don't use \def but
-% \newcommand{}{}
-
 \newcommand{\D}{...}
 \newcommand*{\affaddr}[1]{#1}
 \newcommand*{\affmark}[1][*]{\textsuperscript{#1}}
 
-%
+
 % Insert the name of "your journal" with
 % \journalname{myjournal}
-%
+
 \begin{document}
 
 \title{A comprehensive framework to capture the arcana of neuroimaging
-analysis%\thanks{Grants or other notes
-%about the article that should go on the front page should be
-%placed here. General acknowledgments should be placed at the end of the article.}
+analysis
 }
 
 %\titlerunning{Short form of title}        % if too long for running head
@@ -103,12 +75,12 @@ analysis%\thanks{Grants or other notes
 }
 
 \authorrunning{
-        Thomas G. Close \and
+     Thomas G. Close \and
 	Phillip G. D. Ward  \and
 	Francesco Sforazzini  \and
 	Wojtek Goscinski  \and
 	Zhaolin Chen  \and
-	Gary F. Egan  \and} % if too long for running head
+	Gary F. Egan}
 
 \institute{
 	Thomas G. Close \at
@@ -124,18 +96,20 @@ analysis%\thanks{Grants or other notes
 %\date{Received: date / Accepted: date}
 % The correct dates will be entered by the editor
 
-
 \maketitle
 
 \begin{abstract}
 
-Insert your abstract here. Include keywords, PACS and mathematical
-subject classification numbers as needed.
+These are the notes I have for my abstract
 
-\keywords{Neuroimaging \and Workflows \and Repository \and Large-scale \and Reproducibility}
+\begin{itemize}
+\item The heterogeneous collection of neuroimaging analysis tools, parameters, styles makes it difficult to design comprehensive workflows
+\item Complex workflows in a flexible extensible manner, reusable
+\item portable between different data storage solutions/scale of studies, separation between design and application yet programmatic
+\item Easily updatable, switchable between tools/versions
+\end{itemize}
 
-% \PACS{PACS code1 \and PACS code2 \and more}
-% \subclass{MSC code1 \and MSC code2 \and more}
+\keywords{Neuroimaging \and Workflows \and Repository \and Reproducibility \and Reusability \and Large-scale \and Python}
 
 \end{abstract}
 
@@ -143,7 +117,8 @@ subject classification numbers as needed.
 \label{intro}
 
 Despite the availability of well-established neuroimaging analysis
-packages \citep{cox_afni:_1996,smith_advances_2004,friston_statistical_2007,tournier_mrtrix:_2012}, the arcana of neuroimaging analysis is substantial due to
+packages \citep{cox_afni:_1996,smith_advances_2004,friston_statistical_2007,tournier_mrtrix:_2012},
+the arcana of neuroimaging analysis is substantial due to
 the range of available tools, tuneable parameters, and imaging sequences
 involved \citep{cusack_automatic_2015}. The distribution of complete
 ``end-to-end'' workflows, from acquired data to publication results, is
@@ -161,8 +136,9 @@ Imaging Data Standard (BIDS) \citep{gorgolewski_brain_2016} provides a way
 to standardise the storage of neuroimaging data in file system
 directories. BIDS specifies strict file and directory naming
 conventions, which facilitate the design of portable \emph{BIDS Apps}
-(https://bids-apps.neuroimaging.io). However, for research groups with
-sufficient informatics support, software-managed repositories \citep{marcus_extensible_2007,das_loris:_2012} can provide additional features, such as
+(\url{bids-apps.neuroimaging.io}). However, for research groups with
+sufficient informatics support, software-managed repositories \citep{marcus_extensible_2007,das_loris:_2012}
+can provide additional features, such as
 flexible access-control and automated pipelines. Therefore, for
 published workflows, the choice of repository should be transparent in
 order to maximise their audience.
@@ -175,7 +151,8 @@ logic in construction or execution to be portable. Nipype is a flexible
 Python framework for neuroimaging analysis in which workflows are
 constructed programmatically in Python \citep{gorgolewski_nipype:_2011}.
 Programmatic construction allows for rich control-flow logic that is not
-readily available in alternative workflow frameworks \citep{cusack_automatic_2015,achterberg_fastr:_2016,amstutz_common_2016}, and has been used
+readily available in alternative workflow frameworks \citep{cusack_automatic_2015,achterberg_fastr:_2016,amstutz_common_2016},
+and has been used
 to implement workflows that are robust to differences in fMRI protocols
 across a large number of sites \citep{esteban_fmriprep:_2018}.
 
@@ -213,7 +190,7 @@ Our objective was to extract common elements of repository-centric
 workflow design into an abstract framework to make it practical to
 implement flexible, portable and complete workflows for a wide range of
 neuroimaging analyses. \emph{Abstraction of Repository-Centric ANAlysis
-(Arcana)} \\(\href{http://arcana.readthedocs.io}{http://arcana.readthedocs.io} is a Python framework for
+(Arcana)} (\url{arcana.readthedocs.io}) is a Python framework for
 designing complex workflows in which modular Nipype pipelines operate on
 data stored in various repositories. Intermediate derivatives are
 derived on demand, checking against stored provenance for required
@@ -901,9 +878,9 @@ the analysis.
 
 The \emph{ModulesEnvironment} module can be used if environment
 modules \citep{furlani_modules:_1991} are installed on the system (typical in many
-HPC environments). In this case, modules are loaded before the interface of a pipeline node
-is run based on the requirements specified for the node during construction of the pipeline
-(see \emph{Pipeline constructors} and then unloaded afterwards. Mappings from non-standard
+HPC environments). In this case, modules are loaded before a workflow node is run,
+based on the requirements specified for the node during construction of the pipeline
+(see \emph{Pipeline constructors}), and then unloaded afterwards. Mappings from non-standard
 module names installed on the system to requirements required by the Study can be
 can be passed to the \emph{packages\_map} keyword argument of the ModulesEnvironment
 at initialisation. Likewise non-standard versions for packages can be mapped onto requirements
@@ -920,9 +897,9 @@ implemented as part of the \emph{Biomedical imAgiNg ANAlysis (Banana)} package
 (\url{github.com/MonashBI/banana}; \url{pypi.org./project/banana}).
 All three classes, \emph{T1Study}, \emph{T2starStudy} and
 \emph{DmriStudy}, inherit generic image analysis methods, such as
-registration and brain extraction, from the base class \emph{MRIStudy}.
+registration and brain extraction, from the base class \emph{MriStudy}.
 The T1Study and T2starStudy classes are aggregated into the
-\emph{T2starwT1Study} MultiStudy class to combine analysis of T2* and
+\emph{T2starT1Study} MultiStudy class to combine analysis of T2* and
 T1-weighted contrasts.
 
 The DmriStudy class implements diffusion tensor metrics, FA and ADC, as
@@ -945,10 +922,11 @@ derivatives: FA and ADC and/or streamlines fibre tracking.}
 \label{fig:dmri_study}
 \end{figure*}
 
-The \emph{T2starwT1Study} class implements an algorithm to generate
+The \emph{T2starT1Study} class implements an algorithm to generate
 \emph{composite vein images} from the combination of QSM and SWI
 contrasts derived from the T2*-weighted acquisition with an vein atlas
-registered to the T1-weighted acquisition \citep{ward_combining_2018} (Figure \ref{fig:t2star_t1_study}).
+registered to the T1-weighted acquisition \citep{ward_combining_2018}.
+(Figure \ref{fig:t2star_t1_study}).
 
 \begin{figure*}
 	\centering
@@ -987,28 +965,28 @@ matrix size 256x240x192, FOV 256x240x192, TE = 2.13ms, TR, = 2300ms, TI
 256x232x72, FOV 230x208x130, TE = 20ms, TR, = 30ms,
 bandwidth=120Hz/pixel), diffusion MRI (1.2 mm contiguous, matrix size
 110x100x60, FOV 256x240x192, TE = 95ms, TR, = 8200ms, 33 diffusion
-directions with b=1500 mm2/s and 3 b=0, bandwidth=781Hz/pixel)
-(\textbf{cite Lifespan paper ??}). Methods for Figure \ref{fig:veins}, \ref{fig:fa_acs},
-and \ref{fig:tractography} in
+directions with b=1500 mm2/s and 3 b=0, bandwidth=781Hz/pixel).
+Methods for Figure \ref{fig:veins}, \ref{fig:fa_adc}, and \ref{fig:tractography} in
 the ArcanaPaper class were applied to the acquired dataset to using the
 \emph{SlurmProcessor} to submit jobs to the the MASSIVE HPC cluster
 \citep{goscinski_multi-modal_2014} in order to generate the figures.
 
-Figure \ref{fig:veins} displays composite vein images and vein masks for the healthy
+Figure \ref{fig:veins} displays composite vein images for the healthy
 volunteer along with the SWI and QSM intermediate derivatives and the
 input vein atlas. The derived vein images are comparable to those
-generated by the original implementation \citep{ward_combining_2018}. The complete
-workflow took ?? min to complete over ?? compute cores.
+generated by the original implementation \citep{ward_combining_2018}.
 
 \begin{figure*}
     \centering
     \includegraphics[width=\textwidth]{figures/veins}
-  \caption{Vein image (\emph{right column}) constructed by
-combining susceptibility weighted imaging (SWI) (\emph{left column}),
-quantitative susceptibility mapping (QSM) (\emph{left-middle column})
-and a vein atlas from manual tracings (\emph{right-middle column}).
-\emph{Top row}: sagittal slices. \emph{Middle row}: axial slices.
-\emph{Bottom row}: coronal slices.}
+  \caption{Composite vein image (\emph{third row}) constructed by
+  combining susceptibility weighted imaging (SWI) (\emph{top row}),
+  quantitative susceptibility mapping (QSM) (\emph{second row})
+  and a vein atlas from manual tracings. A vein mask was then
+  generated (\emph{bottom row}) by thresholding the composite
+  vein image.
+  \emph{left column}: axial slices. \emph{centre column}: coronal slices.
+  \emph{right column}: sagittal slices.}
 \label{fig:veins}
 \end{figure*}
 
@@ -1100,7 +1078,7 @@ improvement of code quality in larger community efforts, due to more
 eyeballs to detect and fix errors, has the potential to form a
 reinforcing cycle where more developers are attracted to the project.
 To these ends, the Banana code repository on GitHub
-(\url{http://github.com/MonashBI/banana.git}) is proposed as a code base
+(\url{github.com/MonashBI/banana.git}) is proposed as a code base
 for communal development of biomedical imaging workflows using Arcana.
 
 A level of proficiency in Python OO design is required to design new
@@ -1130,9 +1108,12 @@ workflow implementation to be applied to datasets stored in BIDS format
 or XNAT repositories. A single code-base can therefore be containerized
 into BIDS apps or XNAT pipelines without adaptation, helping to form a
 bridge between the two communities of users and developers. Alternative
-data storage systems \citep{scott_coins:_2011,das_loris:_2012,book_neuroinformatics_2013}, can be integrated into Arcana by overriding a small number of
+data storage systems \citep{scott_coins:_2011,das_loris:_2012,book_neuroinformatics_2013},
+can be integrated into Arcana by overriding a small number of
 methods from the Repository abstract base class. Repository modules
-could also be created for data portals such as \emph{DataLad} \citep{yaroslav_halchenko_datalad/datalad_2018} in order to take advantage of the range of platforms they support.
+could also be created for data portals such as \emph{DataLad}
+\citep{yaroslav_halchenko_datalad/datalad_2018}
+in order to take advantage of the range of platforms they support.
 Implementing analyses in Arcana therefore enables researchers and
 research groups to easily migrate their workflows between storage
 platforms, and not risk being locked in to a particular technology.
@@ -1154,8 +1135,12 @@ after each node is executed. When running Arcana within a container,
 environment modules and software versions can be installed inside the
 container giving exact control over the versions used. To these ends, a
 Docker container is available on Docker Hub,
-(\href{http://hub.docker.com/r/monashbi/banana}{{http://hub.docker.com/r/monashbi/banana}}),
-which can be used as a base for biomedical imaging analysis containers.
+(\url{hub.docker.com/r/monashbi/banana}), which can be used as a
+base for biomedical imaging analysis containers. In future versions of Arcana,
+additional Environment modules could be implemented to run each pipeline
+node within its own container if required to take advantage of
+containers maintained by tool developers (e.g. 
+\url{hub.docker.com/r/vistalab/freesurfer/}).
 
 While the same tools and versions should be applied across an analysis
 to avoid bias, there are cases where it is desirable to rerun the same
@@ -1167,7 +1152,7 @@ clear what variability between results produced by comparable tools is
 due to. Therefore, in the absence of \emph{a priori} reason to favour a
 particular tool, perhaps the most rigorous approach is to rerun analyses
 with different combinations of available tools and only present results
-that are robust to the ``analytic noise'' (cite here?) they introduce.
+that are robust to the ``analytic noise'' \citep{maumet:inserm-01886089} they introduce.
 Switch parameters make it straightforward to rerun analyses in Arcana
 with substituted tools while controlling all other aspects of the
 workflow.
@@ -1204,7 +1189,7 @@ of the National Imaging Facility, a National Collaborative Research
 Infrastructure Strategy (NCRIS) capability, at Monash Biomedical Imaging,
 Monash University. The ``transparent repository'' feature of Arcana was
 inspired by in-house software written by Parnesh Raniga while he was
-employed at Monash Biomedical Imaging prior to 2016.
+employed at Monash University prior to 2016.
 \end{acknowledgements}
 
 \bibliographystyle{spbasic} 

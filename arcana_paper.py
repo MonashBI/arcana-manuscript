@@ -1,8 +1,7 @@
+#!/usr/bin/env python3
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
-from nianalysis.study.mri.structural.diffusion import DiffusionStudy
-from nianalysis.study.mri.structural.t1 import T1Study
-from nianalysis.study.mri.structural.t2star import T2StarStudy
+from nianalysis.study.mri import (DiffusionStudy, T1Study, T2StarStudy)
 from nianalysis.plot import ImageDisplayMixin
 import os.path as op
 
@@ -18,13 +17,17 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
     add_sub_study_specs = [
         # Include two Study classes in the overall study
         SubStudySpec(
-            't1', T1Study),
+            't1',
+            T1Study),
         SubStudySpec(
-            't2star', T2StarStudy,
+            't2star',
+            T2StarStudy,
             name_map={'t1_brain': 'coreg_ref_brain',
                       't1_coreg_to_atlas_mat': 'coreg_to_atlas_mat',
                       't1_coreg_to_atlas_warp': 'coreg_to_atlas_warp'}),
-        SubStudySpec('dmri', DiffusionStudy)]
+        SubStudySpec(
+            'dmri',
+            DiffusionStudy)]
 
     add_param_specs = [
         ParameterSpec(
@@ -53,12 +56,17 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         # Loop through all sessions
         for swi, qsm, vein_atlas, vein_mask in zip(swis, qsms, cv_image,
                                                    vein_masks):
+            # Set the saturation limits for the QSM image
+            row_kwargs = [{} for _ in range(4)]
+            row_kwargs[1]['vmax_percentile'] = 95
+            row_kwargs[1]['vmin_percentile'] = 5
             # Display slices from the filesets in a panel using
             # method from the ImageDisplayMixin base class.
             self.display_slice_panel(
-                (swi, qsm, vein_atlas, vein_mask), **kwargs)
+                (swi, qsm, vein_atlas, vein_mask),
+                row_kwargs=row_kwargs, **kwargs)
             # Display or save to file the generated image.
-            self.save_or_show(save_path, swi.subject_id, swi.visit_id)
+            self.show(save_path, swi.subject_id, swi.visit_id)
 
     def fa_adc_fig(self, save_path=None, **kwargs):
         """
@@ -84,7 +92,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
                 offset=self.parameter('dmri_fig_slice_offset'),
                 **kwargs)
             # Display or save to file the generated image.
-            self.save_or_show(save_path, fa.subject_id, fa.visit_id)
+            self.show(save_path, fa.subject_id, fa.visit_id)
 
     def tractography_fig(self, save_path=None, **kwargs):
         """
@@ -112,24 +120,36 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             # MRtrix package
             self.display_tcks_with_mrview(
                 tcks=(tck,), backgrounds=(fa,),
-                offset=self.parameter('tractography_fig_slice_offset'),
+                offset=self.parameter('dmri_fig_slice_offset'),
                 **kwargs)
             # Display or save to file the generated image.
-            self.save_or_show(save_path, tck.subject_id, tck.visit_id)
+            self.show(save_path, tck.subject_id, tck.visit_id)
 
 
 if __name__ == '__main__':
-    from arcana import (
-        DirectoryRepository, LinearProcessor, FilesetSelector)
-    from nianalysis.file_format import dicom_format, zip_format
     import os
+    from argparse import ArgumentParser
+    from arcana import (
+        DirectoryRepository, LinearProcessor, StaticEnvironment,
+        FilesetSelector)
+    from nianalysis.file_format import (
+        dicom_format, zip_format, nifti_gz_format)
 
-    # Path to data, work and output directories
-    this_dir = op.dirname(__file__)
-    data_dir = op.join(this_dir, 'data', 'lifespan')
-    work_dir = op.join(this_dir, 'work')
-    fig_dir = op.join(this_dir, 'manuscript', 'figures')
-    os.makedirs(fig_dir, exist_ok=True)
+    parser = ArgumentParser(
+        "A script to produce figures for the Arcana manuscript")
+    parser.add_argument('data_dir',
+                        help="The directory containing repository")
+    parser.add_argument('--work_dir', help="The work directory",
+                        default=op.join(op.expanduser('~'),
+                                        'arcana-paper-work'))
+    parser.add_argument(
+        '--fig_dir', help="The directory to store the figures",
+        default=op.join(op.expanduser('~'),
+                        'arcana-paper-fig'))
+    args = parser.parse_args()
+
+    # Make figure directory
+    os.makedirs(args.fig_dir, exist_ok=True)
 
     # Instantiate the ArcanaPaper class in order to apply it to a
     # specific dataset
@@ -137,9 +157,12 @@ if __name__ == '__main__':
         # Name for this analysis instance
         'arcana_paper',
         # Repository is a simple directory on the local file system
-        DirectoryRepository(data_dir),
+        repository=DirectoryRepository(args.data_dir),
         # Use a single process on the local system to derive
-        LinearProcessor(work_dir),
+        processor=LinearProcessor(args.work_dir,
+                                  clean_work_dir_between_runs=False),
+        # Use the static environment (i.e. no Modules)
+        environment=StaticEnvironment(),
         # Match names in the data specification to filenames used
         # in the repository
         inputs=[
@@ -148,18 +171,21 @@ if __name__ == '__main__':
             FilesetSelector('t2star_channels', zip_format,
                             'swi_coils_icerecon'),
             FilesetSelector('t2star_header_image', dicom_format,
-                            '12-SWI_Images'),
-            FilesetSelector('t2star_swi', dicom_format, 'SWI_Images'),
+                            'SWI_Images.old'),
+            FilesetSelector('t2star_swi', nifti_gz_format, 'SWI_Images'),
             FilesetSelector('dmri_magnitude', dicom_format, '.*ep2d_.*',
                             is_regex=True),
             FilesetSelector('dmri_reverse_phase', dicom_format, '.*PRE_DWI.*',
                             is_regex=True)],
         parameters={
             'dmri_num_global_tracks': int(1e5),
-            'dmri_global_tracks_cutoff': 0.175})
+            'dmri_global_tracks_cutoff': 0.175,
+            # This is needed as the channels aren't reconstructed with the
+            # correct headers
+            't2star_force_channel_flip': ['-x', '-y', 'z']})
 
     # Derive required data and display them in a single step for each
     # figure.
-    paper.vein_fig(op.join(fig_dir, 'veins.png'))
-    paper.fa_adc_fig(op.join(fig_dir, 'fa_adc.png'))
-    paper.tractography_fig(op.join(fig_dir, 'tractography.png'))
+    paper.vein_fig(op.join(args.fig_dir, 'veins.png'))
+#     paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
+#     paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
