@@ -2,7 +2,7 @@ from arcana import (Study, StudyMetaClass, AcquiredFilesetSpec, FilesetSpec,
                     AcquiredFieldSpec, FieldSpec, ParameterSpec, SwitchSpec,
                     FilesetCollection, XnatRepository, Fileset)
 from arcana.data.file_format.standard import text_format
-from nianalysis.file_format import (
+from banana.file_format import (
     nifti_gz_format, dicom_format, nifti_format, analyze_format)
 
 STD_IMAGE_FORMATS = (dicom_format, nifti_format, nifti_gz_format,

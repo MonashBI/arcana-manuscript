@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
-from nianalysis.study.mri import (
+from banana.study.mri import (
     DiffusionStudy, T1Study, T2StarStudy, MriStudy)
-from nianalysis.plot import ImageDisplayMixin
+from banana.plot import ImageDisplayMixin
 import os.path as op
 
 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     from arcana import (
         DirectoryRepository, LinearProcessor, StaticEnvironment,
         FilesetSelector)
-    from nianalysis.file_format import (
+    from banana.file_format import (
         dicom_format, zip_format, nifti_gz_format)
 
     parser = ArgumentParser(
@@ -157,7 +157,7 @@ if __name__ == '__main__':
                                         'arcana-paper-fig'))
     parser.add_argument('--t1', default='.*mprage.*',
                         help="Pattern to match T1-weighted scan")
-    parser.add_argument('--t2star_chann', default='.*coils.*',
+    parser.add_argument('--t2star_chann', default='.*channels.*',
                         help="Pattern to match T1-weighted scan")
     parser.add_argument('--swi', default='.*(swi|SWI).*',
                         help="Pattern to match T1-weighted scan")
@@ -178,8 +178,7 @@ if __name__ == '__main__':
         # Repository is a simple directory on the local file system
         repository=DirectoryRepository(args.data_dir),
         # Use a single process on the local system to derive
-        processor=LinearProcessor(args.work_dir,
-                                  clean_work_dir_between_runs=False),
+        processor=LinearProcessor(args.work_dir),
         # Use the static environment (i.e. no Modules)
         environment=StaticEnvironment(),
         # Match names in the data specification to filenames used
@@ -191,7 +190,7 @@ if __name__ == '__main__':
                             is_regex=True),
             FilesetSelector('t2star_header_image', dicom_format, args.swi,
                             is_regex=True),
-            FilesetSelector('swi_magnitude', nifti_gz_format, args.swi,
+            FilesetSelector('swi_magnitude', dicom_format, args.swi,
                             is_regex=True),
             FilesetSelector('dmri_magnitude', dicom_format, args.dmri,
                             is_regex=True),

@@ -3,7 +3,7 @@ from arcana import (
     Study, StudyMetaClass, AcquiredFilesetSpec, FilesetSpec,
     AcquiredFieldSpec, FieldSpec, ParameterSpec, SwitchSpec,
     FilesetSelector, XnatRepository)
-from nianalysis.file_format import (
+from banana.file_format import (
     nifti_gz_format, dicom_format, nifti_format, analyze_format,
     text_format, text_mat_format)
 

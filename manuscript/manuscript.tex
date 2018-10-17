@@ -105,8 +105,14 @@ These are the notes I have for my abstract
 \begin{itemize}
 \item The heterogeneous collection of neuroimaging analysis tools, parameters, styles makes it difficult to design comprehensive workflows
 \item Complex workflows in a flexible extensible manner, reusable
-\item portable between different data storage solutions/scale of studies, separation between design and application yet programmatic
+\item portable between different data storage solutions/scale of studies, separation between design and application yet programmatic, prototype locally and deploy on cluster
 \item Easily updatable, switchable between tools/versions
+\item Data specification, like make, dependencies are resolved by framework
+\item Modular Repository, Processor, Environment and input matching
+\item supports BIDS
+\item provenance, checks for updates to find stale data and reprocesses
+\item we have created a framework that handles all the tedious aspects and allows researchers to focus on the analysis design
+\item it is flexible to allow researchers to collaborate
 \end{itemize}
 
 \keywords{Neuroimaging \and Workflows \and Repository \and Reproducibility \and Reusability \and Large-scale \and Python}
@@ -1099,7 +1105,7 @@ with the framework. In addition, class inheritance provides a manageable
 way to adapt and extend to existing analyses and highlights where
 modified analyses differ from standard procedures.
 
-MR contrast-specific analyses are implemented in NiAnalysis via a chain
+MR contrast-specific analyses are implemented in banana via a chain
 of successively specialised Study sub-classes (e.g.
 MRI\textgreater{}EPI\textgreater{}dMRI) to enable generic processing
 steps (e.g. registration) to be shared between classes. While not

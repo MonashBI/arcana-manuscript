@@ -4,7 +4,7 @@ from arcana import (
     FilesetSelector, FieldSelector, XnatRepository,
     SlurmProcessor, ModulesEnvironment)
 from .example_study import ExampleStudy
-from nianalysis.file_format import dicom_format
+from banana.file_format import dicom_format
 
 # Create study object that accesses an XNAT repository
 # and submits jobs to a SLURM scheduler
