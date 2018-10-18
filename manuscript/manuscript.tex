@@ -41,7 +41,7 @@
 \definecolor{stringcolour}{rgb}{0.1,0.1,0.5}
 
 \lstset{
-    captionpos=b,                    % sets the caption-position to bottom
+%    captionpos=b,                    % sets the caption-position to bottom
     language=Python,                 % the language of the code
     showstringspaces=false,          % underline spaces within strings only
     stringstyle=\color{stringcolour},     % string literal style
@@ -100,20 +100,22 @@ analysis
 
 \begin{abstract}
 
-These are the notes I have for my abstract
+Mastering the ``arcana of neuroimaging analysis'', the obscure knowledge required to apply an
+appropriate combination of software tools and parameters to analyse a given neuroimaging dataset,
+is a time consuming process. Therefore, it is typically not feasible to invest the additional effort
+required to implement analysis workflows in a form that generalises across the various acquisition
+parameters, data storage conventions and computing environments in use at different research sites,
+which limits the reusability of published workflows.
 
-\begin{itemize}
-\item The heterogeneous collection of neuroimaging analysis tools, parameters, styles makes it difficult to design comprehensive workflows
-\item Complex workflows in a flexible extensible manner, reusable
-\item portable between different data storage solutions/scale of studies, separation between design and application yet programmatic, prototype locally and deploy on cluster
-\item Easily updatable, switchable between tools/versions
-\item Data specification, like make, dependencies are resolved by framework
-\item Modular Repository, Processor, Environment and input matching
-\item supports BIDS
-\item provenance, checks for updates to find stale data and reprocesses
-\item we have created a framework that handles all the tedious aspects and allows researchers to focus on the analysis design
-\item it is flexible to allow researchers to collaborate
-\end{itemize}
+We present a novel software framework, \emph{Abstraction of Repository-Centric ANAlysis (Arcana)}, which enables
+the development of complex, ``end-to-end'' workflows that are adaptable to new analyses and
+portable to a wide range of computing infrastructures. Analysis templates for specific image types (e.g. MRI contrast)
+are implemented as Python classes that specify potential derivatives and modular pipelines to derive them.
+Arcana retrieves data from imaging repositories, which can be BIDS datasets, XNAT instances or plain directories, and
+stores selected derivatives back into a repository with provenance data for reuse by subsequent analyses.
+Pipelines are constructed using Nipype and can be processed on local or on high performance computing environments,
+enabling a smooth transition from locally developed prototypes to large-scale deployment. we have created a framework that handles all the tedious aspects and allows researchers to focus on the analysis design
+it is flexible to allow researchers to collaborate
 
 \keywords{Neuroimaging \and Workflows \and Repository \and Reproducibility \and Reusability \and Large-scale \and Python}
 
@@ -242,7 +244,7 @@ classes\emph{.}
 
 \begin{figure*}
     \centering
-    \includegraphics[width=0.55\textwidth]{figures/example_study}
+    \includegraphics[width=0.55\textwidth]{../figures/example_study}
   \caption{Example study. Blue boxes represent acquired (input)
 data (filesets or fields) stored in a repository and green derivatives
 from that data stored alongside the original data. Orange ovals are
@@ -272,7 +274,7 @@ specification table.
 
 \begin{figure*}
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/simplified_arcana_uml}
+    \includegraphics[width=0.9\textwidth]{../figures/simplified_arcana_uml}
   \caption{Unified Modelling Language (UML) diagram
 of information flow in the Arcana framework. Boxes: Python classes,
 blue=analysis-design, green=analysis-application. Arrows: orange=data,
@@ -339,7 +341,7 @@ specifications in subclasses or MultiStudy classes, and vice-versa, or
 passed inputs when the class is instantiated.
 
 \begin{figure}
-\lstinputlisting[basicstyle=\footnotesize,firstline=2, lastline=59]{listings/example_study.py}
+\lstinputlisting[basicstyle=\footnotesize,firstline=2, lastline=59]{../code/example_study.py}
 \caption{Example data and parameter specifications. The data
 specification specifies two ``acquired'' file sets, `one' and `ten' and
 ten derived file sets that can be derived from them, at least
@@ -405,7 +407,7 @@ methods, typically in subclasses and multi-studies (see
 \emph{Extension and specialisation by class inheritance} and \emph{Implementing multi-modal studies}).
 
 \begin{figure}
-\lstinputlisting[firstline=61, basicstyle=\footnotesize]{listings/example_study.py}
+\lstinputlisting[firstline=61, basicstyle=\footnotesize]{../code/example_study.py}
 \caption{Example pipeline constructor method. Pipelines are
 created using the \emph{pipeline} method of the Study class.
 Pipeline objects are thin wrappers around Nipype Workflow objects to
@@ -531,7 +533,7 @@ tractography).
 
 \begin{figure*}
   \centering
-    \includegraphics[width=0.775\textwidth]{figures/example_multi_study}
+    \includegraphics[width=0.775\textwidth]{../figures/example_multi_study}
   \caption{Example MultiStudy. Blue boxes represent acquired
 (input) data (filesets or fields) and green derivatives. Orange ovals
 are pipelines. Blue and green arrows: acquired and derived inputs to
@@ -589,7 +591,7 @@ and the flow of data to and from the repository (Figure \ref{fig:full_uml}).
 
 \begin{figure*}
 	\centering
-    \includegraphics[width=\textwidth]{figures/full_arcana_uml}
+    \includegraphics[width=\textwidth]{../figures/full_arcana_uml}
   \caption{Detailed Unified Modelling Language (UML) diagram of
 information flow in the Arcana framework. Boxes: Python classes
 (blue=core, green=interchangeable modules, grey=example
@@ -616,7 +618,7 @@ it with the Study's data specification table.
 (Figure \ref{fig:study_application}).
 
 \begin{figure}
-\lstinputlisting[basicstyle=\footnotesize]{listings/example_application.py}
+\lstinputlisting[basicstyle=\footnotesize]{../code/example_application.py}
 \caption{Example application of Study class to a dataset stored in an XNAT
 repository. Once the Study object has been initialised potential
 derivatives of the Study can be requested, and will be generated and
@@ -917,13 +919,13 @@ All three classes, \emph{T1Study}, \emph{T2starStudy} and
 \emph{DmriStudy}, inherit generic image analysis methods, such as
 registration and brain extraction, from the base class \emph{MriStudy}.
 
-The DmriStudy class implements diffusion tensor metrics, FA and ADC, as
-well as global tractography using streamlines tracking from the MRtrix
+The DmriStudy class implements the extraction of diffusion tensor metrics,
+FA and ADC, as well as whole-brain tractography using streamlines tracking from the MRtrix
 toolbox \citep{tournier_improved_2010,tournier_mrtrix:_2012} (Figure \ref{fig:dmri_study}).
 
 \begin{figure*}
 	\centering
-    \includegraphics[width=0.55\textwidth]{figures/dmri_study}
+    \includegraphics[width=0.55\textwidth]{../figures/dmri_study}
   \caption{Example diffusion MRI (dMRI) study, which can derive
 tensor metrics, fractional anisotropy (FA) and apparent diffusion
 coefficient (ADC) as well as streamlines fibre tracking. Blue boxes:
@@ -939,13 +941,13 @@ derivatives: FA and ADC and/or streamlines fibre tracking.}
 
 The \emph{T2starStudy} class implements an algorithm to generate
 \emph{composite vein images} \citep{ward_combining_2018} and
-vein masks \citep{ward_vein_2017} from the combination of QSM and SWI
-contrasts derived from the T2*-weighted acquisition with vein atlases
-derived from manual tracings (Figure \ref{fig:t2star_t1_study}).
+vein masks \citep{ward_vein_2017} from the combination of
+vein atlases derived from manual tracings with QSM and SWI
+contrasts derived from the T2*-weighted acquisition (Figure \ref{fig:t2star_t1_study}).
 
 \begin{figure*}
 	\centering
-    \includegraphics[width=0.775\textwidth]{figures/t2star_t1_study}
+    \includegraphics[width=0.775\textwidth]{../figures/t2star_t1_study}
   \caption{Combined T2*-weighted/T1-weighted multi-study,
 which can derive vein masks by combining Quantitative Susceptibility
 Mapping (QSM) and Susceptible Weighted Imaging (SWI) contrasts with a
@@ -970,12 +972,11 @@ The T1Study, T2starStudy and DmriStudy classes are
 aggregated into a single MultiStudy class,
 \emph{ArcanaPaper} (Supplementary material), which is specialised to produce
 the figures in the Results section of this manuscript. In order to warp the
-prior vein atlases to the subject space in the generation of the composite vein images,
+vein atlases to the subject space for comparison with the SWI and QSM images,
 nonlinear registration to Montreal Neurological Institute templates
 \citep{grabner_symmetric_2006} is performed in the T1Study. The transform and warp
 field from this registration are then mapped onto the `coreg\_to\_atlas\_mat` and
-`coreg\_to\_atlas\_warp' specifications in the T2starStudy, instead
-of registering the T2*-weighted images directly, in order to improve the registration.
+`coreg\_to\_atlas\_warp' specifications in the T2starStudy, in order to improve the registration.
 These transforms were used to produce the composite vein
 image in conjuction with the linear transform from the brain-extracted T2*-weighted
 magnitude image to the brain extracted T1-weighted image, which required the
@@ -992,7 +993,7 @@ generated by the original implementation \citep{ward_combining_2018}.
 
 \begin{figure*}
     \centering
-    \includegraphics[width=\textwidth]{figures/veins}
+    \includegraphics[width=\textwidth]{../figures/veins}
   \caption{Composite vein image (\emph{third row}) constructed by
   combining susceptibility weighted imaging (SWI) (\emph{top row}),
   quantitative susceptibility mapping (QSM) (\emph{second row})
@@ -1018,7 +1019,7 @@ reused in the generation of the streamlines.
 
 \begin{figure*}
     \centering
-    \includegraphics[width=\textwidth]{figures/fa_adc}
+    \includegraphics[width=\textwidth]{../figures/fa_adc}
   \caption{Fractional Anisotropy (FA) \emph{(top row)} and
 Apparent Diffusion Coefficient (ADC) (\emph{bottom rowI)} derived from
 diffusion MRI data. \emph{Left column:} axial midline slices.
@@ -1030,7 +1031,7 @@ sagittal midline slices.}
 
 \begin{figure*}
     \centering
-    \includegraphics[width=\textwidth]{figures/tractography}
+    \includegraphics[width=\textwidth]{../figures/tractography}
   \caption{Global tractography performed using the MRtrix
 toolbox. Probabilistic streamlines generated with the iFOD2 algorithm
 from fibre Orientation Distribution Function (fODF) estimated from
@@ -1105,7 +1106,7 @@ with the framework. In addition, class inheritance provides a manageable
 way to adapt and extend to existing analyses and highlights where
 modified analyses differ from standard procedures.
 
-MR contrast-specific analyses are implemented in banana via a chain
+MR contrast-specific analyses are implemented in Banana via a chain
 of successively specialised Study sub-classes (e.g.
 MRI\textgreater{}EPI\textgreater{}dMRI) to enable generic processing
 steps (e.g. registration) to be shared between classes. While not
@@ -1207,5 +1208,9 @@ employed at Monash University prior to 2016.
 
 \bibliographystyle{spbasic} 
 \bibliography{arcana}
+
+\section*{Supplementary material}
+\lstinputlisting[basicstyle=\footnotesize,caption=ArcanaPaper class definition,lastline=135]{../code/arcana_paper.py}
+\lstinputlisting[basicstyle=\footnotesize,caption=Application of ArcanaPaper class to a dataset,firstline=139]{../code/arcana_paper.py}
 
 \end{document}

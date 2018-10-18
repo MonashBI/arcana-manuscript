@@ -2,7 +2,7 @@
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
 from banana.study.mri import (
-    DiffusionStudy, T1Study, T2StarStudy, MriStudy)
+    DmriStudy, T1Study, T2starStudy, MriStudy)
 from banana.plot import ImageDisplayMixin
 import os.path as op
 
@@ -22,14 +22,14 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             T1Study),
         SubStudySpec(
             't2star',
-            T2StarStudy,
+            T2starStudy,
             name_map={'t1_brain': 'coreg_ref_brain',
                       'swi_brain': 'swi',
                       't1_coreg_to_atlas_mat': 'coreg_to_atlas_mat',
                       't1_coreg_to_atlas_warp': 'coreg_to_atlas_warp'}),
         SubStudySpec(
             'dmri',
-            DiffusionStudy),
+            DmriStudy),
         # Since we are using the SWI image produced from the scanner console
         # we need to brain extract it in order to display it properly, so
         # we create a basic MriStudy to use its brain extraction before
