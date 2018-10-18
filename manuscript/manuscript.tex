@@ -102,20 +102,22 @@ analysis
 
 Mastering the ``arcana of neuroimaging analysis'', the obscure knowledge required to apply an
 appropriate combination of software tools and parameters to analyse a given neuroimaging dataset,
-is a time consuming process. Therefore, it is typically not feasible to invest the additional effort
-required to implement analysis workflows in a form that generalises across the various acquisition
-parameters, data storage conventions and computing environments in use at different research sites,
-which limits the reusability of published workflows.
+is a time consuming process. Therefore, it is not typically feasible to invest the additional effort
+required generalise workflow implementations to accommodate for the various acquisition parameters,
+data storage conventions and computing environments in use at different research sites,
+limiting the reusability of published workflows.
 
-We present a novel software framework, \emph{Abstraction of Repository-Centric ANAlysis (Arcana)}, which enables
-the development of complex, ``end-to-end'' workflows that are adaptable to new analyses and
+We present a novel software framework, \emph{Abstraction of Repository-Centric ANAlysis (Arcana)},
+which enables the development of complex, ``end-to-end'' workflows that are adaptable to new analyses and
 portable to a wide range of computing infrastructures. Analysis templates for specific image types (e.g. MRI contrast)
-are implemented as Python classes that specify potential derivatives and modular pipelines to derive them.
+are implemented as Python classes, which specify a range of potential derivatives and analysis methods.
 Arcana retrieves data from imaging repositories, which can be BIDS datasets, XNAT instances or plain directories, and
 stores selected derivatives back into a repository with provenance data for reuse by subsequent analyses.
-Pipelines are constructed using Nipype and can be processed on local or on high performance computing environments,
-enabling a smooth transition from locally developed prototypes to large-scale deployment. we have created a framework that handles all the tedious aspects and allows researchers to focus on the analysis design
-it is flexible to allow researchers to collaborate
+Workflows are constructed using Nipype and can be executed on local workstations or in high performance
+computing environments without alteration. Generic analysis methods can be consolidated within a common
+base classes to facilitate code-reuse and collaborative development, which can be specialised for study-specific
+requirements via class inheritance. Therefore, Arcana provides a platform to develop unified neuroimaging
+workflows that can be reused across many research sites and studies.
 
 \keywords{Neuroimaging \and Workflows \and Repository \and Reproducibility \and Reusability \and Large-scale \and Python}
 
