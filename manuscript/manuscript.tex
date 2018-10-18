@@ -440,10 +440,10 @@ Interface traits are connected to inputs and outputs of the pipeline by
 providing \emph{inputs} and \emph{outputs} keyword arguments to the \emph{add} method. Both
 arguments take a dictionary, where the keys of the dictionary are the names of traits of the interface. The
 values of the dictionary are 2-tuples each consisting of the name of a data specification
-and the format the pipeline expects the data in (i.e. a FileFormat for Fileset specifications or datatype
-for Field specifications). If the expected format does not match that of the corresponding data specification
-or study input then a conversion node is implicitly connected to the pipeline.
-Inputs and outputs that are conditional on parameters or inputs provided to the
+and the format the pipeline either expects or produces the data in (i.e. a FileFormat for Fileset specifications
+or Python datatype for Field specifications). If the expected format does not match that of the
+corresponding data specification or study input then a conversion node is implicitly connected
+to the pipeline. Inputs and outputs that are conditional on parameters or inputs provided to the
 study can be set outside of the \emph{add} method using the \emph{connect\_input} or
 \emph{connect\_output} methods, respectively.
 
@@ -459,7 +459,7 @@ Nipype workflow.
 Any external software packages required by a node should be referenced
 in the \emph{requirements} keyword argument as a list of
 \emph{Requirement} objects when the node added to the pipeline.
-Similarly, the expected memory requirements and
+Similarly, the expected memory requirements in MB and
 wall time for the node execution should be provided to the keyword arguments
 \emph{memory}, and \emph{wall\_time}.
 
@@ -902,11 +902,11 @@ A healthy volunteer was scanned using a 3T Siemens Skyra with a 32-channel head
 and neck coil to demonstrate the application of analyses implemented in
 Arcana. The protocol was a T1-weighted MPRAGE (1mm contiguous,
 matrix size 256x240x192, FOV 256x240x192, TE = 2.13ms, TR, = 2300ms, TI
-= 900ms, bandwidth=230Hz/pixel), GRE (1.8 mm contiguous, matrix size
+= 900ms, bandwidth = 230Hz/pixel), GRE (1.8 mm contiguous, matrix size
 256x232x72, FOV 230x208x130, TE = 20ms, TR, = 30ms,
-bandwidth=120Hz/pixel), and diffusion MRI (1.2 mm contiguous, matrix size
+bandwidth = 120Hz/pixel), and diffusion MRI (1.2 mm contiguous, matrix size
 110x100x60, FOV 256x240x192, TE = 95ms, TR, = 8200ms, 33 diffusion
-directions with b=1500 mm2/s and 3 b=0, bandwidth=781Hz/pixel).
+directions with b = 1500 mm2/s and 3 b=0, bandwidth = 781Hz/pixel).
 
 \section*{Results}
 \label{results}
