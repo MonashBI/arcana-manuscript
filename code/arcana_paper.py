@@ -58,10 +58,10 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         """
         # Derive (when necessary) and access data SWI, QSM, vein atlas,
         # and vein mask data in the repository.
-        swis = self.data('swi_brain')
-        qsms = self.data('t2star_qsm')
-        cv_image = self.data('t2star_composite_vein_image')
         vein_masks = self.data('t2star_vein_mask')
+        qsms = self.data('t2star_qsm')
+        swis = self.data('swi_brain')
+        cv_image = self.data('t2star_composite_vein_image')
         # Loop through all sessions
         for swi, qsm, vein_atlas, vein_mask in zip(swis, qsms, cv_image,
                                                    vein_masks):
@@ -137,12 +137,12 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 
 if __name__ == '__main__':
     import os
+    import os.path as op
     from argparse import ArgumentParser
     from arcana import (
         DirectoryRepository, LinearProcessor, StaticEnvironment,
         FilesetSelector)
-    from banana.file_format import (
-        dicom_format, zip_format, nifti_gz_format)
+    from banana.file_format import dicom_format, zip_format
 
     parser = ArgumentParser(
         "A script to produce figures for the Arcana manuscript")
@@ -158,13 +158,13 @@ if __name__ == '__main__':
     parser.add_argument('--t1', default='.*mprage.*',
                         help="Pattern to match T1-weighted scan")
     parser.add_argument('--t2star_chann', default='.*channels.*',
-                        help="Pattern to match T1-weighted scan")
+                        help="Pattern to match T2*-weighted scan")
     parser.add_argument('--swi', default='.*(swi|SWI).*',
-                        help="Pattern to match T1-weighted scan")
+                        help="Pattern to match SWI scan")
     parser.add_argument('--dmri', default='.*diff.*',
-                        help="Pattern to match T1-weighted scan")
+                        help="Pattern to match dMRI scan")
     parser.add_argument('--distort', default='.*distortion_correction.*',
-                        help="Pattern to match T1-weighted scan")
+                        help="Pattern to match dMRI reverse PE ref. scan")
     args = parser.parse_args()
 
     # Make figure directory
@@ -199,6 +199,7 @@ if __name__ == '__main__':
         parameters={
             'dmri_num_global_tracks': int(1e5),
             'dmri_global_tracks_cutoff': 0.175,
+            't2star_qsm_erosion_size': 5,
             # This is needed as the channels aren't reconstructed with the
             # correct headers
             't2star_force_channel_flip': ['-x', '-y', 'z']})
