@@ -199,7 +199,7 @@ if __name__ == '__main__':
         parameters={
             'dmri_num_global_tracks': int(1e5),
             'dmri_global_tracks_cutoff': 0.175,
-            't2star_qsm_erosion_size': 5,
+            't2star_qsm_erosion_size': 7,
             # This is needed as the channels aren't reconstructed with the
             # correct headers
             't2star_force_channel_flip': ['-x', '-y', 'z']})
@@ -207,5 +207,5 @@ if __name__ == '__main__':
     # Derive required data and display them in a single step for each
     # figure.
     paper.vein_fig(op.join(args.fig_dir, 'veins.png'))
-    paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
-    paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
+    #paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
+    #paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
