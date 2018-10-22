@@ -4,7 +4,6 @@ from arcana import (
 from banana.study.mri import (
     DmriStudy, T1Study, T2starStudy, MriStudy)
 from banana.plot import ImageDisplayMixin
-import os.path as op
 
 
 class ArcanaPaper(MultiStudy, ImageDisplayMixin,
@@ -24,7 +23,6 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             't2star',
             T2starStudy,
             name_map={'t1_brain': 'coreg_ref_brain',
-                      'swi_brain': 'swi',
                       't1_coreg_to_atlas_mat': 'coreg_to_atlas_mat',
                       't1_coreg_to_atlas_warp': 'coreg_to_atlas_warp'}),
         SubStudySpec(
@@ -43,7 +41,11 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             'dmri_fig_slice_offset', (6, 0, 0),
             desc=("Offset the sagittal slices of dMRI figures so they "
                   "intersect a cerebral hemisphere instead of the "
-                  "midline between the hemispheres"))]
+                  "midline between the hemispheres")),
+        # Override default values to reduce the number of tracks in order to
+        # make it easier to see the tracts
+        ParameterSpec('dmri_num_global_tracks', int(1e5)),
+        ParameterSpec('dmri_global_tracks_cutoff', 0.175)]
 
     def vein_fig(self, save_path=None, **kwargs):
         """
@@ -142,6 +144,7 @@ if __name__ == '__main__':
     from arcana import (
         DirectoryRepository, LinearProcessor, StaticEnvironment,
         FilesetSelector)
+    from arcana.utils import parse_value
     from banana.file_format import dicom_format, zip_format
 
     parser = ArgumentParser(
@@ -158,13 +161,19 @@ if __name__ == '__main__':
     parser.add_argument('--t1', default='.*mprage.*',
                         help="Pattern to match T1-weighted scan")
     parser.add_argument('--t2star_chann', default='.*channels.*',
-                        help="Pattern to match T2*-weighted scan")
+                        help=("Pattern to match separate channels from the "
+                              "head coil for the T2*-weighted scan in "
+                              "separate NiFTI files within a single "
+                              "directory"))
     parser.add_argument('--swi', default='.*(swi|SWI).*',
-                        help="Pattern to match SWI scan")
+                        help="Pattern to match SWI scan in DICOM format")
     parser.add_argument('--dmri', default='.*diff.*',
                         help="Pattern to match dMRI scan")
     parser.add_argument('--distort', default='.*distortion_correction.*',
                         help="Pattern to match dMRI reverse PE ref. scan")
+    parser.add_argument('--parameter', '-p', nargs=2, action='append',
+                        metavar=('NAME', 'VALUE'),
+                        help="Parameters to pass to the study")
     args = parser.parse_args()
 
     # Make figure directory
@@ -190,22 +199,18 @@ if __name__ == '__main__':
                             is_regex=True),
             FilesetSelector('t2star_header_image', dicom_format, args.swi,
                             is_regex=True),
+            FilesetSelector('t2star_swi', dicom_format, args.swi,
+                            is_regex=True),
             FilesetSelector('swi_magnitude', dicom_format, args.swi,
                             is_regex=True),
             FilesetSelector('dmri_magnitude', dicom_format, args.dmri,
                             is_regex=True),
             FilesetSelector('dmri_reverse_phase', dicom_format, args.distort,
                             is_regex=True)],
-        parameters={
-            'dmri_num_global_tracks': int(1e5),
-            'dmri_global_tracks_cutoff': 0.175,
-            't2star_qsm_erosion_size': 7,
-            # This is needed as the channels aren't reconstructed with the
-            # correct headers
-            't2star_force_channel_flip': ['-x', '-y', 'z']})
+        parameters={n: parse_value(v.strip()) for n, v in args.parameter})
 
     # Derive required data and display them in a single step for each
     # figure.
     paper.vein_fig(op.join(args.fig_dir, 'veins.png'))
-    #paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
-    #paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
+    paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
+    paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
