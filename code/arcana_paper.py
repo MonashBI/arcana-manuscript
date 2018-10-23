@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
-from banana.study.mri import (
+from banana import (
     DmriStudy, T1Study, T2starStudy, MriStudy)
 from banana.plot import ImageDisplayMixin
 
@@ -15,23 +15,24 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
     """
 
     add_sub_study_specs = [
-        # Include two Study classes in the overall study
+        # Sub-study to process the T1-weighted data
         SubStudySpec(
             't1',
             T1Study),
+        # Sub-study to process the T2*-weighted data
         SubStudySpec(
             't2star',
             T2starStudy,
-            name_map={'t1_brain': 'coreg_ref_brain',
-                      't1_coreg_to_atlas_mat': 'coreg_to_atlas_mat',
-                      't1_coreg_to_atlas_warp': 'coreg_to_atlas_warp'}),
+            name_map={'coreg_ref_brain': 't1_brain',
+                      'coreg_to_atlas_mat': 't1_coreg_to_atlas_mat',
+                      'coreg_to_atlas_warp': 't1_coreg_to_atlas_warp'}),
+        # Sub-study to process the dMRI data
         SubStudySpec(
             'dmri',
             DmriStudy),
         # Since we are using the SWI image produced from the scanner console
-        # we need to brain extract it in order to display it properly, so
-        # we create a basic MriStudy to use its brain extraction before
-        # mapping the extracted image to the T2* study.
+        # we need to brain extract it in order to compare with QSM/vein image/
+        # mask, which we do with a basic MriStudy.
         SubStudySpec(
             'swi',
             MriStudy)]
@@ -43,7 +44,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
                   "intersect a cerebral hemisphere instead of the "
                   "midline between the hemispheres")),
         # Override default values to reduce the number of tracks in order to
-        # make it easier to see the tracts
+        # make it easier to see the tracts in tractography figure.
         ParameterSpec('dmri_num_global_tracks', int(1e5)),
         ParameterSpec('dmri_global_tracks_cutoff', 0.175)]
 
@@ -91,7 +92,9 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             displayed instead of saved
         """
         # Derive FA and ADC if necessary and return a handle to the
-        # data collections in the repository
+        # data collections in the repository. Here we derive both FA and
+        # ADC in a single 'data' method call so the workflows used to
+        # derive them are combined.
         fas, adcs = self.data(('dmri_fa', 'dmri_adc'))
         # Loop through all sessions
         for fa, adc in zip(fas, adcs):
@@ -147,6 +150,7 @@ if __name__ == '__main__':
     from arcana.utils import parse_value
     from banana.file_format import dicom_format, zip_format
 
+    # Set up parser to parse arguments passed to the script
     parser = ArgumentParser(
         "A script to produce figures for the Arcana manuscript")
     parser.add_argument('data_dir',
@@ -207,6 +211,7 @@ if __name__ == '__main__':
                             is_regex=True),
             FilesetSelector('dmri_reverse_phase', dicom_format, args.distort,
                             is_regex=True)],
+        # Set parameters of the study
         parameters={n: parse_value(v.strip()) for n, v in args.parameter})
 
     # Derive required data and display them in a single step for each

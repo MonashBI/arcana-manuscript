@@ -47,7 +47,7 @@ study = ExampleStudy(
 # Generate whole brain tracks and return path to
 # a cached dataset
 derived5 = study.data('whole_brain_tracks')
-print("The \"derived5\" fileset for the second visit "
-      "of subject 'PILOT1' were produced at:\n{}"
+print("The \"derived5\" fileset for the 'SECOND' visit "
+      "of subject 'PILOT1' was produced at:\n{}"
       .format(derived5.path(subject_id='PILOT1',
-                            visit_id=1)))
+                            visit_id='SECOND')))

@@ -517,7 +517,7 @@ also pass the the wildcard keyword arguments of the overriding method to the
 overriding method to be overridden in turn.
 
 
-\subsubsection*{Implementing multi-modal studies}
+\subsubsection*{Implementing multi-modal studies: MultiStudy classes}
 \label{implementing-multi-modal-studies}
 
 While basic Study classes are typically associated with single image
@@ -565,18 +565,18 @@ respectively for additional analysis not included in the sub-studies.
 
 Sub-studies are aggregated in the \emph{sub-study} \emph{specification
 table} of a MultiStudy class via a list of \emph{SubStudySpec} objects
-in the \emph{add\_sub\_study\_specs} class attribute, in the manner of
+in the \emph{add\_sub\_study\_specs} class attribute in the manner of
 data and parameter specifications. A SubStudySpec consists of a name, a
 Study class, and a \emph{name map} dictionary\emph{.} The name map
 dictionary maps data and parameter specification names from the
-namespace of the MultiStudy class to the namespace of the Study class.
+sub-study namespace to the namespace of the MultiStudy class.
 
 Entries in the specification tables of sub-study classes that are not
 referenced in the sub study's name map are implicitly mapped to the
-MultiStudy namespace in the construction of the MultiStudy class by the
-metaclass using the name of the sub-study as a prefix. If the spec is a
-derivative then the pipeline constructor used to derive it is also
-mapped into the MultiStudy namespace. For example, \emph{derived1} in
+MultiStudy namespace by the MultiStudyMetaClass during construction of the MultiStudy class,
+using the name of the sub-study as a prefix.
+If the specification is derived, then its associated pipeline constructor method
+is also mapped into the MultiStudy namespace. For example, \emph{derived1} in
 \emph{sub\_study2} would be mapped to \emph{sub\_study2\_derived1} along
 with the method \emph{sub\_study2\_pipeline1}.
 
