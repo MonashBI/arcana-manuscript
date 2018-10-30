@@ -28,6 +28,7 @@
 
 % \usepackage{mathptmx}      % use Times fonts if available on your TeX system
 
+\usepackage{float}
 \usepackage{natbib}
 \usepackage{listings}
 \usepackage{graphicx}
@@ -41,13 +42,18 @@
 \definecolor{stringcolour}{rgb}{0.1,0.1,0.5}
 
 \lstset{
-%    captionpos=b,                    % sets the caption-position to bottom
+    captionpos=b,                    % sets the caption-position to bottom
     language=Python,                 % the language of the code
     showstringspaces=false,          % underline spaces within strings only
     stringstyle=\color{stringcolour},     % string literal style
     commentstyle=\color{commentcolour},    % comment style
     keywordstyle=\color{keywordcolour}\bfseries,       % keyword style
+    float
 }
+
+\newfloat{lstfloat}{htbp}{lop}
+\floatname{lstfloat}{Listing}
+\def\lstfloatautorefname{Listing}
 
 \newcommand{\D}{...}
 \newcommand*{\affaddr}[1]{#1}
