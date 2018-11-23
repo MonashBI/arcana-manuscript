@@ -5,6 +5,7 @@ from arcana import (
     SlurmProcessor, ModulesEnvironment)
 from .example_study import ExampleStudy
 from banana.file_format import dicom_format
+from myproj.requirements import package1_req
 
 # Create study object that accesses an XNAT repository
 # and submits jobs to a SLURM scheduler

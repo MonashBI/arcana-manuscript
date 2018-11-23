@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
-from banana import (
+from banana.study import (
     DmriStudy, T1Study, T2starStudy, MriStudy)
 from banana.plot import ImageDisplayMixin
 
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     # specific dataset
     paper = ArcanaPaper(
         # Name for this analysis instance
-        'arcana_paper',
+        'arcana_paper1',
         # Repository is a simple directory on the local file system
         repository=DirectoryRepository(args.data_dir),
         # Use a single process on the local system to derive

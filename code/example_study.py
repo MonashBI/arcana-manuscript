@@ -5,7 +5,7 @@ from arcana import (
     FilesetSelector, XnatRepository)
 from banana.file_format import (
     nifti_gz_format, dicom_format, nifti_format, analyze_format,
-    text_format, text_mat_format)
+    text_format, text_matrix_format)
 
 STD_IMAGE_FORMATS = (dicom_format, nifti_format, nifti_gz_format,
                      analyze_format)
@@ -38,7 +38,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
         # Derived file sets
         FilesetSpec('derived_file1', text_format, 'pipeline1'),
         FilesetSpec('derived_file2', nifti_gz_format, 'pipeline1'),
-        FilesetSpec('derived_file3', text_mat_format, 'pipeline2'),
+        FilesetSpec('derived_file3', text_matrix_format, 'pipeline2'),
         FilesetSpec('derived_file4', dicom_format, 'pipeline3'),
         FilesetSpec('derived_file5', nifti_gz_format, 'pipeline3',
                     frequency='per_subject'),
@@ -60,7 +60,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
 
     def pipeline2(self, **name_maps):
 
-        pipeline = self.pipeline(
+        pipeline = self.new_pipeline(
             name='pipeline2',
             name_maps=name_maps,
             desc="Description of the pipeline",
@@ -92,7 +92,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                     'in_file': (node1, 'out_file')},
                 outputs={
                     'out_file': ('derived_file3',
-                                 text_mat_format)},
+                                 text_matrix_format)},
                 wall_time=10, requirements=[software_req2])
 
             self.connect_output('derived_file6', node1, 'out',
@@ -107,7 +107,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                     'in_file': (node1, 'out_file')},
                 outputs={
                     'out_file': ('derived_file3',
-                                 text_mat_format)},
+                                 text_matrix_format)},
                 wall_time=30, requirements=[matlab_req,
                                             toolbox1_req])
         else:
