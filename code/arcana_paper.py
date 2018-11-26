@@ -143,12 +143,20 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 if __name__ == '__main__':
     import os
     import os.path as op
+    import logging
     from argparse import ArgumentParser
     from arcana import (
         DirectoryRepository, LinearProcessor, StaticEnvironment,
-        FilesetSelector)
+        FilesetSelector, PROV_EXCLUDE)
     from arcana.utils import parse_value
     from banana.file_format import dicom_format, zip_format
+
+    logger = logging.getLogger('arcana')
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter("%(levelname)s - %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
     # Set up parser to parse arguments passed to the script
     parser = ArgumentParser(
@@ -178,6 +186,9 @@ if __name__ == '__main__':
     parser.add_argument('--parameter', '-p', nargs=2, action='append',
                         metavar=('NAME', 'VALUE'),
                         help="Parameters to pass to the study")
+    parser.add_argument('--reprocess', action='store_true', default=False,
+                        help=("Reprocess derivatives on mismatches between "
+                              "requested parameters and stored provenance"))
     args = parser.parse_args()
 
     # Make figure directory
@@ -191,7 +202,9 @@ if __name__ == '__main__':
         # Repository is a simple directory on the local file system
         repository=DirectoryRepository(args.data_dir),
         # Use a single process on the local system to derive
-        processor=LinearProcessor(args.work_dir),
+        processor=LinearProcessor(args.work_dir, reprocess=args.reprocess,
+                                  prov_exclude=PROV_EXCLUDE + [
+                                      '/workflow/nodes/.*/requirements']),
         # Use the static environment (i.e. no Modules)
         environment=StaticEnvironment(),
         # Match names in the data specification to filenames used
