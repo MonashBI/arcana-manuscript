@@ -147,7 +147,7 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     from arcana import (
         DirectoryRepository, LinearProcessor, StaticEnvironment,
-        FilesetSelector, PROV_EXCLUDE)
+        FilesetSelector, DEFAULT_PROV_IGNORE)
     from arcana.utils import parse_value
     from banana.file_format import dicom_format, zip_format
 
@@ -203,7 +203,7 @@ if __name__ == '__main__':
         repository=DirectoryRepository(args.data_dir),
         # Use a single process on the local system to derive
         processor=LinearProcessor(args.work_dir, reprocess=args.reprocess,
-                                  prov_exclude=PROV_EXCLUDE + [
+                                  prov_ignore=DEFAULT_PROV_IGNORE + [
                                       '/workflow/nodes/.*/requirements']),
         # Use the static environment (i.e. no Modules)
         environment=StaticEnvironment(),
