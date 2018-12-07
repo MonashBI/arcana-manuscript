@@ -184,7 +184,7 @@ if __name__ == '__main__':
     parser.add_argument('--distort', default='.*distortion_correction.*',
                         help="Pattern to match dMRI reverse PE ref. scan")
     parser.add_argument('--parameter', '-p', nargs=2, action='append',
-                        metavar=('NAME', 'VALUE'),
+                        metavar=('NAME', 'VALUE'), default=[],
                         help="Parameters to pass to the study")
     parser.add_argument('--reprocess', action='store_true', default=False,
                         help=("Reprocess derivatives on mismatches between "
@@ -210,19 +210,19 @@ if __name__ == '__main__':
         # Match names in the data specification to filenames used
         # in the repository
         inputs=[
-            FilesetSelector('t1_magnitude', dicom_format, args.t1,
+            FilesetSelector('t1_magnitude', args.t1, dicom_format,
                             is_regex=True),
-            FilesetSelector('t2star_channels', zip_format, args.t2star_chann,
+            FilesetSelector('t2star_channels', args.t2star_chann, zip_format,
                             is_regex=True),
-            FilesetSelector('t2star_header_image', dicom_format, args.swi,
+            FilesetSelector('t2star_header_image', args.swi, dicom_format,
                             is_regex=True),
-            FilesetSelector('t2star_swi', dicom_format, args.swi,
+            FilesetSelector('t2star_swi', args.swi, dicom_format,
                             is_regex=True),
-            FilesetSelector('swi_magnitude', dicom_format, args.swi,
+            FilesetSelector('swi_magnitude', args.swi, dicom_format,
                             is_regex=True),
-            FilesetSelector('dmri_magnitude', dicom_format, args.dmri,
+            FilesetSelector('dmri_magnitude', args.dmri, dicom_format,
                             is_regex=True),
-            FilesetSelector('dmri_reverse_phase', dicom_format, args.distort,
+            FilesetSelector('dmri_reverse_phase', args.distort, dicom_format,
                             is_regex=True)],
         # Set parameters of the study
         parameters={n: parse_value(v.strip()) for n, v in args.parameter})
