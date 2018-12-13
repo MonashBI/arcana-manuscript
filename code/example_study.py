@@ -76,7 +76,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                 'in_file2': ('acquired_file2', analyze_format),
                 'in_field': ('acquired_field1', int)},
             outputs={
-                'out_field': ('derived_field1', int)},
+                'derived_field1': ('out_field', int)},
             wall_time=25, requirements=[software_req1])
         if self.branch('node1_option'):
             node1.inputs.an_option = 'set-extra-option'
@@ -87,12 +87,11 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                 Interface2(
                     param1=self.parameter('parameter2')),
                 inputs={
-                    'template': ('template1', nifti_gz_format)},
-                connect={
+                    'template': ('template1', nifti_gz_format),
                     'in_file': (node1, 'out_file')},
                 outputs={
-                    'out_file': ('derived_file3',
-                                 text_matrix_format)},
+                    'derived_file3': ('out_file',
+                                      text_matrix_format)},
                 wall_time=10, requirements=[software_req2])
 
             self.connect_output('derived_file6', node1, 'out',
@@ -102,12 +101,11 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
                 'node2',
                 Interface3(),
                 inputs={
-                    'template': ('template1', nifti_gz_format)},
-                connect={
+                    'template': ('template1', nifti_gz_format),
                     'in_file': (node1, 'out_file')},
                 outputs={
-                    'out_file': ('derived_file3',
-                                 text_matrix_format)},
+                    'derived_file3': ('out_file',
+                                      text_matrix_format)},
                 wall_time=30, requirements=[matlab_req,
                                             toolbox1_req])
         else:
