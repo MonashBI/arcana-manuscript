@@ -70,11 +70,11 @@ paper = FreesurferStudy(
     # Match names in the data specification to filenames used
     # in the repository
     inputs=[
-        FilesetSelector('t1_preproc', 't1_preproc', nifti_gz_format,
+        FilesetSelector('t1_magnitude', 't1_preproc', nifti_gz_format,
                         is_regex=True),
-        FilesetSelector('t2_preproc', 't2_preproc', nifti_gz_format,
+        FilesetSelector('t2_magnitude', 't2_preproc', nifti_gz_format,
                         is_regex=True)],
-        enforce_inputs=False)
+    enforce_inputs=False)
 
 print('Running freesurfer')
 paper.data('t1_fs_recon_all')
