@@ -52,8 +52,6 @@ parser.add_argument('--work_dir', help="The work directory",
                                     'arcana-paper-work'))
 args = parser.parse_args()
 
-# Make figure directory
-os.makedirs(args.fig_dir, exist_ok=True)
 
 # Instantiate the ArcanaPaper class in order to apply it to a
 # specific dataset
@@ -63,7 +61,7 @@ paper = FreesurferStudy(
     # Repository is a simple directory on the local file system
     repository=DirectoryRepository(args.data_dir),
     # Use a single process on the local system to derive
-    processor=LinearProcessor(args.work_dir, reprocess=args.reprocess,
+    processor=LinearProcessor(args.work_dir,
                               prov_ignore=DEFAULT_PROV_IGNORE + [
                                   '/workflow/.*'],
                               clean_work_dir_between_runs=False),
@@ -76,10 +74,11 @@ paper = FreesurferStudy(
                         is_regex=True),
         FilesetSelector('t2_preproc', 't2_preproc', nifti_gz_format,
                         is_regex=True)],
-    # Set parameters of the study
-    parameters={n: parse_value(v.strip()) for n, v in args.parameter})
+        enforce_inputs=False)
 
+print('Running freesurfer')
 paper.data('t1_fs_recon_all')
+print('Ran freesurfer')
 
     # Derive required data and display them in a single step for each
     # figure.
