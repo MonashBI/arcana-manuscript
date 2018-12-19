@@ -2,7 +2,7 @@
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
 from banana.study import (
-    DmriStudy, T1Study, T2starStudy, MriStudy)
+    DmriStudy, T1Study, T2Study, T2starStudy, MriStudy)
 from banana.plot import ImageDisplayMixin
 
 
@@ -18,7 +18,14 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         # Sub-study to process the T1-weighted data
         SubStudySpec(
             't1',
-            T1Study),
+            T1Study,
+            name_map={
+                't2_coreg': 't2_coreg'}),
+        SubStudySpec(
+            't2',
+            T2Study,
+            name_map={
+                'coreg_ref': 't1_magnitude'}),
         # Sub-study to process the T2*-weighted data
         SubStudySpec(
             't2star',
@@ -172,6 +179,8 @@ if __name__ == '__main__':
                                         'arcana-paper-fig'))
     parser.add_argument('--t1', default='.*mprage.*',
                         help="Pattern to match T1-weighted scan")
+    parser.add_argument('--t2', default='.*t2_spc_da_fl.*',
+                        help="Pattern to match T1-weighted scan")
     parser.add_argument('--t2star_chann', default='.*channels.*',
                         help=("Pattern to match separate channels from the "
                               "head coil for the T2*-weighted scan in "
@@ -204,13 +213,16 @@ if __name__ == '__main__':
         # Use a single process on the local system to derive
         processor=LinearProcessor(args.work_dir, reprocess=args.reprocess,
                                   prov_ignore=DEFAULT_PROV_IGNORE + [
-                                      '/workflow/nodes/.*/requirements']),
+                                      '/workflow/.*'],
+                                  clean_work_dir_between_runs=False),
         # Use the static environment (i.e. no Modules)
         environment=StaticEnvironment(),
         # Match names in the data specification to filenames used
         # in the repository
         inputs=[
             FilesetSelector('t1_magnitude', args.t1, dicom_format,
+                            is_regex=True),
+            FilesetSelector('t2_magnitude', args.t2, dicom_format,
                             is_regex=True),
             FilesetSelector('t2star_channels', args.t2star_chann, zip_format,
                             is_regex=True),
@@ -227,8 +239,10 @@ if __name__ == '__main__':
         # Set parameters of the study
         parameters={n: parse_value(v.strip()) for n, v in args.parameter})
 
+    paper.data('t1_fs_recon_all')
+
     # Derive required data and display them in a single step for each
     # figure.
-    paper.vein_fig(op.join(args.fig_dir, 'veins.png'))
-    paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
-    paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
+#     paper.vein_fig(op.join(args.fig_dir, 'veins.png'))
+#     paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
+#     paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
