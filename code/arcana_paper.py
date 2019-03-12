@@ -2,7 +2,7 @@
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
 from banana.study import (
-    DmriStudy, T1Study, T2Study, T2starStudy, MriStudy)
+    DwiStudy, T1Study, T2Study, T2starStudy, MriStudy)
 from banana.plot import ImageDisplayMixin
 
 
@@ -36,7 +36,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
         # Sub-study to process the dMRI data
         SubStudySpec(
             'dmri',
-            DmriStudy),
+            DwiStudy),
         # Since we are using the SWI image produced from the scanner console
         # we need to brain extract it in order to compare with QSM/vein image/
         # mask, which we do with a basic MriStudy.

@@ -809,13 +809,13 @@ package
 (\href{https://github.com/MonashBI/banana}{{http://github.com/MonashBI/banana}};
 \href{http://pypi.org./project/banana}{{http://pypi.org./project/banana}}).
 All three classes, \emph{T1wStudy}, \emph{T2starwStudy} and
-\emph{DmriStudy}, inherit generic image analysis methods, such as
+\emph{DwiStudy}, inherit generic image analysis methods, such as
 registration and brain extraction, from the base class \emph{MRIStudy}.
 The T1Study and T2starStudy classes are aggregated into the
 \emph{T2starwT1wStudy} MultiStudy class to combine analysis of T2* and
 T1-weighted contrasts.
 
-The DmriStudy class implements diffusion tensor metrics, FA and ADC, as
+The DwiStudy class implements diffusion tensor metrics, FA and ADC, as
 well as global tractography using streamlines tracking from the MRtrix
 toolbox (Tournier et. al. 2010; Tournier et. al. 2012) (Figure 9).
 

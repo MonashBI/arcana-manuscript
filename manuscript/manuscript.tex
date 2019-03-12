@@ -924,10 +924,10 @@ Study classes for T1, T2* and diffusion weighted MRI data have been
 implemented as part of the \emph{Biomedical imAgiNg ANAlysis (Banana)} package
 (\url{github.com/MonashBI/banana}; \url{pypi.org./project/banana}).
 All three classes, \emph{T1Study}, \emph{T2starStudy} and
-\emph{DmriStudy}, inherit generic image analysis methods, such as
+\emph{DwiStudy}, inherit generic image analysis methods, such as
 registration and brain extraction, from the base class \emph{MriStudy}.
 
-The DmriStudy class implements the extraction of diffusion tensor metrics,
+The DwiStudy class implements the extraction of diffusion tensor metrics,
 FA and ADC, as well as whole-brain tractography using streamlines tracking from the MRtrix
 toolbox \citep{tournier_improved_2010,tournier_mrtrix:_2012} (Figure \ref{fig:dmri_study}).
 
@@ -978,7 +978,7 @@ as an input to the derived \emph{SWI} specification, overriding the
 \label{fig:t2star_t1_study}
 \end{figure*} 
 
-The T1Study, T2starStudy and DmriStudy classes are
+The T1Study, T2starStudy and DwiStudy classes are
 aggregated into a single MultiStudy class,
 \emph{ArcanaPaper} (Supplementary material), which is specialised to produce
 the figures in the Results section of this manuscript. In order to warp the
