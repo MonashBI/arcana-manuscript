@@ -442,25 +442,26 @@ a reference to the newly added node. For clarity, is recommended to put all stat
 (Figure \ref{fig:pipeline_constructor}). However, if an input conditionally depends on a parameter of the
 study it can be set via the \emph{inputs} attribute of the node (e.g. \lstinline{my_node.inputs.my_param = 1.0}).
 
-Interface traits are connected to inputs and outputs of the pipeline by
+Node interfaces are connected to each other, and to inputs and outputs of the pipeline, by
 providing \emph{inputs} and \emph{outputs} keyword arguments to the \emph{add} method. Both
-arguments take a dictionary, where the keys of the dictionary are the names of traits of the interface. The
-values of the dictionary are 2-tuples each consisting of the name of a data specification
-and the format the pipeline either expects or produces the data in (i.e. a FileFormat for Fileset specifications
-or Python datatype for Field specifications). If the expected format does not match that of the
-corresponding data specification or study input then a conversion node is implicitly connected
-to the pipeline. Inputs and outputs that are conditional on parameters or inputs provided to the
-study can be set outside of the \emph{add} method using the \emph{connect\_input} or
-\emph{connect\_output} methods, respectively.
+arguments take a dictionary. The keys of the \emph{inputs} dictionary correspond to
+trait names in the node's input interface, whereas the keys of the \emph{outputs} dictionary correspond to
+names of entries in the data specification table. The values of both dictionaries are 2-tuples. For pipeline
+inputs, values of the \emph{inputs} dictionary consist of a name of an entry in the data specification table
+and the format the input is expected in (i.e. a FileFormat for Fileset specifications or Python datatype for Field specifications).
+For pipeline outputs, values of the \emph{outputs} dictionary consist of a trait name in the node's output interface and the format the
+output data is generated in. For input connections from other nodes, values of the \emph{inputs} dictionary
+consist of a reference to the upstream node and the name of a trait in the
+upstream node's output interface (output connections are implied by input connections to other nodes).
 
-Connections between nodes are specified by a dictionary
-passed to the \emph{connect} keyword argument of the \emph{add} method
-that creates the receiving node. The dictionary keys are the names of the
-receiving traits and the values are 2-tuples
-consisting of the sending node and the name of the sending trait. Alternatively,
-conditional connections can be specified via the \emph{connect} method of the
-pipeline, which simply calls the method of the same name in the underlying
-Nipype workflow.
+If the expected format of a pipeline input or generated format of a pipeline output does not match that
+of the corresponding study input or data specification, then a conversion node is implicitly connected
+to the pipeline by the framework to perform the required conversion. Pipeline inputs and outputs of
+that are conditional on parameters or inputs provided to the study can be specified outside of the
+\emph{add} method using the \emph{connect\_input} or
+\emph{connect\_output} methods, respectively. Conditional connections between
+nodes can be specified via the \emph{connect} method of the pipeline (which simply calls the
+method of the same name in the underlying Nipype workflow).
 
 Any external software packages required by a node should be referenced
 in the \emph{requirements} keyword argument as a list of

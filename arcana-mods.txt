@@ -1,0 +1,21 @@
+Repository -> Repo
+ParameterSpec -> ParamSpec
+references -> citations
+Acquired -> Acq
+BidsAssociatedSelector - BidsAssocSelector
+LinearProcessor -> SingleProcessor
+MultiProcessor -> MultiProcessor
+SlurmProcessor -> SlurmProcessor
+ModulesEnvironment -> ModulesEnv
+StaticEnvironment -> StaticEnv
+
+switch key/values in package map
+ "         "         outputs
+remove connect in place of inputs
+
+rename references back to citations
+
+check name_maps sub-studies key/values are around the right way too
+
+move selector name out of constructor and only set when bound
+
