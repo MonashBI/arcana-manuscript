@@ -153,7 +153,7 @@ if __name__ == '__main__':
     import logging
     from argparse import ArgumentParser
     from arcana import (
-        DirectoryRepo, SingleProc, StaticEnvironment,
+        DirectoryRepo, SingleProc, StaticEnv,
         FilesetInput, DEFAULT_PROV_IGNORE)
     from arcana.utils import parse_value
     from banana.file_format import dicom_format, zip_format
@@ -216,7 +216,7 @@ if __name__ == '__main__':
                                       '/workflow/.*'],
                                   clean_work_dir_between_runs=False),
         # Use the static environment (i.e. no Modules)
-        environment=StaticEnvironment(),
+        environment=StaticEnv(),
         # Match names in the data specification to filenames used
         # in the repository
         inputs=[

@@ -889,9 +889,9 @@ The software packages installed on the system that are required by a study's
 workflows (e.g. FSL, SPM) are detected and managed by
 the Environment object passed to the study at initialisation.
 There are currently two types of Environment class implemented in Arcana:
-\emph{StaticEnvironment} and \emph{ModulesEnvironment}.
+\emph{StaticEnv} and \emph{ModulesEnv}.
 
-\emph{ModulesEnvironment} objects can be used if environment
+\emph{ModulesEnv} objects can be used if environment
 modules \citep{furlani_modules:_1991} are installed on the system (typical in many
 HPC systems). In this case, environment modules are loaded before a workflow node is run,
 based on the requirements specified for the node during construction of the pipeline
@@ -902,7 +902,7 @@ at initialisation. Likewise non-standard versions for packages can be mapped
 onto the versioning system of a requirement using the \emph{versions\_map}
 keyword argument.
 
-\emph{StaticEnvironment} objects don't actively manage the environment,
+\emph{StaticEnv} objects don't actively manage the environment,
 and instead only check the current environment for appropriate software
 versions before running requested workflows.
 
