@@ -241,14 +241,14 @@ the Study class to a specific dataset.
 
 The set of input data, the derivatives that can be derived from it,
 and methods that construct pipelines to derive the derivatives, are
-linked together by the \emph{data specification} \emph{table} of the
-Study class (Figure \ref{fig:example_study}). Likewise, free parameters used in pipeline
-construction are defined in the class' \emph{parameter specification}
-\emph{table}. Class inheritance can be used to specialise analysis
-suites by overriding entries in the specification tables or pipeline
-constructor methods. Analysis suites for multi-modal data can be
-implemented by combining Study classes within \emph{MultiStudy}
-classes\emph{.}
+linked together by the \emph{data specification} \emph{table} class
+attribute of the Study (Figure \ref{fig:example_study}). Likewise,
+free parameters used in pipeline construction are defined in the class'
+\emph{parameter specification} \emph{table}. Class inheritance can
+be used to specialise analysis suites by overriding entries in the
+specification tables or pipeline constructor methods. Analysis suites
+for multi-modal data can be implemented by combining Study classes
+within \emph{MultiStudy} classes\emph{.}
 
 \begin{figure*}
     \centering
@@ -266,7 +266,7 @@ Analysis methods defined by a Study class are applied to a
 specific dataset by instantiating an object of the class and
 requesting a derivative listed in the class' data specification table.
 At initialisation, a Study object is passed references to a \emph{Repository},
-a \emph{Processor}, and an \emph{Environment}, which
+a \emph{Processor}, and an \emph{Environment} objects, which
 define where and how data is stored and processed. When a derivative is
 requested, a Study object queries the Repository for intermediate
 derivatives that can be reused before constructing a workflow to produce
@@ -314,7 +314,7 @@ metaclass or subclasses thereof.
 tables}
 \label{sec:data-and-parameter-specification-tables}
 
-At the heart of each Study class is the data specification table, which
+At the heart of each Study class is the data-specification-table attribute, which
 specifies both the input and output data of the analysis, and all the
 stages in between. There is a one-to-one relationship between entries in
 the data specification table and data that is stored in the repository
@@ -329,9 +329,9 @@ Data specified in the data specification table can be of either a
 \emph{fileset} or \emph{field} type. Filesets represent single files,
 or sets of related files typically contained within a directory
 (e.g. a multi-volume DICOM dataset). Fields
-represent integer, floating point or character string
+represent integer, floating point, datetime, or character string
 values. By default, a Field represents a single value but if the \emph{array}
-flag is set a Field represents a list of values.
+flag is set, a Field represents a list of values.
 Each Fileset references a \emph{FileFormat} object, which
 specifies the formats of the files in the set. File formats are
 explicitly registered by the researcher at design time using the
@@ -369,16 +369,17 @@ class that constructs the pipeline to derive them. Therefore, while a
 pipeline can have multiple outputs, each derivative is derived by only
 one pipeline.
 
-For fileset specifications that correspond to a known type in the BIDS
-standard, a \emph{BidsInput} or \emph{BidsAssocInput} can be
-provided to the \emph{bids} keyword arg of the spec. BidsInput
-specifies a primary scan in the BIDS standard using its type, modality
-and optional run number. BidsAssocInput is used to select
-associated files, such as field maps and diffusion encoding matrices.
-When passing a BidsInput to a FilesetSpec the \emph{run} keyword
-argument of the selector is typically not set, so it can be read from
-the \emph{bids\_run} attribute of the Study. This allows the Study class
-to be applicable to any BIDS run.
+For Study classes that correspond to a known type in the BIDS
+standard, a dictionary mapping their data specifications to default
+\emph{BidsInput} or \emph{BidsAssocInput} selectors can be specified in the
+\emph{default\_bids\_inputs} class attribute. BidsInput
+specifies a primary scan in the BIDS standard using its \emph{type}, \emph{modality},
+\emph{format} and optionally the \emph{task} it belongs to. BidsAssocInput is used to select
+associated files, such as field maps and diffusion encoding matrices in reference
+to a primary scan. Default Bids selectors are typically not provided with
+a value for the \emph{task} keyword, which can be set at instantiation of
+the Study class with the \emph{bids\_task} keyword argument to enable the design of Study
+classes that are applicable to any BIDS task.
 
 Similar to data specifications, parameter specifications are included in
 the Study class by providing a list of \emph{ParamSpec} objects to
@@ -576,8 +577,8 @@ data and parameter specifications. A SubStudySpec consists of a name, a
 Study class, and a \emph{name map} dictionary\emph{.} The name map
 dictionary maps data and parameter specification names from the
 sub-study namespace to the namespace of the MultiStudy class, i.e.
-the dictionary keys are in the sub-study namespace and the dictionary
-values are in the global namespace.
+the dictionary keys refer to entries in the sub-study specification table and
+the dictionary values refer to entries in the multi-study specification table.
 
 Entries in the specification tables of sub-study classes that are not
 referenced in the sub study's name map are implicitly mapped to the
@@ -643,16 +644,19 @@ In Arcana, repository access is encapsulated within modular
 \emph{Repository} objects to enable switching between different
 repositories and repository types at analysis ``application time''
 (Figure \ref{fig:simple_uml}). There are currently three supported repository types, XNAT
-\citep{marcus_extensible_2007}, BIDS \citep{gorgolewski_brain_2016} and a simple
-``directory'' format, which are encapsulated by \emph{XnatRepo},
+\citep{marcus_extensible_2007}, BIDS \citep{gorgolewski_brain_2016} and a
+``basic'' format, which are encapsulated by \emph{XnatRepo},
 \emph{BidsRepo}, and \emph{BasicRepo} classes
 respectively.
 
-In its most basic form, a directory repository is just a file system
-directory with separate subdirectories for each subject in the study,
-with subject IDs taken from the subdirectory names. If the study has
-more than one visit then nested subdirectories for each visit are
-required in the subject subdirectories. Note that the directory
+In its most basic form, a ``basic'' repository, is just a file system
+directory containing the data to be processed for a single subject.
+For multi-subject studies, the root directory should contain separate
+subdirectories for each subject in the study, with subject IDs taken
+from the subdirectory names. If data was acquired for each subject
+over multiple visits, than an additional layer of nested subdirectories
+is included in the subject subdirectories, with the visit IDs taken from
+the subdirectory names. Note that the directory
 repository is similar to the BIDS format, however, there are no naming
 conventions in the directory repository, which enables prototyping and
 testing of analyses on loosely structured data.
@@ -679,13 +683,13 @@ JSON files for each pipeline named after the pipeline (Table 1).
 
 Summary data (i.e. with \emph{per\_subject}, \emph{per\_visit}, and
 \emph{per\_study} frequencies\emph{)} are stored in specially named
-subjects and visits (e.g. `all'), the names for which are specified when
+subjects and visits (e.g. `group'), the names for which are specified when
 the repository is initialised. For example, given in plain-directory
 repository using all as the summary name for both subjects and visits,
 per\_subject data for `subj1' would be stored at
-\emph{\textless{}root\textgreater{}/subj1/}all, per\_visit data for
-`visit1' in \emph{\textless{}root\textgreater{}/}all\emph{/visit1},
-and per\_study data in \emph{\textless{}root\textgreater{}/}all/all
+\emph{\textless{}root\textgreater{}/subj1/}group, per\_visit data for
+`visit1' in \emph{\textless{}root\textgreater{}/}group\emph{/visit1},
+and per\_study data in \\ \emph{\textless{}root\textgreater{}/}group/group
 (Table \ref{tbl:repo-structure}).
 
 \begin{table}
@@ -788,9 +792,9 @@ passed as inputs in \emph{FilesetCollection} and \emph{FieldCollection}
 objects. Collection objects reference an entry in the data specification
 table and contain a single Fileset or Field for every session (or
 subject/visit/study depending on the frequency of the corresponding data
-spec). Collection objects can be used to pass reference atlases and
-templates as inputs to analyses. They can also be set as the ``default
-input'' for a data specification via the \emph{default} keyword
+specifcation). Collection objects can be used to pass reference atlases and
+templates as inputs to analyses. They can also be set as the default
+for a data specification via the \emph{default} keyword
 argument. However, for the sake of portability, default inputs should be
 restricted to data in publically accessible repositories or those included in
 standard software packages (e.g. FSL).
@@ -849,7 +853,7 @@ software versions used by the pipeline, a graph representation of the
 underlying Nipype workflow, checksums of inputs, version of Arcana used,
 version of Nipype used, subject and visit IDs used by study.
 
-For subsequent analyses, changes w.r.t. Any of the stored values, with
+For subsequent analyses, changes with respect to any of the stored values, with
 the exception of subject and visit IDs, will be flagged as a mismatch.
 Subject or visit IDs only flag a mismatch if any of the inputs, or
 inputs of upstream pipelines, are per-visit or per-subject,
@@ -890,7 +894,7 @@ There are currently two types of Environment class implemented in Arcana:
 \emph{StaticEnv} and \emph{ModulesEnv}.
 
 \emph{ModulesEnv} objects can be used if environment
-modules \citep{furlani_modules:_1991} are installed on the system (typical in many
+modules \citep{furlani_modules:_1991} are installed on the system (typical on many
 HPC systems). In this case, environment modules are loaded before a workflow node is run,
 based on the requirements specified for the node during construction of the pipeline
 (see \emph{Pipeline constructors}), and then unloaded afterwards. Mappings from non-standard
@@ -923,7 +927,7 @@ The Arcana framework is distributed as a publicly available software
 package via GitHub (\url{github.com/MonashBI/arcana}) and the
 Python Package Index (PyPI) (\url{pypi.org/project/arcana/}).
 Study classes for T1, T2* and diffusion weighted MRI data have been
-implemented as part of the \emph{Biomedical imAgiNg ANAlysis (Banana)} package
+implemented as part of the \emph{Biomedical imging ANAlysis iN Arcana (Banana)} package
 (\url{github.com/MonashBI/banana}; \url{pypi.org./project/banana}).
 All three classes, \emph{T1Study}, \emph{T2starStudy} and
 \emph{DwiStudy}, inherit generic image analysis methods, such as
