@@ -221,7 +221,7 @@ complex workflows that are portable and complete.
 
 The utility of the Arcana framework is demonstrated by the
 implementation of analysis suites for T1, T2* and diffusion weighted MRI
-(dMRI) data and the application of dMRI tractogram \citep{tournier_mrtrix:_2012} and
+(DWI) data and the application of DWI tractogram \citep{tournier_mrtrix:_2012} and
 vein masks \citep{ward_vein_2017} workflows to data collected from a
 healthy subject.
 
@@ -536,7 +536,7 @@ of a MultiStudy class. Entries in specification tables of sub-studies
 are joined by mapping them to a common entry in the specification table
 of the MultiStudy (Figure \ref{fig:example_multi_study}). This enables derivatives from one
 sub-study (e.g. brain extracted T1-weighted anatomical) to be referenced
-by workflows of other sub-studies (e.g. anatomically constrained dMRI
+by workflows of other sub-studies (e.g. anatomically constrained DWI
 tractography).
 
 
@@ -931,22 +931,22 @@ registration and brain extraction, from the base class \emph{MriStudy}.
 
 The DwiStudy class implements the extraction of diffusion tensor metrics,
 FA and ADC, as well as whole-brain tractography using streamlines tracking from the MRtrix
-toolbox \citep{tournier_improved_2010,tournier_mrtrix:_2012} (Figure \ref{fig:dmri_study}).
+toolbox \citep{tournier_improved_2010,tournier_mrtrix:_2012} (Figure \ref{fig:dwi_study}).
 
 \begin{figure*}
 	\centering
-    \includegraphics[width=0.55\textwidth]{../figures/dmri_study}
+    \includegraphics[width=0.55\textwidth]{../figures/dwi_study}
   \caption{Example diffusion-weighted MRI (DWI) study, which can derive
 tensor metrics, fractional anisotropy (FA) and apparent diffusion
 coefficient (ADC) as well as streamlines fibre tracking. Blue boxes:
 acquired (input) data (filesets or fields). Green boxes: derivatives.
 Orange ovals: pipelines. Blue and green arrows: acquired and derived
 inputs to pipelines, respectively. Orange arrows: outputs of pipelines.
-The dMRI magnitude image is preprocessed for motion correction and EPI
+The DWI magnitude image is preprocessed for motion correction and EPI
 distortions masked and bias corrected. From the bias corrected image two
 branches of analysis can be performed using the same intermediate
 derivatives: FA and ADC and/or streamlines fibre tracking.}
-\label{fig:dmri_study}
+\label{fig:dwi_study}
 \end{figure*}
 
 The \emph{T2starStudy} class implements an algorithm to generate
@@ -1027,11 +1027,11 @@ acquisition. The FA map shows high intensity in known white matter
 tracts and low intensities in known grey matter regions. The ADC map
 shows high intensity in cortical spinal fluid and low intensity through
 the rest of the brain.
-Figure \ref{fig:tractography} displays the global tractography derived from the dMRI
+Figure \ref{fig:tractography} displays the global tractography derived from the DWI
 acquisition. The streamlines follow well known white matter tracts such
 as the cortico-spinal, fasciculus and corpus callosum. Intermediate
 derivatives derived for the FA and ADC analysis, including the
-preprocessed and bias-corrected dMRI image and a whole brain mask, were
+preprocessed and bias-corrected DWI image and a whole brain mask, were
 reused in the generation of the streamlines.
 
 \begin{figure*}
@@ -1125,7 +1125,7 @@ modified analyses differ from standard procedures.
 
 MR contrast-specific analyses are implemented in Banana via a chain
 of successively specialised Study sub-classes (e.g.
-MRI\textgreater{}EPI\textgreater{}dMRI) to enable generic processing
+MRI\textgreater{}EPI\textgreater{}DWI) to enable generic processing
 steps (e.g. registration) to be shared between classes. While not
 necessary, it is recommended to create a subclass specific to the
 research study in question and aggregate all related analysis within it,
@@ -1195,7 +1195,7 @@ makes it feasible to process data as it is acquired over the course of
 long studies, and therefore help detect any problems that might arise
 with the acquisition protocol when they occur. In addition, by reusing
 shared intermediate derivatives between analyses, such as the
-preprocessed dMRI shared between tensor and fibre tracking workflows
+preprocessed DWI shared between tensor and fibre tracking workflows
 (Figure \ref{fig:fa_adc} and \ref{fig:tractography}), processing time as
 well as time required for manual
 QC is minimised. Given analyses implemented in Arcana are also able to
