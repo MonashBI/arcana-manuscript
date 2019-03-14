@@ -153,8 +153,7 @@ if __name__ == '__main__':
     import logging
     from argparse import ArgumentParser
     from arcana import (
-        BasicRepo, SingleProc, StaticEnv,
-        FilesetInput, DEFAULT_PROV_IGNORE)
+        BasicRepo, SingleProc, StaticEnv, FilesetInput)
     from arcana.utils import parse_value
     from banana.file_format import dicom_format, zip_format
 
@@ -179,7 +178,7 @@ if __name__ == '__main__':
                                         'arcana-paper-fig'))
     parser.add_argument('--t1', default='.*mprage.*',
                         help="Pattern to match T1-weighted scan")
-    parser.add_argument('--t2', default='.*t2_spc_da_fl.*',
+    parser.add_argument('--t2', default='.*t2.*',
                         help="Pattern to match T1-weighted scan")
     parser.add_argument('--t2star_chann', default='.*channels.*',
                         help=("Pattern to match separate channels from the "
@@ -188,7 +187,7 @@ if __name__ == '__main__':
                               "directory"))
     parser.add_argument('--swi', default='.*(swi|SWI).*',
                         help="Pattern to match SWI scan in DICOM format")
-    parser.add_argument('--dmri', default='.*diff.*',
+    parser.add_argument('--dwi', default='.*diff.*',
                         help="Pattern to match dMRI scan")
     parser.add_argument('--distort', default='.*distortion_correction.*',
                         help="Pattern to match dMRI reverse PE ref. scan")
@@ -210,39 +209,29 @@ if __name__ == '__main__':
         'arcana_paper1',
         # Repository is a simple directory on the local file system
         repository=BasicRepo(args.data_dir),
-        # Use a single process on the local system to derive
-        processor=SingleProc(args.work_dir, reprocess=args.reprocess,
-                                  prov_ignore=DEFAULT_PROV_IGNORE + [
-                                      '/workflow/.*'],
-                                  clean_work_dir_between_runs=False),
-        # Use the static environment (i.e. no Modules)
+        # Use a single process on the local system to run pipelines
+        processor=SingleProc(args.work_dir, reprocess=args.reprocess),
+        # Use the software installed and on the curren PATH (i.e. no Modules)
         environment=StaticEnv(),
         # Match names in the data specification to filenames used
         # in the repository
-        inputs=[
-            FilesetInput('t1_magnitude', args.t1, dicom_format,
-                            is_regex=True),
-            FilesetInput('t2_magnitude', args.t2, dicom_format,
-                            is_regex=True),
-            FilesetInput('t2star_channels', args.t2star_chann, zip_format,
-                            is_regex=True),
-            FilesetInput('t2star_header_image', args.swi, dicom_format,
-                            is_regex=True),
-            FilesetInput('t2star_swi', args.swi, dicom_format,
-                            is_regex=True),
-            FilesetInput('swi_magnitude', args.swi, dicom_format,
-                            is_regex=True),
-            FilesetInput('dmri_magnitude', args.dmri, dicom_format,
-                            is_regex=True),
-            FilesetInput('dmri_reverse_phase', args.distort, dicom_format,
-                            is_regex=True)],
+        inputs={
+            't1_magnitude': FilesetInput(pattern=args.t1, dicom_format),
+            't2_magnitude': FilesetInput(pattern=args.t2, dicom_format),
+            't2star_channels': FilesetInput(pattern=args.t2star_chann,
+                                            zip_format),
+            't2star_header_image': FilesetInput(pattern=args.swi,
+                                                dicom_format),
+            't2star_swi': FilesetInput(pattern=args.swi, dicom_format),
+            'swi_magnitude': FilesetInput(pattern=args.swi, dicom_format),
+            'dmri_magnitude': FilesetInput(pattern=args.dwi, dicom_format),
+            'dmri_reverse_phase': FilesetInput(pattern=args.distort,
+                                               dicom_format)},
         # Set parameters of the study
         parameters={n: parse_value(v.strip()) for n, v in args.parameter})
 
-    paper.data('t1_fs_recon_all')
-
     # Derive required data and display them in a single step for each
     # figure.
-#     paper.vein_fig(op.join(args.fig_dir, 'veins.png'))
-#     paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
-#     paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
+    paper.vein_fig(op.join(args.fig_dir, 'veins.png'))
+    paper.fa_adc_fig(op.join(args.fig_dir, 'fa_adc.png'))
+    paper.tractography_fig(op.join(args.fig_dir, 'tractography.png'))
