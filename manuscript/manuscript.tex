@@ -370,12 +370,12 @@ pipeline can have multiple outputs, each derivative is derived by only
 one pipeline.
 
 For fileset specifications that correspond to a known type in the BIDS
-standard, a \emph{BidsSelector} or \emph{BidsAssociatedSelector} can be
-provided to the \emph{bids} keyword arg of the spec. BidsSelector
+standard, a \emph{BidsInput} or \emph{BidsAssocInput} can be
+provided to the \emph{bids} keyword arg of the spec. BidsInput
 specifies a primary scan in the BIDS standard using its type, modality
-and optional run number. BidsAssociatedSelector is used to select
+and optional run number. BidsAssocInput is used to select
 associated files, such as field maps and diffusion encoding matrices.
-When passing a BidsSelector to a FilesetSpec the \emph{run} keyword
+When passing a BidsInput to a FilesetSpec the \emph{run} keyword
 argument of the selector is typically not set, so it can be read from
 the \emph{bids\_run} attribute of the Study. This allows the Study class
 to be applicable to any BIDS run.
@@ -800,8 +800,8 @@ standard software packages (e.g. FSL).
 When using BIDS repositories, the selection stage is typically already
 included in the data specification (see \emph{Data and parameter
 specifications)} so inputs do not need to be provided to the
-initialisation of the Study. However, BidsSelector and
-BidsAssociatedSelector objects can be provided to override the default
+initialisation of the Study. However, BidsInput and
+BidsAssocInput objects can be provided to override the default
 selections is required.
 
 \subsubsection*{Processor modules}
