@@ -1,5 +1,5 @@
 from arcana import (Study, StudyMetaClass, AcquiredFilesetSpec, FilesetSpec,
-                    AcquiredFieldSpec, FieldSpec, ParameterSpec, SwitchSpec,
+                    AcquiredFieldSpec, FieldSpec, ParamSpec, SwitchSpec,
                     FilesetCollection, XnatRepo, Fileset)
 from arcana.data.file_format.standard import text_format
 from banana.file_format import (
@@ -40,7 +40,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
 
     add_param_specs = [
         # Standard parameters
-        ParameterSpec('parameter1', 10),
-        ParameterSpec('parameter2', 25.8),
+        ParamSpec('parameter1', 10),
+        ParamSpec('parameter2', 25.8),
         # Parameters that specify a qualitative change in the analysis
         SwitchSpec('pipeline_tool', 'toolA', ('toolA', 'toolB'))]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from arcana import (
-    MultiStudy, MultiStudyMetaClass, SubStudySpec, ParameterSpec)
+    MultiStudy, MultiStudyMetaClass, SubStudySpec, ParamSpec)
 from banana.study import (
     DwiStudy, T1Study, T2Study, T2starStudy, MriStudy)
 from banana.plot import ImageDisplayMixin
@@ -45,15 +45,15 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             MriStudy)]
 
     add_param_specs = [
-        ParameterSpec(
+        ParamSpec(
             'dmri_fig_slice_offset', (6, 0, 0),
             desc=("Offset the sagittal slices of dMRI figures so they "
                   "intersect a cerebral hemisphere instead of the "
                   "midline between the hemispheres")),
         # Override default values to reduce the number of tracks in order to
         # make it easier to see the tracts in tractography figure.
-        ParameterSpec('dmri_num_global_tracks', int(1e5)),
-        ParameterSpec('dmri_global_tracks_cutoff', 0.175)]
+        ParamSpec('dmri_num_global_tracks', int(1e5)),
+        ParamSpec('dmri_global_tracks_cutoff', 0.175)]
 
     def vein_fig(self, save_path=None, **kwargs):
         """
