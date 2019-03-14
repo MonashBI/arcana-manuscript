@@ -3,9 +3,9 @@ ParameterSpec -> ParamSpec
 references -> citations
 Acquired -> Acq
 BidsAssociatedSelector - BidsAssocSelector
-LinearProcessor -> SingleProcessor
-MultiProcessor -> MultiProcessor
-SlurmProcessor -> SlurmProcessor
+LinearProcessor -> SingleProc
+MultiProcessor -> MultiProc
+SlurmProcessor -> SlurmProc
 ModulesEnvironment -> ModulesEnv
 StaticEnvironment -> StaticEnv
 

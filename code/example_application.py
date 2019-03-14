@@ -28,7 +28,7 @@ study = ExampleStudy(
     # package names explicitly mapped to approp. reqs.
     environment=ModulesEnvironment(
         packages_map={
-            'Package1_Parallel': package1_req}),
+            package1_req: 'Package1_Parallel'}),
     # Link files and fields in the repository
     # to entries in the data specification
     inputs={

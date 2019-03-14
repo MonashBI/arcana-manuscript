@@ -432,8 +432,8 @@ The syntax for pipeline construction is inspired by a proposed form for Nipype v
 Within a pipeline constructor method, a Pipeline object is constructed by the \emph{Study.pipeline} method
 (Figure \ref{fig:pipeline_constructor}). At initialisation, each pipeline is given a name,
 which must be unique amongst the pipelines constructed by the Study. The methods implemented
-by the pipeline can be characterised by providing a the list of scientific references
-and a text description to the \emph{references} and \emph{desc} keyword arguments, respectively.
+by the pipeline can be characterised by providing a the list of citations
+and a text description to the \emph{citations} and \emph{desc} keyword arguments, respectively.
 
 The \emph{add(name, interface)} method is used to add a node to a pipeline and takes
 a unique name for the node (within the pipeline) and a Nipype Interface object, and returns
@@ -517,10 +517,10 @@ specification in the superclass method can be mapped onto different
 entries in the table of the subclass by providing the \emph{input\_map} and
 \emph{output\_map} keyword arguments when calling the superclass method.
 Additionally the name of the pipeline can be altered by providing the \emph{name}
-argument, which is useful when creating multiple  constructor methods from the
-one base method. In these scenarios it is important to
+argument, which is useful when creating multiple pipeline constructor methods
+from a single base method. In these scenarios it is important to
 also pass the the wildcard keyword arguments of the overriding method to the
-\emph{name\_maps} keyword argument of the superclass method, to allow the
+\emph{name\_maps} keyword argument of the superclass method to allow the
 overriding method to be overridden in turn.
 
 
@@ -576,16 +576,19 @@ in the \emph{add\_sub\_study\_specs} class attribute in the manner of
 data and parameter specifications. A SubStudySpec consists of a name, a
 Study class, and a \emph{name map} dictionary\emph{.} The name map
 dictionary maps data and parameter specification names from the
-sub-study namespace to the namespace of the MultiStudy class.
+sub-study namespace to the namespace of the MultiStudy class, i.e.
+the dictionary keys are in the sub-study namespace and the dictionary
+values are in the global namespace.
 
 Entries in the specification tables of sub-study classes that are not
 referenced in the sub study's name map are implicitly mapped to the
-MultiStudy namespace by the MultiStudyMetaClass during construction of the MultiStudy class,
-using the name of the sub-study as a prefix.
-If the specification is derived, then its associated pipeline constructor method
-is also mapped into the MultiStudy namespace. For example, \emph{derived1} in
-\emph{sub\_study2} would be mapped to \emph{sub\_study2\_derived1} along
-with the method \emph{sub\_study2\_pipeline1}.
+MultiStudy namespace by the MultiStudyMetaClass during construction of the
+MultiStudy class using the name of the sub-study as a prefix.
+If the implicitly mapped specification is derived, then its associated pipeline
+constructor method is also mapped into the MultiStudy namespace with a prefix.
+For example, \emph{derived1} in \emph{sub\_study2} would be mapped to
+\emph{sub\_study2\_derived1} along with the method
+\emph{sub\_study2\_pipeline1}.
 
 \subsection*{Analysis application: Study instances}
 \label{analysis-application-study-instances}
@@ -896,8 +899,9 @@ based on the requirements specified for the node during construction of the pipe
 (see \emph{Pipeline constructors}), and then unloaded afterwards. Mappings from non-standard
 module names installed on the system to those expected by the Study can be
 can be passed as a dictionary to the \emph{packages\_map} keyword argument
-at initialisation. Likewise non-standard versions for packages can be mapped onto
-requirements using the \emph{versions\_map} keyword argument.
+at initialisation. Likewise non-standard versions for packages can be mapped
+onto the versioning system of a requirement using the \emph{versions\_map}
+keyword argument.
 
 \emph{StaticEnvironment} objects don't actively manage the environment,
 and instead only check the current environment for appropriate software
