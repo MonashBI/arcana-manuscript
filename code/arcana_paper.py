@@ -154,7 +154,7 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     from arcana import (
         DirectoryRepo, LinearProcessor, StaticEnvironment,
-        FilesetSelector, DEFAULT_PROV_IGNORE)
+        FilesetInput, DEFAULT_PROV_IGNORE)
     from arcana.utils import parse_value
     from banana.file_format import dicom_format, zip_format
 
@@ -220,21 +220,21 @@ if __name__ == '__main__':
         # Match names in the data specification to filenames used
         # in the repository
         inputs=[
-            FilesetSelector('t1_magnitude', args.t1, dicom_format,
+            FilesetInput('t1_magnitude', args.t1, dicom_format,
                             is_regex=True),
-            FilesetSelector('t2_magnitude', args.t2, dicom_format,
+            FilesetInput('t2_magnitude', args.t2, dicom_format,
                             is_regex=True),
-            FilesetSelector('t2star_channels', args.t2star_chann, zip_format,
+            FilesetInput('t2star_channels', args.t2star_chann, zip_format,
                             is_regex=True),
-            FilesetSelector('t2star_header_image', args.swi, dicom_format,
+            FilesetInput('t2star_header_image', args.swi, dicom_format,
                             is_regex=True),
-            FilesetSelector('t2star_swi', args.swi, dicom_format,
+            FilesetInput('t2star_swi', args.swi, dicom_format,
                             is_regex=True),
-            FilesetSelector('swi_magnitude', args.swi, dicom_format,
+            FilesetInput('swi_magnitude', args.swi, dicom_format,
                             is_regex=True),
-            FilesetSelector('dmri_magnitude', args.dmri, dicom_format,
+            FilesetInput('dmri_magnitude', args.dmri, dicom_format,
                             is_regex=True),
-            FilesetSelector('dmri_reverse_phase', args.distort, dicom_format,
+            FilesetInput('dmri_reverse_phase', args.distort, dicom_format,
                             is_regex=True)],
         # Set parameters of the study
         parameters={n: parse_value(v.strip()) for n, v in args.parameter})

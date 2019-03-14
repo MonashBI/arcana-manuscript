@@ -2,13 +2,14 @@ Repository -> Repo
 ParameterSpec -> ParamSpec
 references -> citations
 Acquired -> Acq
+*Selector -> *Input
 BidsAssociatedSelector - BidsAssocSelector
 LinearProcessor -> SingleProc
 MultiProcessor -> MultiProc
 SlurmProcessor -> SlurmProc
 ModulesEnvironment -> ModulesEnv
 StaticEnvironment -> StaticEnv
-*Selector -> *Input
+
 
 move selector name out of constructor and only set when bound (in code not 
 
