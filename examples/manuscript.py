@@ -1,6 +1,6 @@
 from arcana import (Study, StudyMetaClass, AcquiredFilesetSpec, FilesetSpec,
                     AcquiredFieldSpec, FieldSpec, ParameterSpec, SwitchSpec,
-                    FilesetCollection, XnatRepository, Fileset)
+                    FilesetCollection, XnatRepo, Fileset)
 from arcana.data.file_format.standard import text_format
 from banana.file_format import (
     nifti_gz_format, dicom_format, nifti_format, analyze_format)
@@ -8,7 +8,7 @@ from banana.file_format import (
 STD_IMAGE_FORMATS = (dicom_format, nifti_format, nifti_gz_format,
                      analyze_format)
 
-template_repo = XnatRepository('http://central.xnat.org', 'SAMPLE_TEMPLATES')
+template_repo = XnatRepo('http://central.xnat.org', 'SAMPLE_TEMPLATES')
 template1_default = FilesetCollection(Fileset('sample_atlas', ))
 
 

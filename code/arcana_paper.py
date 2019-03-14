@@ -153,7 +153,7 @@ if __name__ == '__main__':
     import logging
     from argparse import ArgumentParser
     from arcana import (
-        DirectoryRepository, LinearProcessor, StaticEnvironment,
+        DirectoryRepo, LinearProcessor, StaticEnvironment,
         FilesetSelector, DEFAULT_PROV_IGNORE)
     from arcana.utils import parse_value
     from banana.file_format import dicom_format, zip_format
@@ -209,7 +209,7 @@ if __name__ == '__main__':
         # Name for this analysis instance
         'arcana_paper1',
         # Repository is a simple directory on the local file system
-        repository=DirectoryRepository(args.data_dir),
+        repository=DirectoryRepo(args.data_dir),
         # Use a single process on the local system to derive
         processor=LinearProcessor(args.work_dir, reprocess=args.reprocess,
                                   prov_ignore=DEFAULT_PROV_IGNORE + [

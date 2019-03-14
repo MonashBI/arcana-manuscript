@@ -9,13 +9,5 @@ SlurmProcessor -> SlurmProc
 ModulesEnvironment -> ModulesEnv
 StaticEnvironment -> StaticEnv
 
-switch key/values in package map
- "         "         outputs
-remove connect in place of inputs
-
-rename references back to citations
-
-check name_maps sub-studies key/values are around the right way too
-
-move selector name out of constructor and only set when bound
+move selector name out of constructor and only set when bound (in code not 
 
