@@ -239,7 +239,7 @@ contrast or modality, with the suite of analysis methods that can be performed o
 them. Study objects apply the analysis suite defined in
 the Study class to a specific dataset.
 
-The set of acquired data, the derivatives that can be derived from it,
+The set of input data, the derivatives that can be derived from it,
 and methods that construct pipelines to derive the derivatives, are
 linked together by the \emph{data specification} \emph{table} of the
 Study class (Figure \ref{fig:example_study}). Likewise, free parameters used in pipeline
@@ -253,7 +253,7 @@ classes\emph{.}
 \begin{figure*}
     \centering
     \includegraphics[width=0.55\textwidth]{../figures/example_study}
-  \caption{Example study. Blue boxes represent acquired (input)
+  \caption{Example study. Blue boxes represent input
 data (filesets or fields) stored in a repository and green derivatives
 from that data stored alongside the original data. Orange ovals are
 pipelines that operate on data in the repository to derive the
@@ -342,8 +342,8 @@ Fileset and field specifications are passed to the data specification of
 a Study class via the \emph{add\_data\_specs} class attribute as a list
 of named \emph{FilesetSpec} and \emph{FieldSpec} objects (Figure \ref{fig:data_spec}).
 Specifications for acquired data (i.e. input data to the study) are
-distinguished from derived data by using the \emph{AcquiredFilesetSpec}
-and \emph{AcquiredFieldSpec} subtypes. However, the distinction is
+distinguished from derived data by using the \emph{FilesetInputSpec}
+and \emph{FieldInputSpec} subtypes. However, the distinction is
 fluid, with derived specifications able to be overridden by acquired
 specifications in subclasses or MultiStudy classes, and vice-versa, or
 passed inputs when the class is instantiated.
@@ -351,7 +351,7 @@ passed inputs when the class is instantiated.
 \begin{figure}
 \lstinputlisting[basicstyle=\footnotesize,firstline=2, lastline=59]{../code/example_study.py}
 \caption{Example data and parameter specifications. The data
-specification specifies two ``acquired'' file sets, `one' and `ten' and
+specification specifies two input file sets, `one' and `ten' and
 ten derived file sets that can be derived from them, at least
 indirectly. Each derived data spec, specifies the name of the pipeline
 constructor that creates the pipeline that derives them. Parameter
@@ -552,14 +552,13 @@ the global namespace and mapped into the sub-study space, and dotted
 arrows the mappings. Sub-studies are linked by mapping the same data
 spec in the global space onto data specifications the multiple sub-study
 namespaces (e.g. \emph{Derived} \emph{1}, \emph{2} and \emph{3}).
-There are no restrictions
-between mapping acquired and derivative specifications: both acquired
-and derivative specifications can be mapped onto acquired data or
-derivative specifications in sub-studies. If a spec in the global spaced
-is mapped onto a derivative spec in the sub-study space, then the
-pipeline that generates that derivative in the sub-study will not run
-unless it generates other required derivatives (e.g. \emph{Pipeline 3} in
-\emph{Sub-Study 2})}
+There are no restrictions between mapping input and derivative data
+specifications: both input and derivative specifications can be mapped
+onto input data or derivative specifications in sub-studies.
+If a spec in the global spaced is mapped onto a derivative spec in the
+sub-study space, then the pipeline that generates that derivative in the
+sub-study will not run unless it generates other required derivatives
+(e.g. \emph{Pipeline 3} in \emph{Sub-Study 2})}
 \label{fig:example_multi_study}
 \end{figure*}
 
@@ -781,7 +780,7 @@ If the data to select has been derived from an alternative Arcana Study
 instance, then the name of the alternative study can be passed to the
 \emph{from\_study} keyword argument provided to the selector. There are
 no restrictions on selecting any data, derived or otherwise, to match
-acquired or derived specifications. For example, it is possible to
+input or derived specifications. For example, it is possible to
 deliberately skip analysis steps by selecting an output of an early step
 in a previous run as a match for a later derived spec although this is
 not recommended as standard practice.
@@ -965,9 +964,9 @@ images derived from the T2*-weighted acquisition (Figure \ref{fig:t2star_t1_stud
   \caption{Combined T2*/T1-weighted studies within \emph{ArcanaPaper}
   MultiStudy class, which can derive vein masks by combining Quantitative Susceptibility
 Mapping (QSM) and Susceptible Weighted Imaging (SWI) contrasts with a
-manual atlas. Blue boxes: acquired (input) data (filesets or fields).
+manual atlas. Blue boxes: input data (filesets or fields).
 Green boxes: derivatives. Orange ovals: pipelines. Blue and green
-arrows: acquired and derived inputs to pipelines, respectively. Orange
+arrows: inputs to pipelines from input and derived data, respectively. Orange
 arrows: outputs of pipelines. Dashed boxes represent data specifications
 in a sub-study that are present in the global namespace and mapped into
 the sub-study space, and dotted arrows the mappings. The acquired

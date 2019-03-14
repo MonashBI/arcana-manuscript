@@ -1,5 +1,5 @@
-from arcana import (Study, StudyMetaClass, AcquiredFilesetSpec, FilesetSpec,
-                    AcquiredFieldSpec, FieldSpec, ParamSpec, SwitchSpec,
+from arcana import (Study, StudyMetaClass, FilesetInputSpec, FilesetSpec,
+                    FieldInputSpec, FieldSpec, ParamSpec, SwitchSpec,
                     FilesetCollection, XnatRepo, Fileset)
 from arcana.data.file_format.standard import text_format
 from banana.file_format import (
@@ -16,13 +16,13 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
 
     add_data_specs = [
         # Acquired file sets
-        AcquiredFilesetSpec('acquired_file1', text_format),
-        AcquiredFilesetSpec('acquired_file2', IMAGE_FORMATS),
+        FilesetInputSpec('acquired_file1', text_format),
+        FilesetInputSpec('acquired_file2', IMAGE_FORMATS),
         # Acquired fields
-        AcquiredFieldSpec('acquired_field1', int, frequency='per_subject'),
-        AcquiredFieldSpec('acquired_field2', str,),
+        FieldInputSpec('acquired_field1', int, frequency='per_subject'),
+        FieldInputSpec('acquired_field2', str,),
         # "Acquired" file set with default value. Useful for standard templates
-        AcquiredFilesetSpec('template1', IMAGE_FORMATS, frequency='per_study',
+        FilesetInputSpec('template1', IMAGE_FORMATS, frequency='per_study',
                             default=template1_default),
         # Derived file sets
         FilesetSpec('derived_file1', text_format, 'pipeline1'),
