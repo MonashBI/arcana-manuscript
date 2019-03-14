@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import os.path as op
 from arcana import (
-    FilesetSelector, FieldSelector, XnatRepository,
-    SlurmProcessor, ModulesEnvironment)
+    FilesetInput, FieldInput, XnatRepo, SlurmProc, ModulesEnv)
 from .example_study import ExampleStudy
 from banana.file_format import dicom_format
 from myproj.requirements import package1_req
@@ -15,31 +14,30 @@ study = ExampleStudy(
     # performed on the same data
     name='example',
     # Set up connection to XNAT repository
-    repository=XnatRepository(
+    repository=XnatRepo(
         project_id='SAMPLE_PROJECT',
         server='https://central.xnat.org',
         cache_dir=op.expanduser('~/xnat-cache')),
     # Specify the use the SLURM scheduler to submit
     # nodes as jobs using Nipype's SlurmGraphPlugin
-    processor=SlurmProcessor(
+    processor=SlurmProc(
         work_dir=op.expanduser('~/work')),
     # Specify the use of environment modules to
     # satisfy software requirements. Non-standard
     # package names explicitly mapped to approp. reqs.
-    environment=ModulesEnvironment(
+    environment=ModulesEnv(
         packages_map={
             package1_req: 'Package1_Parallel'}),
     # Link files and fields in the repository
     # to entries in the data specification
     inputs={
-        'acquired1_file': FilesetSelector(
-            '.*mprage.*', dicom_format, is_regex=True),
-        'acquired_file2': FilesetSelector(
-            'SWI_Images', dicom_format),
-        'acquired_field1': FieldSelector(
-            'YOB', int, frequency='per_subject'),
-        'acquired_field2': FieldSelector(
-            'weight', float)},
+        'acquired1_file': FilesetInput(pattern='.*mprage.*',
+                                       dicom_format),
+        'acquired_file2': FilesetInput('SWI_Images',
+                                       dicom_format),
+        'acquired_field1': FieldInput('YOB', int,
+                                      frequency='per_subject'),
+        'acquired_field2': FieldInput('weight', float)},
     # Specify parameters specific to this
     # analysis
     parameters={'parameter1': 55.0,

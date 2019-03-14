@@ -1,8 +1,8 @@
 import os
 from arcana import (
-    Study, StudyMetaClass, AcquiredFilesetSpec, FilesetSpec,
-    AcquiredFieldSpec, FieldSpec, ParameterSpec, SwitchSpec,
-    FilesetSelector, XnatRepository)
+    Study, StudyMetaClass, FilesetInputSpec, FilesetSpec,
+    FieldInputSpec, FieldSpec, ParamSpec, SwitchSpec,
+    FilesetInput, XnatRepo)
 from banana.file_format import (
     nifti_gz_format, dicom_format, nifti_format, analyze_format,
     text_format, text_matrix_format)
@@ -11,12 +11,11 @@ STD_IMAGE_FORMATS = (dicom_format, nifti_format, nifti_gz_format,
                      analyze_format)
 
 # Select a Fileset collection to use as a default for template1
-template_repo = XnatRepository(
+template_repo = XnatRepo(
     server='http://central.xnat.org', project_id='TEMPLATES',
     cache=os.path.expanduser(os.path.join('~', 'xnat-cache')))
-template_selector = FilesetSelector(
-    name='template1_default', format=nifti_gz_format,
-    pattern='MNI152_T1', frequency='per_study')
+template_selector = FilesetInput('MNI152_T1', nifti_gz_format,
+                                 frequency='per_study')
 template_collectn = template_selector.match(template_repo.tree())
 
 
@@ -24,21 +23,22 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
 
     add_data_specs = [
         # Acquired file sets
-        AcquiredFilesetSpec('acquired_file1', text_format),
-        AcquiredFilesetSpec('acquired_file2', STD_IMAGE_FORMATS),
+        FilesetInputSpec('acquired_file1', text_format),
+        FilesetInputSpec('acquired_file2', STD_IMAGE_FORMATS),
         # Acquired fields
-        AcquiredFieldSpec('acquired_field1', int, array=True,
-                          frequency='per_subject'),
-        AcquiredFieldSpec('acquired_field2', float, optional=True),
+        FieldInputSpec('acquired_field1', int, array=True,
+                       frequency='per_subject'),
+        FieldInputSpec('acquired_field2', float, optional=True),
         # "Acquired" file set with default value. Useful for
         # standard templates
-        AcquiredFilesetSpec('template1', STD_IMAGE_FORMATS,
-                            frequency='per_study',
-                            default=template_collectn),
+        FilesetInputSpec('template1', STD_IMAGE_FORMATS,
+                         frequency='per_study',
+                         default=template_collectn),
         # Derived file sets
         FilesetSpec('derived_file1', text_format, 'pipeline1'),
         FilesetSpec('derived_file2', nifti_gz_format, 'pipeline1'),
-        FilesetSpec('derived_file3', text_matrix_format, 'pipeline2'),
+        FilesetSpec('derived_file3', text_matrix_format,
+                    'pipeline2'),
         FilesetSpec('derived_file4', dicom_format, 'pipeline3'),
         FilesetSpec('derived_file5', nifti_gz_format, 'pipeline3',
                     frequency='per_subject'),
@@ -51,8 +51,8 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
 
     add_param_specs = [
         # Standard parameters
-        ParameterSpec('parameter1', 10),
-        ParameterSpec('parameter2', 25.8),
+        ParamSpec('parameter1', 10),
+        ParamSpec('parameter2', 25.8),
         # "Switch" parameters that specify a qualitative change
         # in the analysis
         SwitchSpec('node1_option', False),  # Boolean switch
@@ -64,7 +64,7 @@ class ExampleStudy(Study, metaclass=StudyMetaClass):
             name='pipeline2',
             name_maps=name_maps,
             desc="Description of the pipeline",
-            references=[methods_paper_cite])
+            citations=[methods_paper_cite])
 
         node1 = pipeline.add(
             'node1',
