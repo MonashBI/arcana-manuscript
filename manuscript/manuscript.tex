@@ -537,9 +537,9 @@ While basic Study classes are typically associated with single image
 modality or contrast, the analysis suites implemented by them can be
 integrated into multi-modal analysis by aggregating multiple Study
 classes (sub-studies) in a \emph{MultiStudy} class. Analysis suites are
-integrated by joining the data specification tables of the sub-studies
-of a MultiStudy class. Entries in specification tables of sub-studies
-are joined by mapping them to a common entry in the specification table
+integrated in a MultiStudy class by linking the data specification tables
+of sub-studies. Sub-study specification table entries are linked by mapping
+them to a common entry in the specification table class attribute
 of the MultiStudy (Figure \ref{fig:example_multi_study}). This enables derivatives from one
 sub-study (e.g. brain extracted T1-weighted anatomical) to be referenced
 by workflows of other sub-studies (e.g. anatomically constrained DWI
