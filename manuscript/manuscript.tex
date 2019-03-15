@@ -339,15 +339,20 @@ explicitly registered by the researcher at design time using the
 \emph{FileFormat.register(format)} class method to avoid conflicts where
 the same extension is used for different formats in different contexts.
 
-Fileset and field specifications are passed to the data specification of
-a Study class via the \emph{add\_data\_specs} class attribute as a list
-of named \emph{FilesetSpec} and \emph{FieldSpec} objects (Figure \ref{fig:data_spec}).
-Specifications for acquired data (i.e. input data to the study) are
-distinguished from derived data by using the \emph{FilesetInputSpec}
-and \emph{FieldInputSpec} subtypes. However, the distinction is
-fluid, with derived specifications able to be overridden by acquired
-specifications in subclasses or MultiStudy classes, and vice-versa, or
-passed inputs when the class is instantiated.
+Fileset and field specifications of a Study class are defined by the
+list of \emph{FilesetSpec} and \emph{FieldSpec} objects in the
+\emph{add\_data\_specs} class attribute (Figure \ref{fig:data_spec}),
+The specifications are collated with any data specifications in base
+classes into the \emph{\_data\_specs} class attribute during the creation
+of the class by the StudyMetaClass metaclass.
+Specifications for input data to the study are
+distinguished from derivative specifications by the \emph{FilesetInputSpec}
+and \emph{FieldInputSpec} subtypes. However, the distinction between
+input and derived data is somewhat blurred, as derivative specifications can be
+passed input data when the class is instantiated. In addition,
+when subclassing a Study class, or combining it in a MultiStudy class,
+derivative specifications can be overridden by input
+specifications, and vice-versa.
 
 \begin{figure}
 \lstinputlisting[basicstyle=\footnotesize,firstline=2, lastline=59]{../code/example_study.py}
@@ -406,11 +411,10 @@ tool). Pipelines source their inputs from, and sink their outputs to, entries
 in the data specification table, thereby linking the table together.
 
 Pipelines are constructed dynamically by ``pipeline constructor" methods
-of the study. Pipeline constructor methods are referenced by name in the \emph{pipeline\_name}
-argument of the FilesetSpec and FieldSpec objects of data specifications
-they derive. Pipeline constructor methods should only receive wildcard keyword
-arguments (e.g. \lstinline{my_pipeline(self, **name_maps)}), and these arguments
-should be passed as a dictionary directly to the \emph{name\_maps} argument
+of the study. Pipeline constructor methods are referenced by name in the
+data specifications they derive. Pipeline constructor methods should only
+receive wildcard keyword arguments (e.g. \lstinline{my_pipeline(self, **name_maps)}),
+and these arguments should be passed as a dictionary directly to the \emph{name\_maps} argument
 of the pipeline initialisation to enable inputs and outputs of the
 pipeline to be rerouted to alternative data specifications in modified constructor
 methods, typically in subclasses and multi-studies (see
@@ -450,11 +454,11 @@ arguments take a dictionary. The keys of the \emph{inputs} dictionary correspond
 trait names in the node's input interface, whereas the keys of the \emph{outputs} dictionary correspond to
 names of entries in the data specification table. The values of both dictionaries are 2-tuples. For pipeline
 inputs, values of the \emph{inputs} dictionary consist of a name of an entry in the data specification table
-and the format the input is expected in (i.e. a FileFormat for Fileset specifications or Python datatype for Field specifications).
+and the format the input data is expected in (i.e. a FileFormat for Fileset specifications or Python datatype for Field specifications).
 For pipeline outputs, values of the \emph{outputs} dictionary consist of a trait name in the node's output interface and the format the
 output data is generated in. For input connections from other nodes, values of the \emph{inputs} dictionary
 consist of a reference to the upstream node and the name of a trait in the
-upstream node's output interface (output connections to other nodes are implied by input connections of other nodes).
+upstream node's output interface (output connections to other nodes are implied by input connections of the receiving nodes).
 
 If the expected format of a pipeline input or generated format of a pipeline output does not match that
 of the corresponding study input or data specification, then a conversion node is implicitly connected
