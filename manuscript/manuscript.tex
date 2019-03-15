@@ -849,38 +849,18 @@ the Nipype execution plugin.
 
 Provenance is stored for each pipeline run alongside the generated
 derivatives and consists of parameter values used by the pipeline,
-software versions used by the pipeline, a graph representation of the
-underlying Nipype workflow, checksums of inputs, version of Arcana used,
-version of Nipype used, subject and visit IDs used by study.
+software versions used by the pipeline, interface parameters,
+a graph representation of the underlying Nipype workflow, checksums of inputs,
+version of Arcana used, version of Nipype used, and any subject and visit IDs
+that were joined over in the workflow.
 
-For subsequent analyses, changes with respect to any of the stored values, with
-the exception of subject and visit IDs, will be flagged as a mismatch by default.
-However, changes can be ignored by providing the path to the attribute to ignore
-to the \emph{prov\_ignore} keyword argument at initialisation of the Processor.
-Subject or visit IDs only flag a mismatch if any of the inputs, or
-inputs of upstream pipelines, are of per-visit or per-subject frequency,
-respectively, or per-study frequency. How provenance mismatches are handled by the
-study is determined by the \emph{reprocess} flag, which is passed to the
-Study on initialisation (Table \ref{tbl:reprocess-flag}).
-
-
-\begin{table}
-\caption{Effect of the \emph{reprocess} flag value on the
-behaviour of the study when existing derivatives are found that were
-derived with mismatching inputs and parameters.}
-\label{tbl:reprocess-flag} 
-\begin{tabular}{ll}
-\hline\noalign{\smallskip}
-\textbf{Reprocess value} & \textbf{Behaviour on provenance mismatch} \\
-\noalign{\smallskip}\hline\noalign{\smallskip}
-False (default) & Raises an exception \\
-True & Mismatching derivatives will be reprocessed \\
-`ignore' & Mismatches are ignored \\
-`ignore\_versions' & Ignore versions, otherwise raise exception \\
-`ignore\_versions\_true' & Ignore versions, otherwise the derivative will be reprocessed \\
-\noalign{\smallskip}\hline
-\end{tabular}
-\end{table}
+For subsequent analyses, changes with respect to any of the stored provenance values will
+be flagged as a mismatch, with the exception of interface package versions
+(e.g. Nipype or Banana versions). How mismatches are handled depends on the \emph{reprocess} flag passed to the
+Processor. If \emph{reprocess} is true then the sessions with mismatching provenance
+will be reprocessed, otherwise if \emph{reprocess} is false (the default) an exception will be raised.
+Changes with respect to any element in the provenance JSON document can be ignored by providing
+a list of JSONPath queries to the \emph{prov\_ignore} keyword argument.
 
 \subsubsection*{Environment modules}
 
