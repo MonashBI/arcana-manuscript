@@ -315,10 +315,11 @@ tables}
 \label{sec:data-and-parameter-specification-tables}
 
 At the heart of each Study class is the data specification table, which
-specifies both the input and output data of the analysis, and all the
+is stored in the \emph{\_data\_specs} class attribute and specifies the
+input and output data of the analysis, and all
 stages in between. There is a one-to-one relationship between entries in
-the data specification table and data that is stored in the repository
-or will be stored if and when it is derived. Which intermediate
+the data specification table and data that are stored in the repository,
+or will be stored if and when they are derived. Which intermediate
 derivatives to include in the data specification table, and therefore
 store in the repository, is left to the discretion of the researcher
 designing the analysis. However, as a general rule, derivatives that
@@ -375,8 +376,8 @@ standard, a dictionary mapping their data specifications to default
 \emph{default\_bids\_inputs} class attribute. BidsInput
 specifies a primary scan in the BIDS standard using its \emph{type}, \emph{modality},
 \emph{format} and optionally the \emph{task} it belongs to. BidsAssocInput is used to select
-associated files, such as field maps and diffusion encoding matrices in reference
-to a primary scan. Default Bids selectors are typically not provided with
+associated files, such as field maps and diffusion encoding matrices relative
+to a primary scan. Default BIDS selectors are typically not provided with
 a value for the \emph{task} keyword, which can be set at instantiation of
 the Study class with the \emph{bids\_task} keyword argument to enable the design of Study
 classes that are applicable to any BIDS task.
@@ -428,7 +429,7 @@ inputs and outputs of the pipeline onto different data specifications.}
 \label{fig:pipeline_constructor}
 \end{figure}
 
-The syntax for pipeline construction is inspired by a proposed form for Nipype v2.0
+The syntax for pipeline construction is inspired by changes proposed for Nipype v2.0
 (\url{github.com/nipy/nipype/issues/2539}).
 Within a pipeline constructor method, a Pipeline object is constructed by the \emph{Study.pipeline} method
 (Figure \ref{fig:pipeline_constructor}). At initialisation, each pipeline is given a name,
@@ -453,11 +454,11 @@ and the format the input is expected in (i.e. a FileFormat for Fileset specifica
 For pipeline outputs, values of the \emph{outputs} dictionary consist of a trait name in the node's output interface and the format the
 output data is generated in. For input connections from other nodes, values of the \emph{inputs} dictionary
 consist of a reference to the upstream node and the name of a trait in the
-upstream node's output interface (output connections are implied by input connections to other nodes).
+upstream node's output interface (output connections to other nodes are implied by input connections of other nodes).
 
 If the expected format of a pipeline input or generated format of a pipeline output does not match that
 of the corresponding study input or data specification, then a conversion node is implicitly connected
-to the pipeline by the framework to perform the required conversion. Pipeline inputs and outputs of
+to the pipeline by the framework to perform the required conversion. Pipeline inputs and outputs
 that are conditional on parameters or inputs provided to the study can be specified outside of the
 \emph{add} method using the \emph{connect\_input} or
 \emph{connect\_output} methods, respectively. Conditional connections between
@@ -500,7 +501,7 @@ Because Arcana analyses are implemented as Python classes, class
 inheritance can be used to specialise existing analyses.
 
 Instead of being set directly, the data and parameter specifications are set
-by the metaclass of the Study (i.e. StudyMetaClass),
+by the metaclass of the Study (i.e. StudyMetaClass)
 in order to combine them with corresponding specifications in the class' bases. The combined
 data and parameter specifications are constructed by visiting the class'
 bases in reverse method resolution order (MRO) and adding specifications
@@ -656,16 +657,15 @@ subdirectories for each subject in the study, with subject IDs taken
 from the subdirectory names. If data was acquired for each subject
 over multiple visits, than an additional layer of nested subdirectories
 is included in the subject subdirectories, with the visit IDs taken from
-the subdirectory names. Note that the directory
+the subdirectory names. Note that the basic
 repository is similar to the BIDS format, however, there are no naming
-conventions in the directory repository, which enables prototyping and
+conventions in the basic repository, which enables prototyping and
 testing of analyses on loosely structured data.
 
 Derivatives are stored by their specification name in a study-specific
-namespaces to avoid clashes with separate analyses. In directory
+namespaces to avoid clashes with separate analyses. In basic
 repositories this namespace is a subdirectory named after the study
-nested within each visit subdirectory if present or subject subdirectory
-otherwise. In BIDS repositories, the namespace is a subdirectory of the
+nested within the lowest layer of the data tree. In BIDS repositories, the namespace is a subdirectory of the
 \emph{derivatives} directory, again named after the study. In XNAT
 repositories, derivatives for each session are stored in separate
 \emph{MrSession} objects alongside the primary session underneath its
@@ -804,7 +804,7 @@ included in the data specification (see \emph{Data and parameter
 specifications)} so inputs do not need to be provided to the
 initialisation of the Study. However, BidsInput and
 BidsAssocInput objects can be provided to override the default
-selections is required.
+selections if required.
 
 \subsubsection*{Processor modules}
 \label{processor-modules}
@@ -813,7 +813,7 @@ Processor modules control how pipelines generated by a Study
 are executed. There currently three Processor modules implemented in
 Arcana: \emph{SingleProc}, \emph{MultiProc},
 \emph{SlurmProc}, which wrap the LinearPlugin, MultiProcPlugin and SlurmPlugin
-Nipype execution plugins. The main task performed
+Nipype execution plugins, respectively. The main task performed
 by the processor, as separate from the Nipype execution plugin it wraps,
 is to determine which pipelines need to be run and link them into a
 single workflow. Since this logic is implemented in the Processor
@@ -848,16 +848,18 @@ iterator nodes in order to create a single workflow, which is then executed usin
 the Nipype execution plugin.
 
 Provenance is stored for each pipeline run alongside the generated
-derivatives and consists of: parameter values used by the pipeline,
+derivatives and consists of parameter values used by the pipeline,
 software versions used by the pipeline, a graph representation of the
 underlying Nipype workflow, checksums of inputs, version of Arcana used,
 version of Nipype used, subject and visit IDs used by study.
 
 For subsequent analyses, changes with respect to any of the stored values, with
-the exception of subject and visit IDs, will be flagged as a mismatch.
+the exception of subject and visit IDs, will be flagged as a mismatch by default.
+However, changes can be ignored by providing the path to the attribute to ignore
+to the \emph{prov\_ignore} keyword argument at initialisation of the Processor.
 Subject or visit IDs only flag a mismatch if any of the inputs, or
-inputs of upstream pipelines, are per-visit or per-subject,
-respectively, or per-study. How provenance mismatches are handled by the
+inputs of upstream pipelines, are of per-visit or per-subject frequency,
+respectively, or per-study frequency. How provenance mismatches are handled by the
 study is determined by the \emph{reprocess} flag, which is passed to the
 Study on initialisation (Table \ref{tbl:reprocess-flag}).
 
@@ -879,11 +881,6 @@ True & Mismatching derivatives will be reprocessed \\
 \noalign{\smallskip}\hline
 \end{tabular}
 \end{table}
-
-Additionally, a time limit can be passed to the
-\emph{reprocess\_time\_limit}, and if the estimated time to reprocess
-all the required sessions is less than the time limit they will be
-reprocessed and otherwise an exception will be raised.
 
 \subsubsection*{Environment modules}
 
