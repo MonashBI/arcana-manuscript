@@ -14,7 +14,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
     T1-weighted, T2*-weighted and diffusion MRI data.
     """
 
-    add_sub_study_specs = [
+    add_substudy_specs = [
         # Sub-study to process the T1-weighted data
         SubStudySpec(
             't1',

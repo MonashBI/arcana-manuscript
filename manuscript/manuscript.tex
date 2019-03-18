@@ -241,12 +241,12 @@ the Study class to a specific dataset.
 
 The set of input data, the derivatives that can be derived from it,
 and methods that construct pipelines to derive the derivatives, are
-linked together by the \emph{data specification} \emph{table} class
-attribute of the Study (Figure \ref{fig:example_study}). Likewise,
+linked together by the \emph{data specification} class attribute of the
+Study (Figure \ref{fig:example_study}). Likewise,
 free parameters used in pipeline construction are defined in the class'
-\emph{parameter specification} \emph{table}. Class inheritance can
+\emph{parameter specification} class attribute. Class inheritance can
 be used to specialise analysis suites by overriding entries in the
-specification tables or pipeline constructor methods. Analysis suites
+specifications or pipeline constructor methods. Analysis suites
 for multi-modal data can be implemented by combining Study classes
 within \emph{MultiStudy} classes\emph{.}
 
@@ -264,21 +264,21 @@ pipelines}
 
 Analysis methods defined by a Study class are applied to a
 specific dataset by instantiating an object of the class and
-requesting a derivative listed in the class' data specification table.
+requesting a derivative listed in the class' data specification.
 At initialisation, a Study object is passed references to a \emph{Repository},
 a \emph{Processor}, and an \emph{Environment} objects, which
 define where and how data is stored and processed. When a derivative is
 requested, a Study object queries the Repository for intermediate
 derivatives that can be reused before constructing a workflow to produce
 the requested derivative. The manner in which the workflows are executed
-(i.e. single/multi-process or via SLURM scheduler) is specified by the
-Processor and software modules required by the analysis are
+(i.e. single/multi-process or via a SLURM scheduler \citep{yoo_slurm:_2003})
+is specified by the Processor and software modules required by the analysis are
 loaded by the Environment. Selected workflow products are
 stored back in the repository for reuse by subsequent analyses (Figure
 \ref{fig:simple_uml}). Input data to a study are selected from repositories
  using criteria defined in \emph{Input} objects passed to the Study
  object at initialisation and matched against entries in the class' data
-specification table.
+specification.
 
 \begin{figure*}
     \centering
@@ -310,43 +310,39 @@ implicitly by the framework. All Study classes must inherit from the
 \emph{Study} base class and be created by the \emph{StudyMetaClass}
 metaclass or subclasses thereof.
 
-\subsubsection*{Data and parameter specification
-tables}
-\label{sec:data-and-parameter-specification-tables}
+\subsubsection*{Data and parameter specifications}
+\label{sec:data-and-parameter-specifications}
 
-At the heart of each Study class is the data specification table, which
-is stored in the \emph{\_data\_specs} class attribute and specifies the
-input and output data of the analysis, and all
+At the heart of each Study class is the data specification attribute, which
+specifies the input and output data of the analysis, and all
 stages in between. There is a one-to-one relationship between entries in
-the data specification table and data that are stored in the repository,
+the data specification and derivatives that are stored in the repository,
 or will be stored if and when they are derived. Which intermediate
-derivatives to include in the data specification table, and therefore
+derivatives to include in the data specification, and therefore
 store in the repository, is left to the discretion of the researcher
 designing the analysis. However, as a general rule, derivatives that
 require manual QC or are likely to be reused between different branches
-of analysis should be included in the table.
+of analysis should be included in the data specification.
 
-Data specified in the data specification table can be of either a
-\emph{fileset} or \emph{field} type. Filesets represent single files,
+Entries in the data specification can be of either a
+\emph{file set} or \emph{field} type. File sets represent single files,
 or sets of related files typically contained within a directory
 (e.g. a multi-volume DICOM dataset). Fields
-represent integer, floating point, datetime, or character string
-values. By default, a Field represents a single value but if the \emph{array}
-flag is set, a Field represents a list of values.
-Each Fileset references a \emph{FileFormat} object, which
+represent integer, floating point, date-time, or character string
+values. By default, a field represents a single value but if the \emph{array}
+flag is set, a field represents a list of values.
+Each file set references a \emph{FileFormat} object, which
 specifies the formats of the files in the set. File formats are
 explicitly registered by the researcher at design time using the
 \emph{FileFormat.register(format)} class method to avoid conflicts where
 the same extension is used for different formats in different contexts.
 
-Fileset and field specifications of a Study class are defined by the
+The data specification of a Study class are defined by providing a
 list of \emph{FilesetSpec} and \emph{FieldSpec} objects in the
-\emph{add\_data\_specs} class attribute (Figure \ref{fig:data_spec}),
-The specifications are collated with any data specifications in base
-classes into the \emph{\_data\_specs} class attribute during the creation
-of the class by the StudyMetaClass metaclass.
-Specifications for input data to the study are
-distinguished from derivative specifications by the \emph{FilesetInputSpec}
+\emph{add\_data\_specs} class attribute (Figure \ref{fig:data_spec}).
+The lists are collated with data specifications in any base Study
+classes during the creation of the class. Input data to the study are
+distinguished from derivatives by using the \emph{FilesetInputSpec}
 and \emph{FieldInputSpec} subtypes. However, the distinction between
 input and derived data is somewhat blurred, as derivative specifications can be
 passed input data when the class is instantiated. In addition,
@@ -383,9 +379,9 @@ specifies a primary scan in the BIDS standard using its \emph{type}, \emph{modal
 \emph{format} and optionally the \emph{task} it belongs to. BidsAssocInput is used to select
 associated files, such as field maps and diffusion encoding matrices relative
 to a primary scan. Default BIDS selectors are typically not provided with
-a value for the \emph{task} keyword, which can be set at instantiation of
-the Study class with the \emph{bids\_task} keyword argument to enable the design of Study
-classes that are applicable to any BIDS task.
+a value for the \emph{task} keyword since the task can be set at instantiation of
+the Study class with the \emph{bids\_task} keyword argument, which enables the design of Study
+classes that are not restricted to a single task by default.
 
 Similar to data specifications, parameter specifications are included in
 the Study class by providing a list of \emph{ParamSpec} objects to
@@ -408,7 +404,7 @@ connections, and namespace management. Each pipeline consists of a
 (typically small) graph of Nipype nodes, with each node wrapping a stand alone tool
 (e.g. FSL's FLIRT) or analysis package function (e.g. SPM's \emph{coreg}
 tool). Pipelines source their inputs from, and sink their outputs to, entries
-in the data specification table, thereby linking the table together.
+in the data specification, thereby linking the specification together.
 
 Pipelines are constructed dynamically by ``pipeline constructor" methods
 of the study. Pipeline constructor methods are referenced by name in the
@@ -436,9 +432,9 @@ inputs and outputs of the pipeline onto different data specifications.}
 The syntax for pipeline construction is inspired by changes proposed for Nipype v2.0
 (\url{github.com/nipy/nipype/issues/2539}).
 Within a pipeline constructor method, a Pipeline object is constructed by the \emph{Study.pipeline} method
-(Figure \ref{fig:pipeline_constructor}). At initialisation, each pipeline is given a name,
-which must be unique amongst the pipelines constructed by the Study. The methods implemented
-by the pipeline can be characterised by providing a the list of citations
+(Figure \ref{fig:pipeline_constructor}). At initialisation, each pipeline is assigned a name,
+which must be unique amongst the pipelines constructed by the Study given the any combination of
+switches. The methods implemented by the pipeline can be characterised by providing a the list of citations
 and a text description to the \emph{citations} and \emph{desc} keyword arguments, respectively.
 
 The \emph{add(name, interface)} method is used to add a node to a pipeline and takes
@@ -452,13 +448,13 @@ Node interfaces are connected to each other, and to inputs and outputs of the pi
 providing \emph{inputs} and \emph{outputs} keyword arguments to the \emph{add} method. Both
 arguments take a dictionary. The keys of the \emph{inputs} dictionary correspond to
 trait names in the node's input interface, whereas the keys of the \emph{outputs} dictionary correspond to
-names of entries in the data specification table. The values of both dictionaries are 2-tuples. For pipeline
-inputs, values of the \emph{inputs} dictionary consist of a name of an entry in the data specification table
-and the format the input data is expected in (i.e. a FileFormat for Fileset specifications or Python datatype for Field specifications).
+names of entries in the data specification. The values of both dictionaries are 2-tuples. For pipeline
+inputs, values of the \emph{inputs} dictionary consist of a name of an entry in the data specification
+and the format the input data is expected in (i.e. a FileFormat for Fileset specifications or core Python type for Field specifications).
 For pipeline outputs, values of the \emph{outputs} dictionary consist of a trait name in the node's output interface and the format the
 output data is generated in. For input connections from other nodes, values of the \emph{inputs} dictionary
 consist of a reference to the upstream node and the name of a trait in the
-upstream node's output interface (output connections to other nodes are implied by input connections of the receiving nodes).
+upstream node's output interface (output connections to other nodes are implied by input connections to the receiving nodes).
 
 If the expected format of a pipeline input or generated format of a pipeline output does not match that
 of the corresponding study input or data specification, then a conversion node is implicitly connected
@@ -506,8 +502,8 @@ inheritance can be used to specialise existing analyses.
 
 Instead of being set directly, the data and parameter specifications are set
 by the metaclass of the Study (i.e. StudyMetaClass)
-in order to combine them with corresponding specifications in the class' bases. The combined
-data and parameter specifications are constructed by visiting the class'
+in order to combine them with corresponding specifications in base classes.
+The combined data and parameter specifications are constructed by visiting the class'
 bases in reverse method resolution order (MRO) and adding specifications
 from their \emph{add\_data\_specs}, \emph{add\_param\_specs} attributes,
 overriding previously added specifications with matching names. Note
@@ -520,7 +516,7 @@ method. Often the overriding method will call the superclass method
 to construct a pipeline, apply modifications and return the
 modified pipeline. In this scenario, references to the data
 specification in the superclass method can be mapped onto different
-entries in the table of the subclass by providing the \emph{input\_map} and
+entries in the specification of the subclass by providing the \emph{input\_map} and
 \emph{output\_map} keyword arguments when calling the superclass method.
 Additionally the name of the pipeline can be altered by providing the \emph{name}
 argument, which is useful when creating multiple pipeline constructor methods
@@ -537,10 +533,10 @@ While basic Study classes are typically associated with single image
 modality or contrast, the analysis suites implemented by them can be
 integrated into multi-modal analysis by aggregating multiple Study
 classes (sub-studies) in a \emph{MultiStudy} class. Analysis suites are
-integrated in a MultiStudy class by linking the data specification tables
-of sub-studies. Sub-study specification table entries are linked by mapping
-them to a common entry in the specification table class attribute
-of the MultiStudy (Figure \ref{fig:example_multi_study}). This enables derivatives from one
+integrated in a MultiStudy class by linking the data specifications
+of sub-studies. Sub-study specification entries are linked by mapping
+them to a common entry in the specification of the MultiStudy class
+(Figure \ref{fig:example_multi_study}). This enables derivatives from one
 sub-study (e.g. brain extracted T1-weighted anatomical) to be referenced
 by workflows of other sub-studies (e.g. anatomically constrained DWI
 tractography).
@@ -575,17 +571,17 @@ class, additional data and parameter specifications can be added to the
 class via \emph{add\_data\_specs} and \emph{add\_param\_specs}
 respectively for additional analysis not included in the sub-studies.
 
-Sub-studies are aggregated in the \emph{sub-study} \emph{specification
-table} of a MultiStudy class via a list of \emph{SubStudySpec} objects
+Sub-studies are aggregated in the \emph{sub-study} \emph{specification}
+of a MultiStudy class via a list of \emph{SubStudySpec} objects
 in the \emph{add\_sub\_study\_specs} class attribute in the manner of
 data and parameter specifications. A SubStudySpec consists of a name, a
 Study class, and a \emph{name map} dictionary\emph{.} The name map
 dictionary maps data and parameter specification names from the
 sub-study namespace to the namespace of the MultiStudy class, i.e.
-the dictionary keys refer to entries in the sub-study specification table and
-the dictionary values refer to entries in the multi-study specification table.
+the dictionary keys refer to entries in the sub-study specification and
+the dictionary values refer to entries in the multi-study specification.
 
-Entries in the specification tables of sub-study classes that are not
+Entries in the specifications of sub-study classes that are not
 referenced in the sub study's name map are implicitly mapped to the
 MultiStudy namespace by the MultiStudyMetaClass during construction of the
 MultiStudy class using the name of the sub-study as a prefix.
@@ -631,7 +627,7 @@ along with the range of subject and visit IDs to be included in the analysis
 The remaining arguments passed to the Study object initialisation are the
 Repository, Processor and Environment modules to use and a list of
 \emph{Input} objects to select input data from the repository and match
-it with the Study's data specification table.
+it with the Study's data specification.
 (Figure \ref{fig:study_application}).
 
 \begin{figure}
@@ -758,7 +754,7 @@ the repository \\
 While derivatives generated by a Study object are named in accordance
 with the data specification of the Study class, arbitrary naming
 conventions can be used for input datasets and fields. A selection
-stage matches input data to entries in the data specification table of
+stage matches input data to entries in the data specification of
 the Study class. The criteria for these selections are passed to the
 the \emph{inputs} argument of the Study object at instantiation in a
 dictionary mapping data specification names to \emph{FilesetInput} and
@@ -794,7 +790,7 @@ not recommended as standard practice.
 Specific files and fields that are not stored within a repository can be
 passed as inputs in \emph{FilesetCollection} and \emph{FieldCollection}
 objects. Collection objects reference an entry in the data specification
-table and contain a single Fileset or Field for every session (or
+and contain a single Fileset or Field for every session (or
 subject/visit/study depending on the frequency of the corresponding data
 specifcation). Collection objects can be used to pass reference atlases and
 templates as inputs to analyses. They can also be set as the default
