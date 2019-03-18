@@ -565,7 +565,7 @@ sub-study will not run unless it generates other required derivatives
 \end{figure*}
 
 All MultiStudy classes must inherit from the Multi\emph{Study} base
-class and be created by the Multi\emph{StudyMetaClass} metaclass or
+class and be created by the \emph{MultiStudyMetaClass} metaclass or
 subclasses thereof. As in the case of subclassing the standard Study
 class, additional data and parameter specifications can be added to the
 class via \emph{add\_data\_specs} and \emph{add\_param\_specs}
@@ -573,7 +573,7 @@ respectively for additional analysis not included in the sub-studies.
 
 Sub-studies are aggregated in the \emph{sub-study} \emph{specification}
 of a MultiStudy class via a list of \emph{SubStudySpec} objects
-in the \emph{add\_sub\_study\_specs} class attribute in the manner of
+in the \emph{add\_substudy\_specs} class attribute in the manner of
 data and parameter specifications. A SubStudySpec consists of a name, a
 Study class, and a \emph{name map} dictionary\emph{.} The name map
 dictionary maps data and parameter specification names from the
@@ -587,16 +587,16 @@ MultiStudy namespace by the MultiStudyMetaClass during construction of the
 MultiStudy class using the name of the sub-study as a prefix.
 If the implicitly mapped specification is derived, then its associated pipeline
 constructor method is also mapped into the MultiStudy namespace with a prefix.
-For example, \emph{derived1} in \emph{sub\_study2} would be mapped to
-\emph{sub\_study2\_derived1} along with the method
-\emph{sub\_study2\_pipeline1}.
+For example, \emph{derived1} in \emph{substudy2} would be mapped to
+\emph{substudy2\_derived1} along with the method
+\emph{substudy2\_pipeline1}.
 
 \subsection*{Analysis application: Study instances}
 \label{analysis-application-study-instances}
 
 To apply the analysis blueprint specified in a Study class to a specific
 dataset, an instance of the Study class is created with details of where
-the data is stored (\emph{Repository} module) the computing
+the data is stored (\emph{Repository} module and \emph{Input} selectors) the computing
 resources available to process it (\emph{Processor} module) and the software
 installed in the environment it will be processed in (\emph{Environment} module).
 A Study object controls the construction and execution of analysis workflows,
@@ -623,12 +623,11 @@ Each Study instance is assigned a name, which is used to differentiate its
 results from alternative analyses on the same dataset (e.g. with different
 parameterisations). Parameters are set on initialisation of the Study object
 along with the range of subject and visit IDs to be included in the analysis
-(if they are not provided then all IDs found in the repository are included).
-The remaining arguments passed to the Study object initialisation are the
-Repository, Processor and Environment modules to use and a list of
-\emph{Input} objects to select input data from the repository and match
-it with the Study's data specification.
-(Figure \ref{fig:study_application}).
+If subject and visit IDs are not explicitly provided then all IDs found in the repository are included.
+The remaining arguments passed to the Study object at initialisation are the
+Repository, Processor and Environment modules and a list of
+\emph{Input} objects to match data in the repository with inputs in the
+data specification (Figure \ref{fig:study_application}).
 
 \begin{figure}
 \lstinputlisting[basicstyle=\footnotesize]{../code/example_application.py}
@@ -657,13 +656,13 @@ subdirectories for each subject in the study, with subject IDs taken
 from the subdirectory names. If data was acquired for each subject
 over multiple visits, than an additional layer of nested subdirectories
 is included in the subject subdirectories, with the visit IDs taken from
-the subdirectory names. Note that the basic
-repository is similar to the BIDS format, however, there are no naming
+the subdirectory names. The basic
+repository is similar to the BIDS format in this form, however, there are no naming
 conventions in the basic repository, which enables prototyping and
 testing of analyses on loosely structured data.
 
 Derivatives are stored by their specification name in a study-specific
-namespaces to avoid clashes with separate analyses. In basic
+namespaces to avoid clashes between separate analyses. In basic
 repositories this namespace is a subdirectory named after the study
 nested within the lowest layer of the data tree. In BIDS repositories, the namespace is a subdirectory of the
 \emph{derivatives} directory, again named after the study. In XNAT
@@ -674,18 +673,18 @@ repositories, derivatives for each session are stored in separate
 (Table \ref{tbl:repo-structure}).
 
 Derived filesets are stored with the format specified in the study's
-data specification. In plain-directory and BIDS repositories, fields are
+data specification. In basic and BIDS repositories, fields are
 stored in a single JSON file named `\_\_fields\_\_.json' in each derived
-session, and on XNAT they are stored in custom fields of the derived
+session, and on XNAT they are stored in custom variables in the derived
 session. Provenance is stored in a `\_\_prov\_\_' sub-directory (dataset
 on XNAT) of the derivatives directory (MrSession on XNAT) in separate
-JSON files for each pipeline named after the pipeline (Table 1).
+JSON files for each pipeline (Table 1).
 
-Summary data (i.e. with \emph{per\_subject}, \emph{per\_visit}, and
+Data from group analyses (i.e. with \emph{per\_subject}, \emph{per\_visit}, and
 \emph{per\_study} frequencies\emph{)} are stored in specially named
 subjects and visits (e.g. `group'), the names for which are specified when
-the repository is initialised. For example, given in plain-directory
-repository using all as the summary name for both subjects and visits,
+the repository is initialised. For example, given a basic
+repository using `group' as the summary name for both subjects and visits,
 per\_subject data for `subj1' would be stored at
 \emph{\textless{}root\textgreater{}/subj1/}group, per\_visit data for
 `visit1' in \emph{\textless{}root\textgreater{}/}group\emph{/visit1},
@@ -752,15 +751,17 @@ the repository \\
 \label{study-inputs}
 
 While derivatives generated by a Study object are named in accordance
-with the data specification of the Study class, arbitrary naming
-conventions can be used for input datasets and fields. A selection
-stage matches input data to entries in the data specification of
-the Study class. The criteria for these selections are passed to the
+with the data specification of the Study class, input file sets and fields
+do not need to be conventionally named when using basic or XNAT
+repositories. In these cases, a selection stage matches input data to
+entries in the data specification of the Study class. The criteria for
+these selections are passed to the
 the \emph{inputs} argument of the Study object at instantiation in a
 dictionary mapping data specification names to \emph{FilesetInput} and
-\emph{FieldInput} objects, and are required
-to match exactly one fileset or field in every session included in the study.
+\emph{FieldInput} objects.
 
+FilesetInput and FieldInput objects are required
+to match exactly one fileset or field in every session included in the study.
 Matching is typically performed on file
 names (dataset labels for XNAT repositories) and field names. If the
 names are inconsistent across the study then regular expressions can be
@@ -778,17 +779,17 @@ inputs come from auxiliary repositories) then explicit
 \emph{subject\_ids}, \emph{visit\_ids} need to be provided and the
 \emph{fill\_tree} flag set when initialising the Study.
 
-If the data to select has been derived from an alternative Arcana Study
+If the data to select has been derived from an alternative Study
 instance, then the name of the alternative study can be passed to the
-\emph{from\_study} keyword argument provided to the selector. There are
+\emph{from\_study} keyword argument provided to the Input object. There are
 no restrictions on selecting any data, derived or otherwise, to match
 input or derived specifications. For example, it is possible to
-deliberately skip analysis steps by selecting an output of an early step
-in a previous run as a match for a later derived spec although this is
+deliberately skip analysis steps by selecting an upstream derivative
+from a previously run workflow as a match for a downstream derivative, although this is
 not recommended as standard practice.
 
-Specific files and fields that are not stored within a repository can be
-passed as inputs in \emph{FilesetCollection} and \emph{FieldCollection}
+Specific file sets and fields can be passed as inputs to a Study in
+\emph{FilesetCollection} and \emph{FieldCollection}
 objects. Collection objects reference an entry in the data specification
 and contain a single Fileset or Field for every session (or
 subject/visit/study depending on the frequency of the corresponding data
@@ -799,7 +800,7 @@ argument. However, for the sake of portability, default inputs should be
 restricted to data in publically accessible repositories or those included in
 standard software packages (e.g. FSL).
 
-When using BIDS repositories, the selection stage is typically already
+When using BIDS repositories, the input selection stage is typically
 included in the data specification (see \emph{Data and parameter
 specifications)} so inputs do not need to be provided to the
 initialisation of the Study. However, BidsInput and
@@ -848,14 +849,13 @@ iterator nodes in order to create a single workflow, which is then executed usin
 the Nipype execution plugin.
 
 Provenance is stored for each pipeline run alongside the generated
-derivatives and consists of parameter values used by the pipeline,
-software versions used by the pipeline, interface parameters,
-a graph representation of the underlying Nipype workflow, checksums of inputs,
-version of Arcana used, version of Nipype used, and any subject and visit IDs
-that were joined over in the workflow.
+derivatives and consists of interface parameter values,
+software versions of external requirements, Arcana and Nipype, 
+a graph representation of the underlying Nipype workflow, checksums of inputs
+and outputs, and any subject and visit IDs that were joined over in the workflow.
 
 For subsequent analyses, changes with respect to any of the stored provenance values will
-be flagged as a mismatch, with the exception of interface package versions
+be flagged as a mismatch by default, with the exception of interface package versions
 (e.g. Nipype or Banana versions). How mismatches are handled depends on the \emph{reprocess} flag passed to the
 Processor. If \emph{reprocess} is true then the sessions with mismatching provenance
 will be reprocessed, otherwise if \emph{reprocess} is false (the default) an exception will be raised.
@@ -905,7 +905,7 @@ package via GitHub (\url{github.com/MonashBI/arcana}) and the
 Python Package Index (PyPI) (\url{pypi.org/project/arcana/}).
 Study classes for T1, T2* and diffusion weighted MRI data have been
 implemented as part of the \emph{Biomedical imging ANAlysis iN Arcana (Banana)} package
-(\url{github.com/MonashBI/banana}; \url{pypi.org./project/banana}).
+(\url{github.com/MonashBI/banana}; \url{pypi.org/project/banana}).
 All three classes, \emph{T1Study}, \emph{T2starStudy} and
 \emph{DwiStudy}, inherit generic image analysis methods, such as
 registration and brain extraction, from the base class \emph{MriStudy}.
@@ -1115,7 +1115,6 @@ reproduce the exact analysis. The \emph{ArcanaPaper} class
 (Supplementary material), which contains methods to generate all figures
 in the Results section of this manuscript, is an example of this approach.
 
-
 The abstraction of data and repositories in Arcana enables the same
 workflow implementation to be applied to datasets stored in BIDS format
 or XNAT repositories. A single code-base can therefore be containerized
@@ -1182,6 +1181,17 @@ preprocessed DWI shared between tensor and fibre tracking workflows
 well as time required for manual
 QC is minimised. Given analyses implemented in Arcana are also able to
 be processed on HPC clusters, they scale well to large studies.
+
+The framework that Arcana provides should facilitate the development of workflows
+that are consistent with the F.A.I.R. guiding principles \citep{wilkinson_fair_2016}.
+\begin{itemize}
+\item Findable all in one code-base
+\item Accessible open source and implemented in different systems
+\item Interoperable with BIDS derivatives
+\item Interoperable with different analysis software
+\item Reusable in different contexts
+\item Reusable with detailed provenance
+\end{itemize}
 
 \section*{Conclusion}
 \label{conclusion}
