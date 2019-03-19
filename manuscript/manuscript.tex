@@ -1045,7 +1045,7 @@ sagittal midline slice.}
 \label{discussion}
 
 We present Arcana, a software framework to facilitate the development of
-comprehensive analysis suites for neuroimaging data that implement
+analysis suites for neuroimaging data that implement
 complete workflows from repository data to publication results. The
 encapsulation of repository data and workflow generation in Arcana
 enables researchers to create robust workflows while focussing on the
@@ -1057,10 +1057,9 @@ application leads to portable workflows, which can be applied to
 datasets stored in a number of storage systems. In addition, the
 management of intermediate derivatives, provenance and software
 versioning, coupled with ability to submit jobs to HPC clusters, enables
-workflows implemented in Arcana to scale to large datasets. Arcana
-thereby enables researchers to quickly prototype analysis suites on
-local workstations that can be deployed on large-scale
-infrastructure without modification.
+workflows implemented in Arcana to scale to large datasets. Researchers
+are able to quickly prototype analyses that can be deployed on large-scale
+infrastructure on local workstations without modification.
 
 Software frameworks \citep{yacoub_pattern-oriented_2004} have been successful in
 improving code quality and efficiency of development in a variety of
@@ -1070,8 +1069,7 @@ given application need to be implemented by the analysis designer, and
 the common elements become battle hardened through repeated use. Arcana
 handles many of the menial tasks involved with workflow implementation,
 such as data retrieval and storage, format conversions, and provenance,
-reducing the time and effort required to implement robust workflows from
-acquired data to publication results.
+reducing the time and effort required to implement robust workflows.
 
 An oft-repeated mantra in the open-source software movement dubbed
 Linus' Law is that ``given a large enough beta-tester and co-developer
@@ -1101,7 +1099,7 @@ have been implemented, which can guide the hand of analysis designers.
 Arcana imposes a consistent structure on workflows implemented within
 it, making the code easier to understand for developers who are familiar
 with the framework. In addition, class inheritance provides a manageable
-way to adapt and extend to existing analyses and highlights where
+way to adapt and extend existing analyses, and highlights where
 modified analyses differ from standard procedures.
 
 MR contrast-specific analyses are implemented in Banana via a chain
@@ -1109,8 +1107,8 @@ of successively specialised Study sub-classes (e.g.
 MRI\textgreater{}EPI\textgreater{}DWI) to enable generic processing
 steps (e.g. registration) to be shared between classes. While not
 necessary, it is recommended to create a subclass specific to the
-research study in question and aggregate all related analysis within it,
-since such classes can be applied to alternate datasets in order to
+research study in question and aggregate all related analysis within it.
+Since such classes can be applied to alternate datasets in order to
 reproduce the exact analysis. The \emph{ArcanaPaper} class
 (Supplementary material), which contains methods to generate all figures
 in the Results section of this manuscript, is an example of this approach.
@@ -1169,7 +1167,7 @@ Switch parameters make it straightforward to rerun analyses in Arcana
 with substituted tools while controlling all other aspects of the
 workflow.
 
-Arcana's management of intermediate derivatives and provenance
+The management of intermediate derivatives and provenance in Arcana
 guarantees that the same analysis is applied across the dataset without
 necessarily requiring a complete rerun of the analysis. This guarantee
 makes it feasible to process data as it is acquired over the course of
@@ -1178,20 +1176,21 @@ with the acquisition protocol when they occur. In addition, by reusing
 shared intermediate derivatives between analyses, such as the
 preprocessed DWI shared between tensor and fibre tracking workflows
 (Figure \ref{fig:fa_adc} and \ref{fig:tractography}), processing time as
-well as time required for manual
-QC is minimised. Given analyses implemented in Arcana are also able to
-be processed on HPC clusters, they scale well to large studies.
+well as time required for manual QC is minimised. Given analyses implemented
+in Arcana are also able to be processed on HPC clusters, they scale well to large studies.
 
-The framework that Arcana provides should facilitate the development of workflows
-that are consistent with the F.A.I.R. guiding principles \citep{wilkinson_fair_2016}.
-\begin{itemize}
-\item Findable all in one code-base
-\item Accessible open source and implemented in different systems
-\item Interoperable with BIDS derivatives
-\item Interoperable with different analysis software
-\item Reusable in different contexts
-\item Reusable with detailed provenance
-\end{itemize}
+The framework provided by Arcana should facilitate the development of workflows
+that are consistent with F.A.I.R. guiding principles \citep{wilkinson_fair_2016},
+particularly with regards to interoperability and reusability.
+and their extensible, modular architecture should encourage code reuse. Every derivative created
+by arcana is accompanied with sufficient provenance information to
+fully reproduce the workflow. Analyses implemented in Arcana are interoperable between different
+repository and execution environments. In addition, the implementation of neuroimaging
+analyses in Banana is planned to closely follow the specification for BIDS
+derivatives \citep{gorgolewski_bids_nodate} to enable interoperability with other tool chains.
+Collaboration within a common code-base should help improve the visibility of
+workflow implementations.
+open source and includes text descriptions and citations of the relevant literature.
 
 \section*{Conclusion}
 \label{conclusion}
