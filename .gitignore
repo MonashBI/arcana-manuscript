@@ -5,7 +5,7 @@
 *.aux
 *.log
 *.out
-*.pdf
+/manuscript/manuscrupt.pdf
 *.bbl
 *.blg
 *.synctex.gz
