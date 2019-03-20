@@ -61,7 +61,7 @@
 
 
 % Insert the name of "your journal" with
-% \journalname{myjournal}
+\journalname{Neuroinformatics}
 
 \begin{document}
 
@@ -217,8 +217,6 @@ with programmatic workflow construction---yet clear delineation between
 analysis design and application---facilitates the implementation of
 complex workflows that are portable and complete.
 
-% Provenanced mentioned here
-
 The utility of the Arcana framework is demonstrated by the
 implementation of analysis suites for T1, T2* and diffusion weighted MRI
 (DWI) data and the application of DWI tractogram \citep{tournier_mrtrix:_2012} and
@@ -345,11 +343,9 @@ classes during the creation of the class. Input data to the study are
 distinguished from derivatives by using the \emph{FilesetInputSpec}
 and \emph{FieldInputSpec} subtypes. However, the distinction between
 input and derived data is somewhat blurred, as derivative specification
-entries can be
-passed input data when the class is instantiated. In addition,
-when subclassing a Study class or combining it in a MultiStudy class,
-derivative specification entries can be overridden by input
-specification entries, and vice-versa.
+entries can be passed input data when the class is instantiated. In addition,
+when subclassing a Study class or aggregating it in a MultiStudy class,
+derivative entries can be overridden by input entries, and vice-versa.
 
 \begin{figure}
 \lstinputlisting[basicstyle=\footnotesize,firstline=2, lastline=59]{../code/example_study.py}
@@ -1181,7 +1177,7 @@ preprocessed DWI shared between tensor and fibre tracking workflows
 well as time required for manual QC is minimised. Given analyses implemented
 in Arcana are also able to be processed on HPC clusters, they scale well to large studies.
 
-The framework provided by Arcana should facilitate the development of workflows
+The framework provided by Arcana should aid the development of workflows
 that are consistent with the F.A.I.R. guiding principles \citep{wilkinson_fair_2016}.
 Each pipeline is accompanied by a text description and
 a list of citations to describe the techniques it employs.
