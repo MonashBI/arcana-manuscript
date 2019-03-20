@@ -11,3 +11,4 @@
 *.synctex.gz
 /.arcana_paper.py.swp
 crash-*
+~*
