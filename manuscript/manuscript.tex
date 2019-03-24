@@ -442,7 +442,7 @@ a reference to the newly added node. For clarity, it is recommended to put all s
 study it can be set via the \emph{inputs} attribute of the returned Nipype node
 (e.g. \lstinline{my_node.inputs.my_param = 1.0}).
 
-Node inputs and ouputs are connected to each other, and to inputs and outputs of the pipeline, by
+Node inputs and outputs are connected to each other, and to inputs and outputs of the pipeline, by
 providing \emph{inputs} and \emph{outputs} keyword arguments to the \emph{add} method. Both
 arguments take a dictionary. The keys of the \emph{inputs} dictionary correspond to
 trait names in the node's input specification, whereas the keys of the \emph{outputs} dictionary correspond to
