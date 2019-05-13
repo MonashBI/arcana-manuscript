@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from arcana import (
     MultiStudy, MultiStudyMetaClass, SubStudySpec, ParamSpec)
-from banana.study import (
+from banana.study.mri import (
     DwiStudy, T1Study, T2Study, T2starStudy, MriStudy)
 from banana.plot import ImageDisplayMixin
 
@@ -31,8 +31,8 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             't2star',
             T2starStudy,
             name_map={'coreg_ref_brain': 't1_brain',
-                      'coreg_to_atlas_mat': 't1_coreg_to_atlas_mat',
-                      'coreg_to_atlas_warp': 't1_coreg_to_atlas_warp'}),
+                      'coreg_to_template_mat': 't1_coreg_to_template_mat',
+                      'coreg_to_template_warp': 't1_coreg_to_template_warp'}),
         # Sub-study to process the dMRI data
         SubStudySpec(
             'dmri',
@@ -57,7 +57,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
 
     def vein_fig(self, save_path=None, **kwargs):
         """
-        Generates an image panel containing the SWI, QSM, vein atlas,
+        Generates an image panel containing the SWI, QSM, vein template,
         and vein mask
 
         Parameters
@@ -66,14 +66,14 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             The path to save the image to. If None the image will be
             displayed instead of saved
         """
-        # Derive (when necessary) and access data SWI, QSM, vein atlas,
+        # Derive (when necessary) and access data SWI, QSM, vein template,
         # and vein mask data in the repository.
         vein_masks = self.data('t2star_vein_mask')
         qsms = self.data('t2star_qsm')
         swis = self.data('swi_brain')
         cv_image = self.data('t2star_composite_vein_image')
         # Loop through all sessions
-        for swi, qsm, vein_atlas, vein_mask in zip(swis, qsms, cv_image,
+        for swi, qsm, vein_template, vein_mask in zip(swis, qsms, cv_image,
                                                    vein_masks):
             # Set the saturation limits for the QSM image
             row_kwargs = [{} for _ in range(4)]
@@ -82,7 +82,7 @@ class ArcanaPaper(MultiStudy, ImageDisplayMixin,
             # Display slices from the filesets in a panel using
             # method from the ImageDisplayMixin base class.
             self.display_slice_panel(
-                (swi, qsm, vein_atlas, vein_mask),
+                (swi, qsm, vein_template, vein_mask),
                 row_kwargs=row_kwargs, **kwargs)
             # Display or save to file the generated image.
             self.show(save_path, swi.subject_id, swi.visit_id)
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     import logging
     from argparse import ArgumentParser
     from arcana import (
-        BasicRepo, SingleProc, StaticEnv, FilesetInput)
+        BasicRepo, SingleProc, StaticEnv, InputFileset)
     from arcana.utils import parse_value
     from banana.file_format import dicom_format, zip_format
 
@@ -216,16 +216,16 @@ if __name__ == '__main__':
         # Match names in the data specification to filenames used
         # in the repository
         inputs={
-            't1_magnitude': FilesetInput(pattern=args.t1, dicom_format),
-            't2_magnitude': FilesetInput(pattern=args.t2, dicom_format),
-            't2star_channels': FilesetInput(pattern=args.t2star_chann,
+            't1_magnitude': InputFileset(pattern=args.t1, dicom_format),
+            't2_magnitude': InputFileset(pattern=args.t2, dicom_format),
+            't2star_channels': InputFileset(pattern=args.t2star_chann,
                                             zip_format),
-            't2star_header_image': FilesetInput(pattern=args.swi,
+            't2star_header_image': InputFileset(pattern=args.swi,
                                                 dicom_format),
-            't2star_swi': FilesetInput(pattern=args.swi, dicom_format),
-            'swi_magnitude': FilesetInput(pattern=args.swi, dicom_format),
-            'dmri_magnitude': FilesetInput(pattern=args.dwi, dicom_format),
-            'dmri_reverse_phase': FilesetInput(pattern=args.distort,
+            't2star_swi': InputFileset(pattern=args.swi, dicom_format),
+            'swi_magnitude': InputFileset(pattern=args.swi, dicom_format),
+            'dmri_magnitude': InputFileset(pattern=args.dwi, dicom_format),
+            'dmri_reverse_phase': InputFileset(pattern=args.distort,
                                                dicom_format)},
         # Set parameters of the study
         parameters={n: parse_value(v.strip()) for n, v in args.parameter})

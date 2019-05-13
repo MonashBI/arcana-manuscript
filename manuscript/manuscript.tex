@@ -340,8 +340,8 @@ list of \emph{FilesetSpec} and \emph{FieldSpec} objects in the
 \emph{add\_data\_specs} class attribute (Figure \ref{fig:data_spec}).
 The lists are collated with data specifications in any base Study
 classes during the creation of the class. Input data to the study are
-distinguished from derivatives by using the \emph{FilesetInputSpec}
-and \emph{FieldInputSpec} subtypes. However, the distinction between
+distinguished from derivatives by using the \emph{InputFilesetSpec}
+and \emph{InputFieldSpec} subtypes. However, the distinction between
 input and derived data is somewhat blurred, as derivative specification
 entries can be passed input data when the class is instantiated. In addition,
 when subclassing a Study class or aggregating it in a MultiStudy class,
@@ -755,10 +755,10 @@ repositories. In these cases, a selection stage matches input data to
 entries in the data specification of the Study class. The criteria for
 these selections are passed to the
 the \emph{inputs} argument of the Study object at instantiation in a
-dictionary mapping data specification names to \emph{FilesetInput} and
-\emph{FieldInput} objects.
+dictionary mapping data specification names to \emph{InputFileset} and
+\emph{InputField} objects.
 
-FilesetInput and FieldInput objects are required
+InputFileset and InputField objects are required
 to match exactly one fileset or field in every session included in the study.
 Matching is typically performed on file
 names (dataset labels for XNAT repositories) and field names. If the
